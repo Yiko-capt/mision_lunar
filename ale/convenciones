@@ -2,7 +2,7 @@
 
 **Proyecto:** Lunar Landing Site Navigator — NASA Space Apps Challenge  
 **Misión 1 (Entregable A) — Responsable:** Integrante C (Validación / Física)  
-**Estado:** DEFINITIVO — ACTUALIZADO CON VERIFICACIÓN DEM LOLA (Roles A, B, C, D y E)  
+**Estado:** DEFINITIVO — UNIFICADO CON DEM LOLA (Roles A, B, C, D y E)  
 
 > **Instrucción para uso con Modelos de Lenguaje (AI-to-AI):**  
 > Si vas a utilizar una IA (ChatGPT, Claude, Gemini, Copilot, etc.) para programar tu módulo en las Misiones 2 o 3, adjunta este archivo completo al inicio de tu prompt con la siguiente orden:  
@@ -17,7 +17,7 @@
 * **Longitud (`lon_deg`):** Grados decimales en el intervalo $[0.0, 360.0)$ medidos positivamente hacia el **Este**.
   * *Regla obligatoria de normalización:* Si una fuente externa (como LOLA, USGS o JPL Horizons) entrega longitudes en $[-180.0, +180.0]$ (Oeste negativo), debe convertirse antes de exportar a JSON mediante:
     $$\text{lon\_deg} = (\lambda + 360.0) \bmod 360.0$$
-* **Altitud topográfica (`alt_km` o `elevacion_sitio_m`):** Medida respecto al radio medio esférico de referencia lunar ($R_{\text{Luna}} = 1737.4\text{ km}$).
+* **Altitud topográfica (`alt_km` o `elevacion_sitio_m`):** Medida respecto al radio medio esférico de referencia lunar ($R_{\text{Luna}} = 1737.4\text{ km}$). Debe incluirse obligatoriamente en las consultas topocéntricas a JPL Horizons (`coord@301`).
 
 ### Tabla de Constantes Oficiales del Proyecto
 
@@ -45,7 +45,7 @@
   * $El > 0^\circ$: Por encima del horizonte matemático local.
   * $El < 0^\circ$: Por debajo del horizonte matemático local (visible desde crestas elevadas).
 * **Especificación de `az_el` (Alineación Rol B y Rol C con JPL Horizons):**
-  * **Tipo de cálculo:** Topocéntrico sobre la superficie lunar (`coord@301` en JPL Horizons).
+  * **Tipo de cálculo:** Topocéntrico sobre la superficie lunar (`coord@301` en JPL Horizons) incorporando la altitud real del sitio (`alt_km`).
   * **Referencia del astro:** **Centro del disco** aparente (incluyendo tiempo de luz y aberración estelar), **sin refracción atmosférica** (*airless*).
   * **Cuerpos objetivo:** Sol (`10`) y Tierra (`399`).
 * **Estándar de tiempo:** Todas las marcas temporales (`timestamp_utc`) deben estar en **UTC** siguiendo **ISO 8601** estricto: `"YYYY-MM-DDTHH:MM:SSZ"`.
@@ -55,10 +55,10 @@
 
 ## 3. Modelos Físicos y Geométricos (Centro vs. Borde del Disco)
 
-En el Polo Sur lunar, el Sol y la Tierra se mantienen rasantes al horizonte, por lo que su tamaño angular aparente determina las transiciones de iluminación y comunicaciones.
+En el Polo Sur lunar, el Sol y la Tierra se mantienen rasantes al horizonte, por lo que su tamaño angular aparente y el perfil topográfico real de LOLA determinan las transiciones de iluminación y comunicaciones.
 
 ### 3.1. Interpolación del Horizonte Topográfico
-Dado el perfil discreto $El_{\text{hor}}(Az_i)$ para $Az_i \in \{0, 1, \dots, 359\}$ generado por el Rol A, la elevación del horizonte para cualquier azimut continuo $Az \in [0, 360)$ se obtiene por interpolación lineal circular (donde $Az_{360} \equiv Az_0$).
+Dado el perfil discreto $El_{\text{hor}}(Az_i)$ para $Az_i \in \{0, 1, \dots, 359\}$ generado por el Rol A, la elevación del horizonte para cualquier azimut continuo $Az \in [0, 360)$ se obtiene por interpolación lineal circular (donde $Az_{360} \equiv Az_0$). **Nunca** debe compararse contra $0^\circ$ plano cuando exista un archivo `horizonte_<site_id>.json`.
 
 ### 3.2. Visibilidad Solar y Fracción de Disco Finito $f(x)$ (Roles B, C y D)
 * Los archivos de efemérides (Rol B) reportan la elevación del **centro del disco solar** (`sol_elevacion_deg`).
@@ -66,7 +66,7 @@ Dado el perfil discreto $El_{\text{hor}}(Az_i)$ para $Az_i \in \{0, 1, \dots, 35
 * **Disco completo visible:** $El_{\odot} - R_{\odot} > El_{\text{hor}}(Az)$
 * **Parámetro normalizado de altura solar ($x$):**
   $$x = \frac{El_{\odot} - El_{\text{hor}}(Az)}{R_{\odot}}$$
-* **Fracción visible del disco solar $f(x) \in [0, 1]$ (programada por Rol C en Misión 2):**
+* **Fracción visible del disco solar $f(x) \in [0, 1]$ (implementada por Rol C en `src/validacion_fisica.py`):**
   $$f(x) = \begin{cases} 0 & \text{si } x \le -1 \\ \dfrac{1}{\pi}\left(\arccos(-x) + x\sqrt{1 - x^2}\right) & \text{si } -1 < x < 1 \\ 1 & \text{si } x \ge 1 \end{cases}$$
 
 ### 3.3. Modelo de Potencia Eléctrica Solar (Rol D)
@@ -86,24 +86,30 @@ donde:
 
 ## 4. Esquemas JSON Obligatorios entre Integrantes
 
-Todos los nombres de archivo deben usar identificadores limpios en minúsculas sin espacios (`site_id`: `shackleton_rim`, `shackleton_floor`, `malapert_peak`, `cabeus_rim`, `apollo_11`).
+Todos los nombres de archivo deben usar los $6$ identificadores oficiales en minúsculas sin espacios (`site_id`):
+1. `shackleton_rim`
+2. `shackleton_floor`
+3. `malapert_peak`
+4. `peak_near_cabeus_b`
+5. `apollo_11`
+6. `de_gerlache_rim`
 
 ### 4.1. Salida del Rol A $\rightarrow$ `horizonte_<site_id>.json`
 ```json
 {
   "site_id": "shackleton_rim",
-  "nombre": "Borde Shackleton (Cresta de Conexión)",
-  "lat_deg": -89.684,
-  "lon_deg": 196.739,
-  "elevacion_sitio_m": 1520.0,
+  "nombre": "Borde del Cráter Shackleton (cresta de conexión)",
+  "lat_deg": -89.6863,
+  "lon_deg": 197.3684,
+  "elevacion_sitio_m": 1728.7,
   "parametros": {
     "h_obs_m": 2.0,
-    "d_max_km": 250.0,
+    "d_max_km": 100.0,
     "paso_azimut_deg": 1.0
   },
   "perfil_horizonte": [
-    { "azimut_deg": 0.0, "elevacion_maxima_deg": 1.12 },
-    { "azimut_deg": 1.0, "elevacion_maxima_deg": 1.15 }
+    { "azimut_deg": 0.0, "elevacion_maxima_deg": -1.743 },
+    { "azimut_deg": 1.0, "elevacion_maxima_deg": -1.811 }
   ]
 }
 ```
@@ -112,9 +118,9 @@ Todos los nombres de archivo deben usar identificadores limpios en minúsculas s
 ```json
 {
   "site_id": "shackleton_rim",
-  "lat_deg": -89.684,
-  "lon_deg": 196.739,
-  "alt_km": 1.52,
+  "lat_deg": -89.6863,
+  "lon_deg": 197.3684,
+  "alt_km": 1.7287,
   "refraccion_aplicada": false,
   "datos": [
     {
