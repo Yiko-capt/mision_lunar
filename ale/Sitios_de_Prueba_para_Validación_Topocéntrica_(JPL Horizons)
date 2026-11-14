@@ -2,54 +2,58 @@
 
 **Proyecto:** Lunar Landing Site Navigator — NASA Space Apps Challenge  
 **Misión 1 (Entregable B) — Responsable:** Integrante C (Validación / Física)  
-**Estado:** ACTUALIZADO CON VERIFICACIÓN DEM LOLA (Alineado con Rol A)  
-**Propósito:** Definir $5$ sitios de prueba oficiales con coordenadas verificadas sobre el DEM de LOLA para ejecutar consultas topocéntricas directas en **NASA JPL Horizons** y auditar la función `az_el` del Integrante B (*"pasa / no pasa"* en Misión 2).
+**Estado:** DEFINITIVO — COORDENADAS DE PICO UNIFICADAS CON DEM LOLA (Roles A, B, C y E)  
+**Propósito:** Definir los $6$ sitios oficiales de estudio y calibración con coordenadas exactas extraídas del DEM de LOLA para ejecutar consultas topocéntricas directas en **NASA JPL Horizons** y auditar la función `az_el` del Integrante B (*"pasa / no pasa"* en Misión 2).
 
 ---
 
-## 1. Registro de Correcciones Topográficas (Auditoría Rol A sobre DEM LOLA)
+## 1. Registro de Unificación Topográfica (Consenso Roles A, C y E)
 
-Se actualizaron las coordenadas iniciales de tres sitios tras verificar su ubicación exacta contra el modelo digital de elevación (DEM) de LOLA:
-1. **`shackleton_rim`:** El centro de Shackleton está en $89.66^\circ\text{S}, 129.20^\circ\text{E}$ ($21\text{ km}$ de diámetro). Se actualiza al punto exacto de unión de la cresta Shackleton–de Gerlache en el borde: **`lat_deg = -89.684`, `lon_deg = 196.739`** ($89.684^\circ\text{S}, 196.739^\circ\text{E}$).
-2. **`shackleton_floor`:** La coordenada antigua del *gazetteer* ($-89.90^\circ, 0.00^\circ$) quedaba sobre el borde exterior. Se actualiza al fondo real medido en el DEM de LOLA: **`lat_deg = -89.625`, `lon_deg = 118.800`**, elevación **`-2868.8 m`** (`alt_km = -2.8688`).
-3. **`cabeus_rim`:** El punto $84.9^\circ\text{S}, 35.5^\circ\text{W}$ ($324.5^\circ\text{E}$) corresponde al interior/centro de Cabeus ($\sim 100\text{ km}$ de diámetro). Se actualiza al borde norte/cresta elevada de la región candidata oficial Artemis III (*Peak near Cabeus B*): **`lat_deg = -83.600`, `lon_deg = 291.200`** ($83.60^\circ\text{S}, 68.80^\circ\text{W}$, a $\sim 194\text{ km}$ del Polo Sur, dentro del DEM polar $80^\circ\text{S}\text{--}90^\circ\text{S}$). *(Nota: El Rol A puede confirmar la altitud exacta de este píxel en su DEM).*
+Para garantizar una única fuente de verdad (SSOT) en todo el repositorio, se adoptan de manera definitiva las coordenadas y altitudes exactas de píxel medidas por el **Rol A (Cris)** sobre el DEM polar de LOLA, se documenta la fuente NASA de Cabeus y se oficializa el sexto caso de estudio:
+
+1. **`shackleton_rim`:** Actualizado al píxel exacto de máxima elevación en la cresta de conexión Shackleton–de Gerlache: **`lat_deg = -89.6863`, `lon_deg = 197.3684`**, elevación **`1728.7 m`** (`alt_km = 1.7287`).
+2. **`shackleton_floor`:** Actualizado al punto interior real del cráter medido en el DEM de LOLA: **`lat_deg = -89.6251`, `lon_deg = 118.8196`**, elevación **`-2868.8 m`** (`alt_km = -2.8688`).
+3. **`malapert_peak`:** Actualizado al píxel exacto de la cima del Macizo Malapert en LOLA: **`lat_deg = -85.9876`, `lon_deg = 2.0528`**, elevación **`5172.5 m`** (`alt_km = 5.1725`).
+4. **`peak_near_cabeus_b`** *(antes `cabeus_rim`)*: Coordenada oficial de la región candidata **NASA Artemis III (*Peak Near Cabeus B*)**, registrada en el archivo planetario **NASA LRO/LROC PDS (`NAC_ROI_CABEUSPKLO2_P836S2912`)**: **`lat_deg = -83.6000`, `lon_deg = 291.2000`** ($83.60^\circ\text{S}, 68.80^\circ\text{W}$ normalizada a Este positiva), `alt_km = 2.1000` *(sujeto al ajuste final de altitud de píxel que exporte el Rol A)*.
+5. **`apollo_11`:** Sitio de calibración histórica ecuatorial (**Base Tranquilidad**): **`lat_deg = 0.67416`, `lon_deg = 23.47315`**, `alt_km = 0.0000`, con evaluación obligatoria en el instante exacto del alunizaje **`1969-07-20T20:17:40Z`**.
+6. **`de_gerlache_rim` (Nuevo — TEST\_06):** Oficializado como sexto sitio de estudio tras la extracción topográfica de LOLA: **`lat_deg = -88.6648`, `lon_deg = 291.6227`**, elevación **`1813.8 m`** (`alt_km = 1.8138`).
 
 ---
 
 ## 2. Configuración Exacta para Consulta en NASA JPL Horizons
 
-Para obtener los valores de referencia oficiales en la interfaz web de [NASA JPL Horizons](https://ssd.jpl.nasa.gov/horizons/app.html) (o mediante `astroquery.jplhorizons` en Python), aplica exactamente estos parámetros:
+Para obtener los valores de referencia oficiales en la interfaz web de [NASA JPL Horizons](https://ssd.jpl.nasa.gov/horizons/app.html) (o mediante la API REST usada en `src/validacion_fisica.py`), aplica exactamente estos parámetros:
 
 1. **Ephemeris Type:** `Observer Table`
 2. **Target Body:** `Sun [10]` (primera consulta) y `Earth [399]` (segunda consulta)
-3. **Observer Location:** Coordenadas selenográficas topocéntricas (`coord@301`), ingresando `lon_deg` Este ($0^\circ \text{ a } 360^\circ$), `lat_deg` ($-90^\circ \text{ a } +90^\circ$) y `alt_km` (altitud en $\text{km}$ respecto a $R_{\text{Luna}} = 1737.4\text{ km}$).
-4. **Time Specification:** Paso de `1 h` (`Step Size: 1 hour`) en escala **UTC**.
-5. **Table Settings:** Seleccionar `4. Apparent AZ & EL`, asegurándose de desactivar cualquier corrección por refracción atmosférica (*airless body*).
+3. **Observer Location:** Coordenadas selenográficas topocéntricas (`coord@301`), ingresando `lon_deg` Este ($0^\circ \text{ a } 360^\circ$), `lat_deg` ($-90^\circ \text{ a } +90^\circ$) y `alt_km` (altitud topográfica real en $\text{km}$ respecto a $R_{\text{Luna}} = 1737.4\text{ km}$).
+4. **Time Specification:** Escala **UTC** (paso de `1 h` para series temporales, y evaluación puntual en `1969-07-20T20:17:40Z` para `TEST_05`).
+5. **Table Settings:** Seleccionar `4. Apparent AZ & EL`, desactivando cualquier refracción atmosférica (`APPARENT=AIRLESS`).
 
 ---
 
-## 3. Catálogo Oficial de 5 Sitios de Prueba
+## 3. Catálogo Oficial de 6 Sitios de Prueba
 
-| ID | `site_id` | Nombre del Sitio | `lat_deg` | `lon_deg` (Este) | `alt_km` (DEM) | Ventana UTC de Prueba (paso 1 h) | Qué valida en la auditoría (`az_el` y DEM) |
+| ID | `site_id` | Nombre del Sitio | `lat_deg` | `lon_deg` (Este) | `alt_km` (DEM) | Ventana / Instante UTC de Prueba | Qué valida en la auditoría (`az_el` y DEM) |
 | :--- | :--- | :--- | :---: | :---: | :---: | :--- | :--- |
-| **TEST_01** | `shackleton_rim` | Borde Shackleton (Cresta de Conexión) | `-89.684` | `196.739` | `1.5200` | `2026-11-15T00:00:00Z` a `2026-11-16T00:00:00Z` | Unión exacta borde–cresta LOLA; Sol rasante cerca del horizonte ($El \approx 0^\circ \text{ a } 2^\circ$). |
-| **TEST_02** | `shackleton_floor` | Interior Cráter Shackleton (Fondo PSR) | `-89.625` | `118.800` | `-2.8688` | `2026-11-15T00:00:00Z` a `2026-11-16T00:00:00Z` | Fondo real del DEM ($-2868.8\text{ m}$); prueba altitud negativa y bloqueo total por paredes del cráter ($0\%$ luz). |
-| **TEST_03** | `malapert_peak` | Cima del Macizo Malapert | `-86.000` | `0.000` | `4.5000` | `2026-11-15T00:00:00Z` a `2026-11-16T00:00:00Z` | Enlace directo continuo con la Tierra (DTE) y libración terrestre en $Az \approx 0^\circ$. |
-| **TEST_04** | `cabeus_rim` | Borde Cráter Cabeus (*Peak near Cabeus B*) | `-83.600` | `291.200` | `2.1000` | `2026-11-15T00:00:00Z` a `2026-11-16T00:00:00Z` | Borde elevado en el cuadrante Oeste ($>180^\circ\text{E}$, $68.80^\circ\text{W}$); valida conversión correcta Oeste $\rightarrow$ Este. |
-| **TEST_05** | `apollo_11` | Base Tranquilidad (Apolo 11) | `0.67416` | `23.47315` | `0.0000` | `1969-07-20T20:00:00Z` a `1969-07-20T21:00:00Z` | Control histórico ecuatorial: a las `20:17:40 UTC` el Sol debe marcar $Az \approx 88.0^\circ$, $El \approx +10.8^\circ$. |
+| **TEST\_01** | `shackleton_rim` | Borde del Cráter Shackleton (cresta de conexión) | `-89.6863` | `197.3684` | `1.7287` | `2026-11-15T00:00:00Z` a `2026-11-16T00:00:00Z` (paso 1 h) | Píxel de pico LOLA; Sol rasante cerca del horizonte ($El \approx 0^\circ \text{ a } 2^\circ$) y disco finito $f(x)$. |
+| **TEST\_02** | `shackleton_floor` | Fondo del Cráter Shackleton (interior PSR) | `-89.6251` | `118.8196` | `-2.8688` | `2026-11-15T00:00:00Z` a `2026-11-16T00:00:00Z` (paso 1 h) | Altitud negativa real ($-2868.8\text{ m}$); cruce con horizonte LOLA ($+18^\circ \text{ a } +27^\circ$) debe dar $0.0\%$ luz. |
+| **TEST\_03** | `malapert_peak` | Cima del Macizo Malapert | `-85.9876` | `2.0528` | `5.1725` | `2026-11-15T00:00:00Z` a `2026-11-16T00:00:00Z` (paso 1 h) | Cima a $5172.5\text{ m}$; enlace directo continuo con la Tierra (DTE) y libración en $Az \approx 0^\circ$. |
+| **TEST\_04** | `peak_near_cabeus_b` | Peak Near Cabeus B (Artemis III) | `-83.6000` | `291.2000` | `2.1000` | `2026-11-15T00:00:00Z` a `2026-11-16T00:00:00Z` (paso 1 h) | Cuadrante Oeste ($>180^\circ\text{E}$, $68.80^\circ\text{W}$); verifica normalización correcta Oeste $\rightarrow$ Este. |
+| **TEST\_05** | `apollo_11` | Base Tranquilidad (Apolo 11) | `0.67416` | `23.47315` | `0.0000` | Instante exacto: `1969-07-20T20:17:40Z` | Calibración histórica ecuatorial: el Sol debe marcar $Az \approx 88.0^\circ$, $El \approx +10.8^\circ$. |
+| **TEST\_06** | `de_gerlache_rim` | Borde del Cráter de Gerlache | `-88.6648` | `291.6227` | `1.8138` | `2026-11-15T00:00:00Z` a `2026-11-16T00:00:00Z` (paso 1 h) | Sexto sitio oficial; valida normalización de longitud Este ($291.6227^\circ\text{E}$) y alta iluminación. |
 
 ---
 
 ## 4. Criterios "Pasa / No Pasa" para la Auditoría (Misión 2)
 
-En la Misión 2, el script del Integrante C comparará hora por hora los archivos `efemerides_<site_id>.json` generados por el Integrante B contra las tablas topocéntricas de NASA JPL Horizons:
+El script `src/validacion_fisica.py` compara los archivos `efemerides_<site_id>.json` generados por el Integrante B contra las tablas topocéntricas de NASA JPL Horizons:
 
 1. **Error máximo en Elevación (`sol_elevacion_deg` y `tierra_elevacion_deg`):**
    $$\max \left| El_{\text{B}}(t) - El_{\text{Horizons}}(t) \right| \le 0.05^\circ$$
 2. **Error máximo en Azimut (`sol_azimut_deg` y `tierra_azimut_deg`):**
-   $$\max \left| \Delta Az_{\text{circular}}\big(Az_{\text{B}}(t), Az_{\text{Horizons}}(t)\big) \right| \le 0.05^\circ$$
-   *(Nota: cerca del cenit o en latitudes muy próximas a $-90^\circ$, el error en azimut se pondera por $\cos(El)$).*
-3. **Verificación sin refracción:** Si el error en elevación cerca del horizonte ($El \approx 0^\circ$) supera los $0.5^\circ$, **NO PASA** (indica que B dejó activada la refracción atmosférica por defecto).
+   $$\max \left| \Delta Az_{\text{circular}}\big(Az_{\text{B}}(t), Az_{\text{Horizons}}(t)\big) \cdot \cos(El) \right| \le 0.05^\circ$$
+3. **Verificación sin refracción:** Si el error en elevación cerca del horizonte ($El \approx 0^\circ$) supera los $0.5^\circ$, **NO PASA** (indica que quedó activada la refracción atmosférica por defecto).
 
 ---
 
@@ -62,10 +66,10 @@ En la Misión 2, el script del Integrante C comparará hora por hora los archivo
     {
       "test_id": "TEST_01",
       "site_id": "shackleton_rim",
-      "nombre": "Borde Shackleton (Cresta de Conexión)",
-      "lat_deg": -89.684,
-      "lon_deg": 196.739,
-      "alt_km": 1.5200,
+      "nombre": "Borde del Cráter Shackleton (cresta de conexión)",
+      "lat_deg": -89.6863,
+      "lon_deg": 197.3684,
+      "alt_km": 1.7287,
       "inicio_utc": "2026-11-15T00:00:00Z",
       "fin_utc": "2026-11-16T00:00:00Z",
       "paso_horas": 1
@@ -73,9 +77,9 @@ En la Misión 2, el script del Integrante C comparará hora por hora los archivo
     {
       "test_id": "TEST_02",
       "site_id": "shackleton_floor",
-      "nombre": "Interior Cráter Shackleton (Fondo PSR)",
-      "lat_deg": -89.625,
-      "lon_deg": 118.800,
+      "nombre": "Fondo del Cráter Shackleton (interior)",
+      "lat_deg": -89.6251,
+      "lon_deg": 118.8196,
       "alt_km": -2.8688,
       "inicio_utc": "2026-11-15T00:00:00Z",
       "fin_utc": "2026-11-16T00:00:00Z",
@@ -85,19 +89,19 @@ En la Misión 2, el script del Integrante C comparará hora por hora los archivo
       "test_id": "TEST_03",
       "site_id": "malapert_peak",
       "nombre": "Cima del Macizo Malapert",
-      "lat_deg": -86.000,
-      "lon_deg": 0.000,
-      "alt_km": 4.5000,
+      "lat_deg": -85.9876,
+      "lon_deg": 2.0528,
+      "alt_km": 5.1725,
       "inicio_utc": "2026-11-15T00:00:00Z",
       "fin_utc": "2026-11-16T00:00:00Z",
       "paso_horas": 1
     },
     {
       "test_id": "TEST_04",
-      "site_id": "cabeus_rim",
-      "nombre": "Borde Cráter Cabeus (Peak near Cabeus B)",
-      "lat_deg": -83.600,
-      "lon_deg": 291.200,
+      "site_id": "peak_near_cabeus_b",
+      "nombre": "Peak Near Cabeus B (Artemis III)",
+      "lat_deg": -83.6000,
+      "lon_deg": 291.2000,
       "alt_km": 2.1000,
       "inicio_utc": "2026-11-15T00:00:00Z",
       "fin_utc": "2026-11-16T00:00:00Z",
@@ -110,8 +114,19 @@ En la Misión 2, el script del Integrante C comparará hora por hora los archivo
       "lat_deg": 0.67416,
       "lon_deg": 23.47315,
       "alt_km": 0.0000,
-      "inicio_utc": "1969-07-20T20:00:00Z",
-      "fin_utc": "1969-07-20T21:00:00Z",
+      "inicio_utc": "1969-07-20T20:17:40Z",
+      "fin_utc": "1969-07-20T20:17:40Z",
+      "paso_horas": 1
+    },
+    {
+      "test_id": "TEST_06",
+      "site_id": "de_gerlache_rim",
+      "nombre": "Borde del Cráter de Gerlache",
+      "lat_deg": -88.6648,
+      "lon_deg": 291.6227,
+      "alt_km": 1.8138,
+      "inicio_utc": "2026-11-15T00:00:00Z",
+      "fin_utc": "2026-11-16T00:00:00Z",
       "paso_horas": 1
     }
   ]
