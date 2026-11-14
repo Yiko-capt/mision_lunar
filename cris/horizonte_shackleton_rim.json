@@ -1,0 +1,1454 @@
+{
+ "site_id": "shackleton_rim",
+ "nombre": "Borde del Cráter Shackleton (cresta de conexión)",
+ "lat_deg": -89.6863,
+ "lon_deg": 197.3684,
+ "elevacion_sitio_m": 1728.7,
+ "parametros": {
+  "h_obs_m": 2.0,
+  "d_max_km": 100.0,
+  "paso_azimut_deg": 1.0
+ },
+ "perfil_horizonte": [
+  {
+   "azimut_deg": 0.0,
+   "elevacion_maxima_deg": -1.732
+  },
+  {
+   "azimut_deg": 1.0,
+   "elevacion_maxima_deg": -1.775
+  },
+  {
+   "azimut_deg": 2.0,
+   "elevacion_maxima_deg": -1.856
+  },
+  {
+   "azimut_deg": 3.0,
+   "elevacion_maxima_deg": -1.907
+  },
+  {
+   "azimut_deg": 4.0,
+   "elevacion_maxima_deg": -2.022
+  },
+  {
+   "azimut_deg": 5.0,
+   "elevacion_maxima_deg": -2.212
+  },
+  {
+   "azimut_deg": 6.0,
+   "elevacion_maxima_deg": -2.343
+  },
+  {
+   "azimut_deg": 7.0,
+   "elevacion_maxima_deg": -2.518
+  },
+  {
+   "azimut_deg": 8.0,
+   "elevacion_maxima_deg": -2.675
+  },
+  {
+   "azimut_deg": 9.0,
+   "elevacion_maxima_deg": -2.683
+  },
+  {
+   "azimut_deg": 10.0,
+   "elevacion_maxima_deg": -2.67
+  },
+  {
+   "azimut_deg": 11.0,
+   "elevacion_maxima_deg": -2.679
+  },
+  {
+   "azimut_deg": 12.0,
+   "elevacion_maxima_deg": -2.593
+  },
+  {
+   "azimut_deg": 13.0,
+   "elevacion_maxima_deg": -2.476
+  },
+  {
+   "azimut_deg": 14.0,
+   "elevacion_maxima_deg": -2.348
+  },
+  {
+   "azimut_deg": 15.0,
+   "elevacion_maxima_deg": -2.173
+  },
+  {
+   "azimut_deg": 16.0,
+   "elevacion_maxima_deg": -2.044
+  },
+  {
+   "azimut_deg": 17.0,
+   "elevacion_maxima_deg": -1.908
+  },
+  {
+   "azimut_deg": 18.0,
+   "elevacion_maxima_deg": -1.767
+  },
+  {
+   "azimut_deg": 19.0,
+   "elevacion_maxima_deg": -1.646
+  },
+  {
+   "azimut_deg": 20.0,
+   "elevacion_maxima_deg": -1.522
+  },
+  {
+   "azimut_deg": 21.0,
+   "elevacion_maxima_deg": -1.39
+  },
+  {
+   "azimut_deg": 22.0,
+   "elevacion_maxima_deg": -1.374
+  },
+  {
+   "azimut_deg": 23.0,
+   "elevacion_maxima_deg": -1.411
+  },
+  {
+   "azimut_deg": 24.0,
+   "elevacion_maxima_deg": -1.401
+  },
+  {
+   "azimut_deg": 25.0,
+   "elevacion_maxima_deg": -1.376
+  },
+  {
+   "azimut_deg": 26.0,
+   "elevacion_maxima_deg": -1.333
+  },
+  {
+   "azimut_deg": 27.0,
+   "elevacion_maxima_deg": -1.283
+  },
+  {
+   "azimut_deg": 28.0,
+   "elevacion_maxima_deg": -1.213
+  },
+  {
+   "azimut_deg": 29.0,
+   "elevacion_maxima_deg": -1.159
+  },
+  {
+   "azimut_deg": 30.0,
+   "elevacion_maxima_deg": -1.051
+  },
+  {
+   "azimut_deg": 31.0,
+   "elevacion_maxima_deg": -1.008
+  },
+  {
+   "azimut_deg": 32.0,
+   "elevacion_maxima_deg": -0.891
+  },
+  {
+   "azimut_deg": 33.0,
+   "elevacion_maxima_deg": -0.819
+  },
+  {
+   "azimut_deg": 34.0,
+   "elevacion_maxima_deg": -0.754
+  },
+  {
+   "azimut_deg": 35.0,
+   "elevacion_maxima_deg": -0.681
+  },
+  {
+   "azimut_deg": 36.0,
+   "elevacion_maxima_deg": -0.561
+  },
+  {
+   "azimut_deg": 37.0,
+   "elevacion_maxima_deg": -0.377
+  },
+  {
+   "azimut_deg": 38.0,
+   "elevacion_maxima_deg": -0.219
+  },
+  {
+   "azimut_deg": 39.0,
+   "elevacion_maxima_deg": -0.062
+  },
+  {
+   "azimut_deg": 40.0,
+   "elevacion_maxima_deg": 0.115
+  },
+  {
+   "azimut_deg": 41.0,
+   "elevacion_maxima_deg": 0.261
+  },
+  {
+   "azimut_deg": 42.0,
+   "elevacion_maxima_deg": 0.476
+  },
+  {
+   "azimut_deg": 43.0,
+   "elevacion_maxima_deg": 0.605
+  },
+  {
+   "azimut_deg": 44.0,
+   "elevacion_maxima_deg": 0.687
+  },
+  {
+   "azimut_deg": 45.0,
+   "elevacion_maxima_deg": 0.742
+  },
+  {
+   "azimut_deg": 46.0,
+   "elevacion_maxima_deg": 0.776
+  },
+  {
+   "azimut_deg": 47.0,
+   "elevacion_maxima_deg": 0.846
+  },
+  {
+   "azimut_deg": 48.0,
+   "elevacion_maxima_deg": 1.034
+  },
+  {
+   "azimut_deg": 49.0,
+   "elevacion_maxima_deg": 1.16
+  },
+  {
+   "azimut_deg": 50.0,
+   "elevacion_maxima_deg": 1.229
+  },
+  {
+   "azimut_deg": 51.0,
+   "elevacion_maxima_deg": 1.248
+  },
+  {
+   "azimut_deg": 52.0,
+   "elevacion_maxima_deg": 1.283
+  },
+  {
+   "azimut_deg": 53.0,
+   "elevacion_maxima_deg": 1.315
+  },
+  {
+   "azimut_deg": 54.0,
+   "elevacion_maxima_deg": 1.341
+  },
+  {
+   "azimut_deg": 55.0,
+   "elevacion_maxima_deg": 1.317
+  },
+  {
+   "azimut_deg": 56.0,
+   "elevacion_maxima_deg": 1.238
+  },
+  {
+   "azimut_deg": 57.0,
+   "elevacion_maxima_deg": 1.098
+  },
+  {
+   "azimut_deg": 58.0,
+   "elevacion_maxima_deg": 0.924
+  },
+  {
+   "azimut_deg": 59.0,
+   "elevacion_maxima_deg": 0.674
+  },
+  {
+   "azimut_deg": 60.0,
+   "elevacion_maxima_deg": 0.406
+  },
+  {
+   "azimut_deg": 61.0,
+   "elevacion_maxima_deg": 0.167
+  },
+  {
+   "azimut_deg": 62.0,
+   "elevacion_maxima_deg": -0.139
+  },
+  {
+   "azimut_deg": 63.0,
+   "elevacion_maxima_deg": -0.458
+  },
+  {
+   "azimut_deg": 64.0,
+   "elevacion_maxima_deg": -0.797
+  },
+  {
+   "azimut_deg": 65.0,
+   "elevacion_maxima_deg": -1.104
+  },
+  {
+   "azimut_deg": 66.0,
+   "elevacion_maxima_deg": -1.448
+  },
+  {
+   "azimut_deg": 67.0,
+   "elevacion_maxima_deg": -1.522
+  },
+  {
+   "azimut_deg": 68.0,
+   "elevacion_maxima_deg": -1.384
+  },
+  {
+   "azimut_deg": 69.0,
+   "elevacion_maxima_deg": -1.27
+  },
+  {
+   "azimut_deg": 70.0,
+   "elevacion_maxima_deg": -1.167
+  },
+  {
+   "azimut_deg": 71.0,
+   "elevacion_maxima_deg": -0.841
+  },
+  {
+   "azimut_deg": 72.0,
+   "elevacion_maxima_deg": -0.669
+  },
+  {
+   "azimut_deg": 73.0,
+   "elevacion_maxima_deg": -0.473
+  },
+  {
+   "azimut_deg": 74.0,
+   "elevacion_maxima_deg": -0.426
+  },
+  {
+   "azimut_deg": 75.0,
+   "elevacion_maxima_deg": -0.41
+  },
+  {
+   "azimut_deg": 76.0,
+   "elevacion_maxima_deg": -0.465
+  },
+  {
+   "azimut_deg": 77.0,
+   "elevacion_maxima_deg": -0.559
+  },
+  {
+   "azimut_deg": 78.0,
+   "elevacion_maxima_deg": -0.71
+  },
+  {
+   "azimut_deg": 79.0,
+   "elevacion_maxima_deg": -0.952
+  },
+  {
+   "azimut_deg": 80.0,
+   "elevacion_maxima_deg": -1.119
+  },
+  {
+   "azimut_deg": 81.0,
+   "elevacion_maxima_deg": -1.022
+  },
+  {
+   "azimut_deg": 82.0,
+   "elevacion_maxima_deg": -0.946
+  },
+  {
+   "azimut_deg": 83.0,
+   "elevacion_maxima_deg": -0.888
+  },
+  {
+   "azimut_deg": 84.0,
+   "elevacion_maxima_deg": -0.821
+  },
+  {
+   "azimut_deg": 85.0,
+   "elevacion_maxima_deg": -0.821
+  },
+  {
+   "azimut_deg": 86.0,
+   "elevacion_maxima_deg": -0.825
+  },
+  {
+   "azimut_deg": 87.0,
+   "elevacion_maxima_deg": -0.83
+  },
+  {
+   "azimut_deg": 88.0,
+   "elevacion_maxima_deg": -0.874
+  },
+  {
+   "azimut_deg": 89.0,
+   "elevacion_maxima_deg": -0.882
+  },
+  {
+   "azimut_deg": 90.0,
+   "elevacion_maxima_deg": -0.94
+  },
+  {
+   "azimut_deg": 91.0,
+   "elevacion_maxima_deg": -1.076
+  },
+  {
+   "azimut_deg": 92.0,
+   "elevacion_maxima_deg": -1.195
+  },
+  {
+   "azimut_deg": 93.0,
+   "elevacion_maxima_deg": -1.356
+  },
+  {
+   "azimut_deg": 94.0,
+   "elevacion_maxima_deg": -1.533
+  },
+  {
+   "azimut_deg": 95.0,
+   "elevacion_maxima_deg": -1.567
+  },
+  {
+   "azimut_deg": 96.0,
+   "elevacion_maxima_deg": -1.626
+  },
+  {
+   "azimut_deg": 97.0,
+   "elevacion_maxima_deg": -1.79
+  },
+  {
+   "azimut_deg": 98.0,
+   "elevacion_maxima_deg": -1.957
+  },
+  {
+   "azimut_deg": 99.0,
+   "elevacion_maxima_deg": -2.07
+  },
+  {
+   "azimut_deg": 100.0,
+   "elevacion_maxima_deg": -2.085
+  },
+  {
+   "azimut_deg": 101.0,
+   "elevacion_maxima_deg": -1.835
+  },
+  {
+   "azimut_deg": 102.0,
+   "elevacion_maxima_deg": -1.533
+  },
+  {
+   "azimut_deg": 103.0,
+   "elevacion_maxima_deg": -1.23
+  },
+  {
+   "azimut_deg": 104.0,
+   "elevacion_maxima_deg": -1.081
+  },
+  {
+   "azimut_deg": 105.0,
+   "elevacion_maxima_deg": -1.04
+  },
+  {
+   "azimut_deg": 106.0,
+   "elevacion_maxima_deg": -0.711
+  },
+  {
+   "azimut_deg": 107.0,
+   "elevacion_maxima_deg": -0.583
+  },
+  {
+   "azimut_deg": 108.0,
+   "elevacion_maxima_deg": -0.589
+  },
+  {
+   "azimut_deg": 109.0,
+   "elevacion_maxima_deg": -0.709
+  },
+  {
+   "azimut_deg": 110.0,
+   "elevacion_maxima_deg": -0.944
+  },
+  {
+   "azimut_deg": 111.0,
+   "elevacion_maxima_deg": -1.181
+  },
+  {
+   "azimut_deg": 112.0,
+   "elevacion_maxima_deg": -1.334
+  },
+  {
+   "azimut_deg": 113.0,
+   "elevacion_maxima_deg": -1.508
+  },
+  {
+   "azimut_deg": 114.0,
+   "elevacion_maxima_deg": -1.646
+  },
+  {
+   "azimut_deg": 115.0,
+   "elevacion_maxima_deg": -1.727
+  },
+  {
+   "azimut_deg": 116.0,
+   "elevacion_maxima_deg": -1.874
+  },
+  {
+   "azimut_deg": 117.0,
+   "elevacion_maxima_deg": -2.109
+  },
+  {
+   "azimut_deg": 118.0,
+   "elevacion_maxima_deg": -2.252
+  },
+  {
+   "azimut_deg": 119.0,
+   "elevacion_maxima_deg": -2.271
+  },
+  {
+   "azimut_deg": 120.0,
+   "elevacion_maxima_deg": -2.265
+  },
+  {
+   "azimut_deg": 121.0,
+   "elevacion_maxima_deg": -2.292
+  },
+  {
+   "azimut_deg": 122.0,
+   "elevacion_maxima_deg": -2.328
+  },
+  {
+   "azimut_deg": 123.0,
+   "elevacion_maxima_deg": -2.406
+  },
+  {
+   "azimut_deg": 124.0,
+   "elevacion_maxima_deg": -2.534
+  },
+  {
+   "azimut_deg": 125.0,
+   "elevacion_maxima_deg": -2.608
+  },
+  {
+   "azimut_deg": 126.0,
+   "elevacion_maxima_deg": -2.468
+  },
+  {
+   "azimut_deg": 127.0,
+   "elevacion_maxima_deg": -2.321
+  },
+  {
+   "azimut_deg": 128.0,
+   "elevacion_maxima_deg": -2.202
+  },
+  {
+   "azimut_deg": 129.0,
+   "elevacion_maxima_deg": -2.101
+  },
+  {
+   "azimut_deg": 130.0,
+   "elevacion_maxima_deg": -2.088
+  },
+  {
+   "azimut_deg": 131.0,
+   "elevacion_maxima_deg": -2.093
+  },
+  {
+   "azimut_deg": 132.0,
+   "elevacion_maxima_deg": -2.183
+  },
+  {
+   "azimut_deg": 133.0,
+   "elevacion_maxima_deg": -2.309
+  },
+  {
+   "azimut_deg": 134.0,
+   "elevacion_maxima_deg": -2.424
+  },
+  {
+   "azimut_deg": 135.0,
+   "elevacion_maxima_deg": -2.333
+  },
+  {
+   "azimut_deg": 136.0,
+   "elevacion_maxima_deg": -2.287
+  },
+  {
+   "azimut_deg": 137.0,
+   "elevacion_maxima_deg": -2.181
+  },
+  {
+   "azimut_deg": 138.0,
+   "elevacion_maxima_deg": -1.996
+  },
+  {
+   "azimut_deg": 139.0,
+   "elevacion_maxima_deg": -1.868
+  },
+  {
+   "azimut_deg": 140.0,
+   "elevacion_maxima_deg": -1.772
+  },
+  {
+   "azimut_deg": 141.0,
+   "elevacion_maxima_deg": -1.653
+  },
+  {
+   "azimut_deg": 142.0,
+   "elevacion_maxima_deg": -1.593
+  },
+  {
+   "azimut_deg": 143.0,
+   "elevacion_maxima_deg": -1.613
+  },
+  {
+   "azimut_deg": 144.0,
+   "elevacion_maxima_deg": -1.636
+  },
+  {
+   "azimut_deg": 145.0,
+   "elevacion_maxima_deg": -1.715
+  },
+  {
+   "azimut_deg": 146.0,
+   "elevacion_maxima_deg": -1.8
+  },
+  {
+   "azimut_deg": 147.0,
+   "elevacion_maxima_deg": -1.903
+  },
+  {
+   "azimut_deg": 148.0,
+   "elevacion_maxima_deg": -2.007
+  },
+  {
+   "azimut_deg": 149.0,
+   "elevacion_maxima_deg": -2.224
+  },
+  {
+   "azimut_deg": 150.0,
+   "elevacion_maxima_deg": -2.379
+  },
+  {
+   "azimut_deg": 151.0,
+   "elevacion_maxima_deg": -2.179
+  },
+  {
+   "azimut_deg": 152.0,
+   "elevacion_maxima_deg": -1.958
+  },
+  {
+   "azimut_deg": 153.0,
+   "elevacion_maxima_deg": -1.558
+  },
+  {
+   "azimut_deg": 154.0,
+   "elevacion_maxima_deg": -1.53
+  },
+  {
+   "azimut_deg": 155.0,
+   "elevacion_maxima_deg": -1.234
+  },
+  {
+   "azimut_deg": 156.0,
+   "elevacion_maxima_deg": -0.944
+  },
+  {
+   "azimut_deg": 157.0,
+   "elevacion_maxima_deg": -0.877
+  },
+  {
+   "azimut_deg": 158.0,
+   "elevacion_maxima_deg": -0.625
+  },
+  {
+   "azimut_deg": 159.0,
+   "elevacion_maxima_deg": -0.393
+  },
+  {
+   "azimut_deg": 160.0,
+   "elevacion_maxima_deg": -0.356
+  },
+  {
+   "azimut_deg": 161.0,
+   "elevacion_maxima_deg": -0.139
+  },
+  {
+   "azimut_deg": 162.0,
+   "elevacion_maxima_deg": -1.827
+  },
+  {
+   "azimut_deg": 163.0,
+   "elevacion_maxima_deg": 0.013
+  },
+  {
+   "azimut_deg": 164.0,
+   "elevacion_maxima_deg": 0.037
+  },
+  {
+   "azimut_deg": 165.0,
+   "elevacion_maxima_deg": -0.018
+  },
+  {
+   "azimut_deg": 166.0,
+   "elevacion_maxima_deg": 0.069
+  },
+  {
+   "azimut_deg": 167.0,
+   "elevacion_maxima_deg": -0.124
+  },
+  {
+   "azimut_deg": 168.0,
+   "elevacion_maxima_deg": -0.496
+  },
+  {
+   "azimut_deg": 169.0,
+   "elevacion_maxima_deg": -0.672
+  },
+  {
+   "azimut_deg": 170.0,
+   "elevacion_maxima_deg": -1.152
+  },
+  {
+   "azimut_deg": 171.0,
+   "elevacion_maxima_deg": -1.48
+  },
+  {
+   "azimut_deg": 172.0,
+   "elevacion_maxima_deg": -1.84
+  },
+  {
+   "azimut_deg": 173.0,
+   "elevacion_maxima_deg": -1.964
+  },
+  {
+   "azimut_deg": 174.0,
+   "elevacion_maxima_deg": -2.087
+  },
+  {
+   "azimut_deg": 175.0,
+   "elevacion_maxima_deg": -2.164
+  },
+  {
+   "azimut_deg": 176.0,
+   "elevacion_maxima_deg": -2.341
+  },
+  {
+   "azimut_deg": 177.0,
+   "elevacion_maxima_deg": -2.382
+  },
+  {
+   "azimut_deg": 178.0,
+   "elevacion_maxima_deg": -2.409
+  },
+  {
+   "azimut_deg": 179.0,
+   "elevacion_maxima_deg": -2.552
+  },
+  {
+   "azimut_deg": 180.0,
+   "elevacion_maxima_deg": -2.682
+  },
+  {
+   "azimut_deg": 181.0,
+   "elevacion_maxima_deg": -2.647
+  },
+  {
+   "azimut_deg": 182.0,
+   "elevacion_maxima_deg": -2.452
+  },
+  {
+   "azimut_deg": 183.0,
+   "elevacion_maxima_deg": -2.392
+  },
+  {
+   "azimut_deg": 184.0,
+   "elevacion_maxima_deg": -2.351
+  },
+  {
+   "azimut_deg": 185.0,
+   "elevacion_maxima_deg": -2.254
+  },
+  {
+   "azimut_deg": 186.0,
+   "elevacion_maxima_deg": -2.229
+  },
+  {
+   "azimut_deg": 187.0,
+   "elevacion_maxima_deg": -2.106
+  },
+  {
+   "azimut_deg": 188.0,
+   "elevacion_maxima_deg": -1.964
+  },
+  {
+   "azimut_deg": 189.0,
+   "elevacion_maxima_deg": -1.836
+  },
+  {
+   "azimut_deg": 190.0,
+   "elevacion_maxima_deg": -1.709
+  },
+  {
+   "azimut_deg": 191.0,
+   "elevacion_maxima_deg": -1.622
+  },
+  {
+   "azimut_deg": 192.0,
+   "elevacion_maxima_deg": -1.514
+  },
+  {
+   "azimut_deg": 193.0,
+   "elevacion_maxima_deg": -1.404
+  },
+  {
+   "azimut_deg": 194.0,
+   "elevacion_maxima_deg": -1.365
+  },
+  {
+   "azimut_deg": 195.0,
+   "elevacion_maxima_deg": -1.389
+  },
+  {
+   "azimut_deg": 196.0,
+   "elevacion_maxima_deg": -1.407
+  },
+  {
+   "azimut_deg": 197.0,
+   "elevacion_maxima_deg": -1.45
+  },
+  {
+   "azimut_deg": 198.0,
+   "elevacion_maxima_deg": -1.481
+  },
+  {
+   "azimut_deg": 199.0,
+   "elevacion_maxima_deg": -1.548
+  },
+  {
+   "azimut_deg": 200.0,
+   "elevacion_maxima_deg": -1.599
+  },
+  {
+   "azimut_deg": 201.0,
+   "elevacion_maxima_deg": -1.651
+  },
+  {
+   "azimut_deg": 202.0,
+   "elevacion_maxima_deg": -1.734
+  },
+  {
+   "azimut_deg": 203.0,
+   "elevacion_maxima_deg": -1.764
+  },
+  {
+   "azimut_deg": 204.0,
+   "elevacion_maxima_deg": -1.833
+  },
+  {
+   "azimut_deg": 205.0,
+   "elevacion_maxima_deg": -1.946
+  },
+  {
+   "azimut_deg": 206.0,
+   "elevacion_maxima_deg": -2.063
+  },
+  {
+   "azimut_deg": 207.0,
+   "elevacion_maxima_deg": -2.201
+  },
+  {
+   "azimut_deg": 208.0,
+   "elevacion_maxima_deg": -2.325
+  },
+  {
+   "azimut_deg": 209.0,
+   "elevacion_maxima_deg": -2.43
+  },
+  {
+   "azimut_deg": 210.0,
+   "elevacion_maxima_deg": -2.368
+  },
+  {
+   "azimut_deg": 211.0,
+   "elevacion_maxima_deg": -2.361
+  },
+  {
+   "azimut_deg": 212.0,
+   "elevacion_maxima_deg": -2.422
+  },
+  {
+   "azimut_deg": 213.0,
+   "elevacion_maxima_deg": -2.434
+  },
+  {
+   "azimut_deg": 214.0,
+   "elevacion_maxima_deg": -2.485
+  },
+  {
+   "azimut_deg": 215.0,
+   "elevacion_maxima_deg": -2.462
+  },
+  {
+   "azimut_deg": 216.0,
+   "elevacion_maxima_deg": -2.438
+  },
+  {
+   "azimut_deg": 217.0,
+   "elevacion_maxima_deg": -2.249
+  },
+  {
+   "azimut_deg": 218.0,
+   "elevacion_maxima_deg": -2.206
+  },
+  {
+   "azimut_deg": 219.0,
+   "elevacion_maxima_deg": -2.163
+  },
+  {
+   "azimut_deg": 220.0,
+   "elevacion_maxima_deg": -2.159
+  },
+  {
+   "azimut_deg": 221.0,
+   "elevacion_maxima_deg": -2.2
+  },
+  {
+   "azimut_deg": 222.0,
+   "elevacion_maxima_deg": -2.252
+  },
+  {
+   "azimut_deg": 223.0,
+   "elevacion_maxima_deg": -2.228
+  },
+  {
+   "azimut_deg": 224.0,
+   "elevacion_maxima_deg": -2.224
+  },
+  {
+   "azimut_deg": 225.0,
+   "elevacion_maxima_deg": -2.263
+  },
+  {
+   "azimut_deg": 226.0,
+   "elevacion_maxima_deg": -2.277
+  },
+  {
+   "azimut_deg": 227.0,
+   "elevacion_maxima_deg": -2.279
+  },
+  {
+   "azimut_deg": 228.0,
+   "elevacion_maxima_deg": -2.345
+  },
+  {
+   "azimut_deg": 229.0,
+   "elevacion_maxima_deg": -2.422
+  },
+  {
+   "azimut_deg": 230.0,
+   "elevacion_maxima_deg": -2.44
+  },
+  {
+   "azimut_deg": 231.0,
+   "elevacion_maxima_deg": -2.448
+  },
+  {
+   "azimut_deg": 232.0,
+   "elevacion_maxima_deg": -2.403
+  },
+  {
+   "azimut_deg": 233.0,
+   "elevacion_maxima_deg": -2.44
+  },
+  {
+   "azimut_deg": 234.0,
+   "elevacion_maxima_deg": -2.389
+  },
+  {
+   "azimut_deg": 235.0,
+   "elevacion_maxima_deg": -2.265
+  },
+  {
+   "azimut_deg": 236.0,
+   "elevacion_maxima_deg": -2.177
+  },
+  {
+   "azimut_deg": 237.0,
+   "elevacion_maxima_deg": -2.092
+  },
+  {
+   "azimut_deg": 238.0,
+   "elevacion_maxima_deg": -1.957
+  },
+  {
+   "azimut_deg": 239.0,
+   "elevacion_maxima_deg": -1.856
+  },
+  {
+   "azimut_deg": 240.0,
+   "elevacion_maxima_deg": -1.809
+  },
+  {
+   "azimut_deg": 241.0,
+   "elevacion_maxima_deg": -1.79
+  },
+  {
+   "azimut_deg": 242.0,
+   "elevacion_maxima_deg": -1.782
+  },
+  {
+   "azimut_deg": 243.0,
+   "elevacion_maxima_deg": -1.815
+  },
+  {
+   "azimut_deg": 244.0,
+   "elevacion_maxima_deg": -1.805
+  },
+  {
+   "azimut_deg": 245.0,
+   "elevacion_maxima_deg": -1.82
+  },
+  {
+   "azimut_deg": 246.0,
+   "elevacion_maxima_deg": -1.859
+  },
+  {
+   "azimut_deg": 247.0,
+   "elevacion_maxima_deg": -1.866
+  },
+  {
+   "azimut_deg": 248.0,
+   "elevacion_maxima_deg": -1.857
+  },
+  {
+   "azimut_deg": 249.0,
+   "elevacion_maxima_deg": -1.855
+  },
+  {
+   "azimut_deg": 250.0,
+   "elevacion_maxima_deg": -1.825
+  },
+  {
+   "azimut_deg": 251.0,
+   "elevacion_maxima_deg": -1.853
+  },
+  {
+   "azimut_deg": 252.0,
+   "elevacion_maxima_deg": -1.821
+  },
+  {
+   "azimut_deg": 253.0,
+   "elevacion_maxima_deg": -1.794
+  },
+  {
+   "azimut_deg": 254.0,
+   "elevacion_maxima_deg": -1.789
+  },
+  {
+   "azimut_deg": 255.0,
+   "elevacion_maxima_deg": -1.735
+  },
+  {
+   "azimut_deg": 256.0,
+   "elevacion_maxima_deg": -1.681
+  },
+  {
+   "azimut_deg": 257.0,
+   "elevacion_maxima_deg": -1.685
+  },
+  {
+   "azimut_deg": 258.0,
+   "elevacion_maxima_deg": -1.627
+  },
+  {
+   "azimut_deg": 259.0,
+   "elevacion_maxima_deg": -1.593
+  },
+  {
+   "azimut_deg": 260.0,
+   "elevacion_maxima_deg": -1.527
+  },
+  {
+   "azimut_deg": 261.0,
+   "elevacion_maxima_deg": -1.604
+  },
+  {
+   "azimut_deg": 262.0,
+   "elevacion_maxima_deg": -1.656
+  },
+  {
+   "azimut_deg": 263.0,
+   "elevacion_maxima_deg": -1.613
+  },
+  {
+   "azimut_deg": 264.0,
+   "elevacion_maxima_deg": -1.515
+  },
+  {
+   "azimut_deg": 265.0,
+   "elevacion_maxima_deg": -1.368
+  },
+  {
+   "azimut_deg": 266.0,
+   "elevacion_maxima_deg": -1.269
+  },
+  {
+   "azimut_deg": 267.0,
+   "elevacion_maxima_deg": -1.087
+  },
+  {
+   "azimut_deg": 268.0,
+   "elevacion_maxima_deg": -0.926
+  },
+  {
+   "azimut_deg": 269.0,
+   "elevacion_maxima_deg": -0.822
+  },
+  {
+   "azimut_deg": 270.0,
+   "elevacion_maxima_deg": -0.742
+  },
+  {
+   "azimut_deg": 271.0,
+   "elevacion_maxima_deg": -0.709
+  },
+  {
+   "azimut_deg": 272.0,
+   "elevacion_maxima_deg": -0.731
+  },
+  {
+   "azimut_deg": 273.0,
+   "elevacion_maxima_deg": -0.775
+  },
+  {
+   "azimut_deg": 274.0,
+   "elevacion_maxima_deg": -0.901
+  },
+  {
+   "azimut_deg": 275.0,
+   "elevacion_maxima_deg": -0.967
+  },
+  {
+   "azimut_deg": 276.0,
+   "elevacion_maxima_deg": -0.998
+  },
+  {
+   "azimut_deg": 277.0,
+   "elevacion_maxima_deg": -1.056
+  },
+  {
+   "azimut_deg": 278.0,
+   "elevacion_maxima_deg": -1.085
+  },
+  {
+   "azimut_deg": 279.0,
+   "elevacion_maxima_deg": -1.062
+  },
+  {
+   "azimut_deg": 280.0,
+   "elevacion_maxima_deg": -1.08
+  },
+  {
+   "azimut_deg": 281.0,
+   "elevacion_maxima_deg": -1.205
+  },
+  {
+   "azimut_deg": 282.0,
+   "elevacion_maxima_deg": -1.345
+  },
+  {
+   "azimut_deg": 283.0,
+   "elevacion_maxima_deg": -1.567
+  },
+  {
+   "azimut_deg": 284.0,
+   "elevacion_maxima_deg": -1.668
+  },
+  {
+   "azimut_deg": 285.0,
+   "elevacion_maxima_deg": -1.782
+  },
+  {
+   "azimut_deg": 286.0,
+   "elevacion_maxima_deg": -1.957
+  },
+  {
+   "azimut_deg": 287.0,
+   "elevacion_maxima_deg": -2.107
+  },
+  {
+   "azimut_deg": 288.0,
+   "elevacion_maxima_deg": -2.202
+  },
+  {
+   "azimut_deg": 289.0,
+   "elevacion_maxima_deg": -2.302
+  },
+  {
+   "azimut_deg": 290.0,
+   "elevacion_maxima_deg": -2.294
+  },
+  {
+   "azimut_deg": 291.0,
+   "elevacion_maxima_deg": -2.233
+  },
+  {
+   "azimut_deg": 292.0,
+   "elevacion_maxima_deg": -2.236
+  },
+  {
+   "azimut_deg": 293.0,
+   "elevacion_maxima_deg": -2.208
+  },
+  {
+   "azimut_deg": 294.0,
+   "elevacion_maxima_deg": -2.127
+  },
+  {
+   "azimut_deg": 295.0,
+   "elevacion_maxima_deg": -1.99
+  },
+  {
+   "azimut_deg": 296.0,
+   "elevacion_maxima_deg": -1.969
+  },
+  {
+   "azimut_deg": 297.0,
+   "elevacion_maxima_deg": -1.969
+  },
+  {
+   "azimut_deg": 298.0,
+   "elevacion_maxima_deg": -1.542
+  },
+  {
+   "azimut_deg": 299.0,
+   "elevacion_maxima_deg": -1.955
+  },
+  {
+   "azimut_deg": 300.0,
+   "elevacion_maxima_deg": -1.965
+  },
+  {
+   "azimut_deg": 301.0,
+   "elevacion_maxima_deg": -1.863
+  },
+  {
+   "azimut_deg": 302.0,
+   "elevacion_maxima_deg": -1.769
+  },
+  {
+   "azimut_deg": 303.0,
+   "elevacion_maxima_deg": -1.744
+  },
+  {
+   "azimut_deg": 304.0,
+   "elevacion_maxima_deg": -1.757
+  },
+  {
+   "azimut_deg": 305.0,
+   "elevacion_maxima_deg": -1.785
+  },
+  {
+   "azimut_deg": 306.0,
+   "elevacion_maxima_deg": -1.782
+  },
+  {
+   "azimut_deg": 307.0,
+   "elevacion_maxima_deg": -1.832
+  },
+  {
+   "azimut_deg": 308.0,
+   "elevacion_maxima_deg": -1.888
+  },
+  {
+   "azimut_deg": 309.0,
+   "elevacion_maxima_deg": -1.981
+  },
+  {
+   "azimut_deg": 310.0,
+   "elevacion_maxima_deg": -2.043
+  },
+  {
+   "azimut_deg": 311.0,
+   "elevacion_maxima_deg": -2.123
+  },
+  {
+   "azimut_deg": 312.0,
+   "elevacion_maxima_deg": -2.253
+  },
+  {
+   "azimut_deg": 313.0,
+   "elevacion_maxima_deg": -2.319
+  },
+  {
+   "azimut_deg": 314.0,
+   "elevacion_maxima_deg": -2.378
+  },
+  {
+   "azimut_deg": 315.0,
+   "elevacion_maxima_deg": -2.436
+  },
+  {
+   "azimut_deg": 316.0,
+   "elevacion_maxima_deg": -2.484
+  },
+  {
+   "azimut_deg": 317.0,
+   "elevacion_maxima_deg": -2.576
+  },
+  {
+   "azimut_deg": 318.0,
+   "elevacion_maxima_deg": -2.592
+  },
+  {
+   "azimut_deg": 319.0,
+   "elevacion_maxima_deg": -2.58
+  },
+  {
+   "azimut_deg": 320.0,
+   "elevacion_maxima_deg": -2.569
+  },
+  {
+   "azimut_deg": 321.0,
+   "elevacion_maxima_deg": -2.443
+  },
+  {
+   "azimut_deg": 322.0,
+   "elevacion_maxima_deg": -2.432
+  },
+  {
+   "azimut_deg": 323.0,
+   "elevacion_maxima_deg": -2.449
+  },
+  {
+   "azimut_deg": 324.0,
+   "elevacion_maxima_deg": -2.514
+  },
+  {
+   "azimut_deg": 325.0,
+   "elevacion_maxima_deg": -2.509
+  },
+  {
+   "azimut_deg": 326.0,
+   "elevacion_maxima_deg": -2.537
+  },
+  {
+   "azimut_deg": 327.0,
+   "elevacion_maxima_deg": -2.498
+  },
+  {
+   "azimut_deg": 328.0,
+   "elevacion_maxima_deg": -2.51
+  },
+  {
+   "azimut_deg": 329.0,
+   "elevacion_maxima_deg": -2.51
+  },
+  {
+   "azimut_deg": 330.0,
+   "elevacion_maxima_deg": -2.635
+  },
+  {
+   "azimut_deg": 331.0,
+   "elevacion_maxima_deg": -2.673
+  },
+  {
+   "azimut_deg": 332.0,
+   "elevacion_maxima_deg": -2.663
+  },
+  {
+   "azimut_deg": 333.0,
+   "elevacion_maxima_deg": -2.619
+  },
+  {
+   "azimut_deg": 334.0,
+   "elevacion_maxima_deg": -2.596
+  },
+  {
+   "azimut_deg": 335.0,
+   "elevacion_maxima_deg": -2.59
+  },
+  {
+   "azimut_deg": 336.0,
+   "elevacion_maxima_deg": -2.599
+  },
+  {
+   "azimut_deg": 337.0,
+   "elevacion_maxima_deg": -2.612
+  },
+  {
+   "azimut_deg": 338.0,
+   "elevacion_maxima_deg": -2.684
+  },
+  {
+   "azimut_deg": 339.0,
+   "elevacion_maxima_deg": -2.812
+  },
+  {
+   "azimut_deg": 340.0,
+   "elevacion_maxima_deg": -2.907
+  },
+  {
+   "azimut_deg": 341.0,
+   "elevacion_maxima_deg": -3.08
+  },
+  {
+   "azimut_deg": 342.0,
+   "elevacion_maxima_deg": -3.19
+  },
+  {
+   "azimut_deg": 343.0,
+   "elevacion_maxima_deg": -3.302
+  },
+  {
+   "azimut_deg": 344.0,
+   "elevacion_maxima_deg": -3.284
+  },
+  {
+   "azimut_deg": 345.0,
+   "elevacion_maxima_deg": -3.196
+  },
+  {
+   "azimut_deg": 346.0,
+   "elevacion_maxima_deg": -3.008
+  },
+  {
+   "azimut_deg": 347.0,
+   "elevacion_maxima_deg": -2.822
+  },
+  {
+   "azimut_deg": 348.0,
+   "elevacion_maxima_deg": -2.618
+  },
+  {
+   "azimut_deg": 349.0,
+   "elevacion_maxima_deg": -2.35
+  },
+  {
+   "azimut_deg": 350.0,
+   "elevacion_maxima_deg": -2.069
+  },
+  {
+   "azimut_deg": 351.0,
+   "elevacion_maxima_deg": -1.829
+  },
+  {
+   "azimut_deg": 352.0,
+   "elevacion_maxima_deg": -1.758
+  },
+  {
+   "azimut_deg": 353.0,
+   "elevacion_maxima_deg": -1.667
+  },
+  {
+   "azimut_deg": 354.0,
+   "elevacion_maxima_deg": -1.512
+  },
+  {
+   "azimut_deg": 355.0,
+   "elevacion_maxima_deg": -1.362
+  },
+  {
+   "azimut_deg": 356.0,
+   "elevacion_maxima_deg": -1.357
+  },
+  {
+   "azimut_deg": 357.0,
+   "elevacion_maxima_deg": -1.407
+  },
+  {
+   "azimut_deg": 358.0,
+   "elevacion_maxima_deg": -1.529
+  },
+  {
+   "azimut_deg": 359.0,
+   "elevacion_maxima_deg": -1.651
+  }
+ ]
+}
