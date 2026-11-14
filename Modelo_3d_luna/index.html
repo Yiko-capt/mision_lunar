@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SeleneHorizon — Navegador del Polo Sur Lunar</title>
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Three.js desde CDN (no hay que instalar nada) -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+<div id="app">
+  <aside>
+    <h1>🌙 SeleneHorizon</h1>
+    <div class="subtitle">Polo Sur Lunar · Navegador</div>
+
+    <div class="panel">
+      <h3>Sitio de aterrizaje</h3>
+      <select id="site-select"></select>
+      <div class="note" id="site-note"></div>
+    </div>
+
+    <div class="panel">
+      <h3>Fecha y hora base (UTC)</h3>
+      <div class="row">
+        <input type="date" id="date-input">
+        <input type="time" id="time-input">
+      </div>
+      <label style="margin-top:10px">Desplazamiento: <span id="days-label">0.00</span> días</label>
+      <input type="range" id="time-slider" min="-180" max="180" value="0" step="0.05">
+      <div class="row" style="margin-top:6px">
+        <button id="play-btn">▶ Animar</button>
+        <button id="now-btn">Ahora</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Métricas · Escenario A</h3>
+      <div class="metric"><span class="label">Elevación Sol</span><span class="value" id="m-sun-el">—</span></div>
+      <div class="metric"><span class="label">Azimut Sol</span><span class="value" id="m-sun-az">—</span></div>
+      <div class="metric"><span class="label">Elevación Tierra</span><span class="value" id="m-earth-el">—</span></div>
+      <div class="metric"><span class="label">Azimut Tierra</span><span class="value" id="m-earth-az">—</span></div>
+      <div class="metric"><span class="label">Fase lunar</span><span class="value" id="m-phase">—</span></div>
+      <div class="metric"><span class="label">Próx. evento solar</span><span class="value" id="m-sunset">—</span></div>
+      <div class="metric"><span class="label">η solar (horizontal)</span><span class="value" id="m-efficiency">—</span></div>
+      <div class="metric"><span class="label">Visibilidad DTE</span><span class="value" id="m-dte">—</span></div>
+    </div>
+
+    <div class="panel">
+      <h3>Comparación A/B</h3>
+      <button id="snapshot-btn" class="primary">📌 Guardar actual como Escenario B</button>
+      <button id="clear-b-btn">Limpiar B</button>
+    </div>
+
+    <div class="panel">
+      <h3>Vista</h3>
+      <button id="reset-view-btn">🔄 Resetear cámara</button>
+      <button id="earth-view-btn">🌍 Vista desde la Tierra</button>
+      <button id="follow-site-btn">🎯 Enfocar sitio</button>
+    </div>
+
+    <div class="note" style="margin-top:4px">
+      v0.1 MVP · Efemérides analíticas (Meeus), validadas contra PyEphem: error < 0.2°.
+    </div>
+  </aside>
+
+  <main id="viewport">
+    <div id="hud">
+      <div>Sitio seleccionado · <span id="hud-site">—</span></div>
+      <div class="date" id="hud-date">—</div>
+    </div>
+
+    <div id="compare-panel">
+      <h3>📌 Escenario B (comparación)</h3>
+      <div class="site-name" id="b-site">—</div>
+      <div class="metric"><span class="label">Sol elev.</span><span class="value" id="b-sun-el">—</span></div>
+      <div class="metric"><span class="label">Tierra elev.</span><span class="value" id="b-earth-el">—</span></div>
+      <div class="metric"><span class="label">η solar</span><span class="value" id="b-eff">—</span></div>
+      <div class="metric"><span class="label">Fase</span><span class="value" id="b-phase">—</span></div>
+      <div class="metric delta-row">
+        <span class="label">Δ η solar (A−B)</span><span class="value" id="b-delta">—</span>
+      </div>
+    </div>
+
+    <div class="legend">
+      <div class="item"><div class="dot" style="background:#ffcc55"></div> Sol</div>
+      <div class="item"><div class="dot" style="background:#4a90e2"></div> Tierra</div>
+      <div class="item"><div class="dot" style="background:#ff6b6b"></div> Sitio candidato</div>
+      <div class="item"><div class="dot" style="background:#4ade80"></div> Sitio seleccionado</div>
+    </div>
+  </main>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
