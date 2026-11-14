@@ -1,0 +1,1175 @@
+{
+  "sitio": "shackleton_borde",
+  "lat": -89.9,
+  "lon": 0.0,
+  "panel": {
+    "area_m2": 1.0,
+    "eficiencia_celda": 0.28,
+    "factor_sistema": 0.85,
+    "inclinacion_deg": 90.0,
+    "az_panel_deg": 0.0,
+    "seguimiento_az": false,
+    "eta": 0.238
+  },
+  "enlace": {
+    "frecuencia_hz": 8400000000.0,
+    "eirp_dbw": 25.0,
+    "g_t_dbk": 45.0,
+    "perdidas_otras_db": 3.0,
+    "eb_n0_req_db": 3.0,
+    "margen_req_db": 3.0
+  },
+  "requisitos": {
+    "duracion_h": 336.0,
+    "el_sol_min_deg": 0.0,
+    "el_tierra_min_deg": 0.0,
+    "horas_luz_min_h": 168.0,
+    "oscuridad_max_h": 120.0,
+    "potencia_media_min_w": null,
+    "horas_dte_min_h": 120.0,
+    "ventana_dte_min_h": 24.0
+  },
+  "escenario": {
+    "inicio_utc": "2027-01-10T00:00:00Z",
+    "fin_utc": "2027-01-24T00:00:00Z",
+    "energia": {
+      "horas_luz_h": 0.0,
+      "horas_luz_util_h": 0.0,
+      "fraccion_luz": 0.0,
+      "luz_continua_max_h": 0.0,
+      "oscuridad_continua_max_h": 336.0,
+      "n_periodos_luz": 0,
+      "el_sol_max_deg": -1.339,
+      "el_sol_media_iluminada_deg": 0.0,
+      "potencia_pico_w": 0.0,
+      "potencia_media_w": 0.0,
+      "energia_total_wh": 0.0,
+      "t_hasta_puesta_h": null,
+      "t_hasta_salida_h": null,
+      "sol_visible_ahora": false
+    },
+    "comunicacion": {
+      "horas_dte_h": 307.36,
+      "fraccion_dte": 0.915,
+      "n_ventanas_dte": 1,
+      "ventana_dte_max_h": 307.36,
+      "el_tierra_max_deg": 6.8,
+      "t_hasta_tierra_puesta_h": null,
+      "t_hasta_tierra_salida_h": 15.71,
+      "tierra_visible_ahora": false,
+      "distancia_media_km": 395920.0,
+      "fspl_db": 223.1,
+      "tasa_max_mbps": 4.47
+    },
+    "viabilidad": {
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "criterios": [
+        {
+          "nombre": "Horas de luz útil",
+          "valor": 0.0,
+          "umbral": 168.0,
+          "unidad": "h",
+          "tipo": "min",
+          "cumple": false
+        },
+        {
+          "nombre": "Oscuridad continua máxima",
+          "valor": 336.0,
+          "umbral": 120.0,
+          "unidad": "h",
+          "tipo": "max",
+          "cumple": false
+        },
+        {
+          "nombre": "Horas de enlace directo (DTE)",
+          "valor": 307.36,
+          "umbral": 120.0,
+          "unidad": "h",
+          "tipo": "min",
+          "cumple": true
+        },
+        {
+          "nombre": "Ventana DTE más larga",
+          "valor": 307.36,
+          "umbral": 24.0,
+          "unidad": "h",
+          "tipo": "min",
+          "cumple": true
+        }
+      ]
+    }
+  },
+  "comparacion_paneles": [
+    {
+      "configuracion": "Horizontal",
+      "energia_wh": 0.0,
+      "potencia_media_w": 0.0,
+      "az_panel_deg": null
+    },
+    {
+      "configuracion": "Vertical fijo (azimut configurado)",
+      "energia_wh": 0.0,
+      "potencia_media_w": 0.0,
+      "az_panel_deg": 0.0
+    },
+    {
+      "configuracion": "Vertical fijo (azimut óptimo)",
+      "energia_wh": 0.0,
+      "potencia_media_w": 0.0,
+      "az_panel_deg": 0.0
+    },
+    {
+      "configuracion": "Vertical con seguimiento en azimut",
+      "energia_wh": 0.0,
+      "potencia_media_w": 0.0,
+      "az_panel_deg": null
+    }
+  ],
+  "calendario": [
+    {
+      "fecha_utc": "2027-01-10T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 307.36
+    },
+    {
+      "fecha_utc": "2027-01-11T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 299.07
+    },
+    {
+      "fecha_utc": "2027-01-12T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 275.07
+    },
+    {
+      "fecha_utc": "2027-01-13T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 251.07
+    },
+    {
+      "fecha_utc": "2027-01-14T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 227.07
+    },
+    {
+      "fecha_utc": "2027-01-15T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 203.07
+    },
+    {
+      "fecha_utc": "2027-01-16T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 179.07
+    },
+    {
+      "fecha_utc": "2027-01-17T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 155.07
+    },
+    {
+      "fecha_utc": "2027-01-18T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 131.07
+    },
+    {
+      "fecha_utc": "2027-01-19T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 56.2,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 107.07
+    },
+    {
+      "fecha_utc": "2027-01-20T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 51.2,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 83.07
+    },
+    {
+      "fecha_utc": "2027-01-21T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 46.2,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 59.07
+    },
+    {
+      "fecha_utc": "2027-01-22T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 41.2,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 35.07
+    },
+    {
+      "fecha_utc": "2027-01-23T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 22.8,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 11.07
+    },
+    {
+      "fecha_utc": "2027-01-24T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 12.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 3.17
+    },
+    {
+      "fecha_utc": "2027-01-25T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 39.6,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 27.17
+    },
+    {
+      "fecha_utc": "2027-01-26T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 44.6,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 51.17
+    },
+    {
+      "fecha_utc": "2027-01-27T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 49.6,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 75.17
+    },
+    {
+      "fecha_utc": "2027-01-28T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 54.6,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 99.17
+    },
+    {
+      "fecha_utc": "2027-01-29T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 123.17
+    },
+    {
+      "fecha_utc": "2027-01-30T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 147.17
+    },
+    {
+      "fecha_utc": "2027-01-31T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 171.17
+    },
+    {
+      "fecha_utc": "2027-02-01T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 195.17
+    },
+    {
+      "fecha_utc": "2027-02-02T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 219.17
+    },
+    {
+      "fecha_utc": "2027-02-03T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 243.17
+    },
+    {
+      "fecha_utc": "2027-02-04T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 267.17
+    },
+    {
+      "fecha_utc": "2027-02-05T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 291.17
+    },
+    {
+      "fecha_utc": "2027-02-06T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 307.37
+    },
+    {
+      "fecha_utc": "2027-02-07T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 304.19
+    },
+    {
+      "fecha_utc": "2027-02-08T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 280.19
+    },
+    {
+      "fecha_utc": "2027-02-09T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 256.19
+    },
+    {
+      "fecha_utc": "2027-02-10T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 232.19
+    },
+    {
+      "fecha_utc": "2027-02-11T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 208.19
+    },
+    {
+      "fecha_utc": "2027-02-12T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 184.19
+    },
+    {
+      "fecha_utc": "2027-02-13T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 160.19
+    },
+    {
+      "fecha_utc": "2027-02-14T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 136.19
+    },
+    {
+      "fecha_utc": "2027-02-15T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 57.3,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 112.19
+    },
+    {
+      "fecha_utc": "2027-02-16T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 52.3,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 88.19
+    },
+    {
+      "fecha_utc": "2027-02-17T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 47.3,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 64.19
+    },
+    {
+      "fecha_utc": "2027-02-18T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 42.3,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 40.19
+    },
+    {
+      "fecha_utc": "2027-02-19T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 29.2,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 16.19
+    },
+    {
+      "fecha_utc": "2027-02-20T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 8.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 0.0
+    },
+    {
+      "fecha_utc": "2027-02-21T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 36.5,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 22.05
+    },
+    {
+      "fecha_utc": "2027-02-22T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 43.5,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 46.05
+    },
+    {
+      "fecha_utc": "2027-02-23T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 48.5,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 70.05
+    },
+    {
+      "fecha_utc": "2027-02-24T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 53.5,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 94.05
+    },
+    {
+      "fecha_utc": "2027-02-25T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.5,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 118.05
+    },
+    {
+      "fecha_utc": "2027-02-26T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 142.05
+    },
+    {
+      "fecha_utc": "2027-02-27T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 166.05
+    },
+    {
+      "fecha_utc": "2027-02-28T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 190.05
+    },
+    {
+      "fecha_utc": "2027-03-01T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 214.05
+    },
+    {
+      "fecha_utc": "2027-03-02T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 238.05
+    },
+    {
+      "fecha_utc": "2027-03-03T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 262.05
+    },
+    {
+      "fecha_utc": "2027-03-04T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 286.05
+    },
+    {
+      "fecha_utc": "2027-03-05T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 58.9,
+      "holgura_min": 0.0,
+      "horas_luz_h": 0.0,
+      "oscuridad_max_h": 336.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 307.38
+    },
+    {
+      "fecha_utc": "2027-03-06T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 59.8,
+      "holgura_min": 0.03,
+      "horas_luz_h": 5.0,
+      "oscuridad_max_h": 331.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 307.38
+    },
+    {
+      "fecha_utc": "2027-03-07T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 64.1,
+      "holgura_min": 0.17,
+      "horas_luz_h": 29.0,
+      "oscuridad_max_h": 307.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 285.32
+    },
+    {
+      "fecha_utc": "2027-03-08T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 68.5,
+      "holgura_min": 0.32,
+      "horas_luz_h": 53.0,
+      "oscuridad_max_h": 283.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 261.32
+    },
+    {
+      "fecha_utc": "2027-03-09T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 73.0,
+      "holgura_min": 0.46,
+      "horas_luz_h": 77.0,
+      "oscuridad_max_h": 259.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 237.32
+    },
+    {
+      "fecha_utc": "2027-03-10T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 77.8,
+      "holgura_min": 0.51,
+      "horas_luz_h": 101.0,
+      "oscuridad_max_h": 235.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 213.32
+    },
+    {
+      "fecha_utc": "2027-03-11T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 82.8,
+      "holgura_min": 0.57,
+      "horas_luz_h": 125.0,
+      "oscuridad_max_h": 211.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 189.32
+    },
+    {
+      "fecha_utc": "2027-03-12T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 86.6,
+      "holgura_min": 0.64,
+      "horas_luz_h": 138.14,
+      "oscuridad_max_h": 187.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 165.32
+    },
+    {
+      "fecha_utc": "2027-03-13T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 89.0,
+      "holgura_min": 0.74,
+      "horas_luz_h": 138.14,
+      "oscuridad_max_h": 163.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 141.32
+    },
+    {
+      "fecha_utc": "2027-03-14T00:00:00Z",
+      "semaforo": "amarillo",
+      "score": 91.6,
+      "holgura_min": 0.82,
+      "horas_luz_h": 138.14,
+      "oscuridad_max_h": 139.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 117.32
+    },
+    {
+      "fecha_utc": "2027-03-15T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 90.0,
+      "holgura_min": 0.78,
+      "horas_luz_h": 138.14,
+      "oscuridad_max_h": 115.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 93.32
+    },
+    {
+      "fecha_utc": "2027-03-16T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 85.0,
+      "holgura_min": 0.58,
+      "horas_luz_h": 138.14,
+      "oscuridad_max_h": 106.86,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 69.32
+    },
+    {
+      "fecha_utc": "2027-03-17T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 77.9,
+      "holgura_min": 0.38,
+      "horas_luz_h": 138.14,
+      "oscuridad_max_h": 130.86,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 45.32
+    },
+    {
+      "fecha_utc": "2027-03-18T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 66.6,
+      "holgura_min": 0.18,
+      "horas_luz_h": 138.14,
+      "oscuridad_max_h": 154.86,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 21.32
+    },
+    {
+      "fecha_utc": "2027-03-19T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 37.3,
+      "holgura_min": 0.0,
+      "horas_luz_h": 138.14,
+      "oscuridad_max_h": 178.86,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 0.0
+    },
+    {
+      "fecha_utc": "2027-03-20T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 55.8,
+      "holgura_min": 0.14,
+      "horas_luz_h": 133.14,
+      "oscuridad_max_h": 202.86,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 16.93
+    },
+    {
+      "fecha_utc": "2027-03-21T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 63.0,
+      "holgura_min": 0.34,
+      "horas_luz_h": 109.14,
+      "oscuridad_max_h": 226.86,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 40.93
+    },
+    {
+      "fecha_utc": "2027-03-22T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 63.2,
+      "holgura_min": 0.48,
+      "horas_luz_h": 85.14,
+      "oscuridad_max_h": 250.86,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 64.93
+    },
+    {
+      "fecha_utc": "2027-03-23T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 63.5,
+      "holgura_min": 0.36,
+      "horas_luz_h": 61.14,
+      "oscuridad_max_h": 274.86,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 88.93
+    },
+    {
+      "fecha_utc": "2027-03-24T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 64.1,
+      "holgura_min": 0.22,
+      "horas_luz_h": 37.14,
+      "oscuridad_max_h": 298.86,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 112.93
+    },
+    {
+      "fecha_utc": "2027-03-25T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 63.1,
+      "holgura_min": 0.14,
+      "horas_luz_h": 23.32,
+      "oscuridad_max_h": 312.68,
+      "potencia_media_w": 10.39,
+      "horas_dte_h": 136.93
+    },
+    {
+      "fecha_utc": "2027-03-26T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 65.0,
+      "holgura_min": 0.2,
+      "horas_luz_h": 34.17,
+      "oscuridad_max_h": 301.83,
+      "potencia_media_w": 32.12,
+      "horas_dte_h": 160.93
+    },
+    {
+      "fecha_utc": "2027-03-27T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 69.5,
+      "holgura_min": 0.35,
+      "horas_luz_h": 58.17,
+      "oscuridad_max_h": 277.83,
+      "potencia_media_w": 51.79,
+      "horas_dte_h": 184.93
+    },
+    {
+      "fecha_utc": "2027-03-28T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 74.0,
+      "holgura_min": 0.47,
+      "horas_luz_h": 82.17,
+      "oscuridad_max_h": 253.83,
+      "potencia_media_w": 68.5,
+      "horas_dte_h": 208.93
+    },
+    {
+      "fecha_utc": "2027-03-29T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 78.9,
+      "holgura_min": 0.52,
+      "horas_luz_h": 106.17,
+      "oscuridad_max_h": 229.83,
+      "potencia_media_w": 81.52,
+      "horas_dte_h": 232.93
+    },
+    {
+      "fecha_utc": "2027-03-30T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 83.9,
+      "holgura_min": 0.58,
+      "horas_luz_h": 130.17,
+      "oscuridad_max_h": 205.83,
+      "potencia_media_w": 90.24,
+      "horas_dte_h": 256.93
+    },
+    {
+      "fecha_utc": "2027-03-31T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 89.4,
+      "holgura_min": 0.66,
+      "horas_luz_h": 154.17,
+      "oscuridad_max_h": 181.83,
+      "potencia_media_w": 94.3,
+      "horas_dte_h": 280.93
+    },
+    {
+      "fecha_utc": "2027-04-01T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 94.0,
+      "holgura_min": 0.76,
+      "horas_luz_h": 178.17,
+      "oscuridad_max_h": 157.83,
+      "potencia_media_w": 94.57,
+      "horas_dte_h": 304.93
+    },
+    {
+      "fecha_utc": "2027-04-02T00:00:00Z",
+      "semaforo": "amarillo",
+      "score": 97.4,
+      "holgura_min": 0.9,
+      "horas_luz_h": 202.17,
+      "oscuridad_max_h": 133.83,
+      "potencia_media_w": 94.57,
+      "horas_dte_h": 307.39
+    },
+    {
+      "fecha_utc": "2027-04-03T00:00:00Z",
+      "semaforo": "verde",
+      "score": 100.0,
+      "holgura_min": 1.09,
+      "horas_luz_h": 226.17,
+      "oscuridad_max_h": 109.83,
+      "potencia_media_w": 94.57,
+      "horas_dte_h": 290.46
+    },
+    {
+      "fecha_utc": "2027-04-04T00:00:00Z",
+      "semaforo": "verde",
+      "score": 100.0,
+      "holgura_min": 1.4,
+      "horas_luz_h": 250.17,
+      "oscuridad_max_h": 85.83,
+      "potencia_media_w": 94.57,
+      "horas_dte_h": 266.46
+    },
+    {
+      "fecha_utc": "2027-04-05T00:00:00Z",
+      "semaforo": "verde",
+      "score": 100.0,
+      "holgura_min": 1.63,
+      "horas_luz_h": 274.17,
+      "oscuridad_max_h": 61.83,
+      "potencia_media_w": 94.57,
+      "horas_dte_h": 242.46
+    },
+    {
+      "fecha_utc": "2027-04-06T00:00:00Z",
+      "semaforo": "verde",
+      "score": 100.0,
+      "holgura_min": 1.77,
+      "horas_luz_h": 298.17,
+      "oscuridad_max_h": 37.83,
+      "potencia_media_w": 94.57,
+      "horas_dte_h": 218.46
+    },
+    {
+      "fecha_utc": "2027-04-07T00:00:00Z",
+      "semaforo": "verde",
+      "score": 100.0,
+      "holgura_min": 1.62,
+      "horas_luz_h": 322.17,
+      "oscuridad_max_h": 13.83,
+      "potencia_media_w": 94.57,
+      "horas_dte_h": 194.46
+    },
+    {
+      "fecha_utc": "2027-04-08T00:00:00Z",
+      "semaforo": "verde",
+      "score": 100.0,
+      "holgura_min": 1.42,
+      "horas_luz_h": 336.0,
+      "oscuridad_max_h": 0.0,
+      "potencia_media_w": 85.12,
+      "horas_dte_h": 170.46
+    },
+    {
+      "fecha_utc": "2027-04-09T00:00:00Z",
+      "semaforo": "verde",
+      "score": 100.0,
+      "holgura_min": 1.22,
+      "horas_luz_h": 336.0,
+      "oscuridad_max_h": 0.0,
+      "potencia_media_w": 63.32,
+      "horas_dte_h": 146.46
+    },
+    {
+      "fecha_utc": "2027-04-10T00:00:00Z",
+      "semaforo": "verde",
+      "score": 100.0,
+      "holgura_min": 1.02,
+      "horas_luz_h": 336.0,
+      "oscuridad_max_h": 0.0,
+      "potencia_media_w": 43.55,
+      "horas_dte_h": 122.46
+    },
+    {
+      "fecha_utc": "2027-04-11T00:00:00Z",
+      "semaforo": "amarillo",
+      "score": 95.5,
+      "holgura_min": 0.82,
+      "horas_luz_h": 336.0,
+      "oscuridad_max_h": 0.0,
+      "potencia_media_w": 26.69,
+      "horas_dte_h": 98.46
+    },
+    {
+      "fecha_utc": "2027-04-12T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 90.5,
+      "holgura_min": 0.62,
+      "horas_luz_h": 336.0,
+      "oscuridad_max_h": 0.0,
+      "potencia_media_w": 13.52,
+      "horas_dte_h": 74.46
+    },
+    {
+      "fecha_utc": "2027-04-13T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 85.5,
+      "holgura_min": 0.42,
+      "horas_luz_h": 336.0,
+      "oscuridad_max_h": 0.0,
+      "potencia_media_w": 4.6,
+      "horas_dte_h": 50.46
+    },
+    {
+      "fecha_utc": "2027-04-14T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 80.5,
+      "holgura_min": 0.22,
+      "horas_luz_h": 336.0,
+      "oscuridad_max_h": 0.0,
+      "potencia_media_w": 0.35,
+      "horas_dte_h": 26.46
+    },
+    {
+      "fecha_utc": "2027-04-15T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 53.1,
+      "holgura_min": 0.02,
+      "horas_luz_h": 336.0,
+      "oscuridad_max_h": 0.0,
+      "potencia_media_w": 0.0,
+      "horas_dte_h": 2.46
+    },
+    {
+      "fecha_utc": "2027-04-16T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 64.8,
+      "holgura_min": 0.1,
+      "horas_luz_h": 336.0,
+      "oscuridad_max_h": 0.0,
+      "potencia_media_w": 1.95,
+      "horas_dte_h": 11.81
+    },
+    {
+      "fecha_utc": "2027-04-17T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 82.5,
+      "holgura_min": 0.3,
+      "horas_luz_h": 336.0,
+      "oscuridad_max_h": 0.0,
+      "potencia_media_w": 8.6,
+      "horas_dte_h": 35.81
+    },
+    {
+      "fecha_utc": "2027-04-18T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 87.5,
+      "holgura_min": 0.5,
+      "horas_luz_h": 336.0,
+      "oscuridad_max_h": 0.0,
+      "potencia_media_w": 19.67,
+      "horas_dte_h": 59.81
+    },
+    {
+      "fecha_utc": "2027-04-19T00:00:00Z",
+      "semaforo": "rojo",
+      "score": 92.5,
+      "holgura_min": 0.7,
+      "horas_luz_h": 336.0,
+      "oscuridad_max_h": 0.0,
+      "potencia_media_w": 34.67,
+      "horas_dte_h": 83.81
+    },
+    {
+      "fecha_utc": "2027-04-20T00:00:00Z",
+      "semaforo": "amarillo",
+      "score": 97.5,
+      "holgura_min": 0.9,
+      "horas_luz_h": 336.0,
+      "oscuridad_max_h": 0.0,
+      "potencia_media_w": 52.91,
+      "horas_dte_h": 107.81
+    }
+  ],
+  "recomendadas": [
+    {
+      "fecha_utc": "2027-04-06T00:00:00Z",
+      "semaforo": "verde",
+      "score": 100.0,
+      "holgura_min": 1.77,
+      "horas_luz_h": 298.17,
+      "oscuridad_max_h": 37.83,
+      "potencia_media_w": 94.57,
+      "horas_dte_h": 218.46
+    },
+    {
+      "fecha_utc": "2027-04-05T00:00:00Z",
+      "semaforo": "verde",
+      "score": 100.0,
+      "holgura_min": 1.63,
+      "horas_luz_h": 274.17,
+      "oscuridad_max_h": 61.83,
+      "potencia_media_w": 94.57,
+      "horas_dte_h": 242.46
+    },
+    {
+      "fecha_utc": "2027-04-07T00:00:00Z",
+      "semaforo": "verde",
+      "score": 100.0,
+      "holgura_min": 1.62,
+      "horas_luz_h": 322.17,
+      "oscuridad_max_h": 13.83,
+      "potencia_media_w": 94.57,
+      "horas_dte_h": 194.46
+    }
+  ],
+  "nota": "Métricas del escenario en horas y vatios; area_m2 = 1 implica W/m²."
+}
