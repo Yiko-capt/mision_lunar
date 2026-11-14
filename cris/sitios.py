@@ -8,6 +8,7 @@ sitios = {
     "shackleton_rim":   (-89.684, 196.739),
     "malapert_peak":    (-85.98, 358.33),
     "de_gerlache_rim":  (-88.5, 272.9),
+    "cabeus_rim":       (-83.6, 291.2),
 }
 # modo de búsqueda y radio (m): min = punto más bajo, max = más alto, anillo = más alto en el borde
 config = {
@@ -15,6 +16,7 @@ config = {
     "shackleton_rim":   ("max", 1500),
     "malapert_peak":    ("max", 10000),
     "de_gerlache_rim":  ("anillo", 20000),
+    "cabeus_rim":       ("max", 3000),
 }
 
 def a_xy(lat, lon):
