@@ -2,7 +2,7 @@
 
 **Proyecto:** Lunar Landing Site Navigator — NASA Space Apps Challenge  
 **Misión 1 (Entregable A) — Responsable:** Integrante C (Validación / Física)  
-**Estado:** DEFINITIVO (Fuente Única de Verdad para Roles A, B, C, D y E)  
+**Estado:** DEFINITIVO — ACTUALIZADO CON VERIFICACIÓN DEM LOLA (Roles A, B, C, D y E)  
 
 > **Instrucción para uso con Modelos de Lenguaje (AI-to-AI):**  
 > Si vas a utilizar una IA (ChatGPT, Claude, Gemini, Copilot, etc.) para programar tu módulo en las Misiones 2 o 3, adjunta este archivo completo al inicio de tu prompt con la siguiente orden:  
@@ -15,7 +15,7 @@
 * **Marco de referencia lunar:** Coordenadas selenográficas estándar IAU (*Mean Earth / Polar Axis*, cuerpo `301` en JPL Horizons).
 * **Latitud (`lat_deg`):** Grados decimales en el intervalo $[-90.0, +90.0]$. Los valores negativos representan el hemisferio sur (Polo Sur lunar: $-90.0^\circ$).
 * **Longitud (`lon_deg`):** Grados decimales en el intervalo $[0.0, 360.0)$ medidos positivamente hacia el **Este**.
-  * *Regla obligatoria de normalización:* Si una fuente externa (como LOLA o JPL Horizons) entrega longitudes en $[-180.0, +180.0]$, debe convertirse antes de exportar a JSON mediante:
+  * *Regla obligatoria de normalización:* Si una fuente externa (como LOLA, USGS o JPL Horizons) entrega longitudes en $[-180.0, +180.0]$ (Oeste negativo), debe convertirse antes de exportar a JSON mediante:
     $$\text{lon\_deg} = (\lambda + 360.0) \bmod 360.0$$
 * **Altitud topográfica (`alt_km` o `elevacion_sitio_m`):** Medida respecto al radio medio esférico de referencia lunar ($R_{\text{Luna}} = 1737.4\text{ km}$).
 
@@ -27,8 +27,8 @@
 | Constante solar a $1\text{ UA}$ | $S_0$ | `1361.0` | $\text{W/m}^2$ | C, D |
 | Radio angular aparente del Sol | $R_{\odot}$ | `0.267` | grados ($^\circ$) | B, C, D |
 | Radio angular aparente de la Tierra | $R_{\oplus}$ | `0.950` | grados ($^\circ$) | B, C, D |
-| Altura del observador / sensor | `h_obs_m` | `2.0` *(ajustable por A)* | $\text{m}$ | A, C |
-| Radio máximo de trazado topográfico | `d_max_km` | `100.0` *(ajustable por A)* | $\text{km}$ | A, C |
+| Altura del observador / sensor | `h_obs_m` | `2.0` *(fijado por A)* | $\text{m}$ | A, C |
+| Radio máximo de trazado topográfico | `d_max_km` | `100.0` *(fijado por A)* | $\text{km}$ | A, C |
 | Paso angular de azimut | `paso_azimut_deg` | `1.0` ($360$ puntos) | grados ($^\circ$) | A, B, C, E |
 
 ---
@@ -86,19 +86,19 @@ donde:
 
 ## 4. Esquemas JSON Obligatorios entre Integrantes
 
-Todos los nombres de archivo deben usar identificadores limpios en minúsculas sin espacios (`site_id`, por ejemplo: `shackleton_rim`, `polo_sur_exacto`, `malapert_peak`, `crater_cabeus`, `apollo_11`).
+Todos los nombres de archivo deben usar identificadores limpios en minúsculas sin espacios (`site_id`: `shackleton_rim`, `shackleton_floor`, `malapert_peak`, `cabeus_rim`, `apollo_11`).
 
 ### 4.1. Salida del Rol A $\rightarrow$ `horizonte_<site_id>.json`
 ```json
 {
   "site_id": "shackleton_rim",
-  "nombre": "Borde del Cráter Shackleton",
-  "lat_deg": -89.68,
-  "lon_deg": 230.80,
-  "elevacion_sitio_m": 1500.0,
+  "nombre": "Borde Shackleton (Cresta de Conexión)",
+  "lat_deg": -89.684,
+  "lon_deg": 196.739,
+  "elevacion_sitio_m": 1520.0,
   "parametros": {
     "h_obs_m": 2.0,
-    "d_max_km": 100.0,
+    "d_max_km": 250.0,
     "paso_azimut_deg": 1.0
   },
   "perfil_horizonte": [
@@ -112,9 +112,9 @@ Todos los nombres de archivo deben usar identificadores limpios en minúsculas s
 ```json
 {
   "site_id": "shackleton_rim",
-  "lat_deg": -89.68,
-  "lon_deg": 230.80,
-  "alt_km": 1.50,
+  "lat_deg": -89.684,
+  "lon_deg": 196.739,
+  "alt_km": 1.52,
   "refraccion_aplicada": false,
   "datos": [
     {
