@@ -1,0 +1,153 @@
+# Contrato Técnico, Convenciones Físicas y Esquemas JSON (SSOT)
+
+**Proyecto:** Lunar Landing Site Navigator — NASA Space Apps Challenge  
+**Misión 1 — Responsable:** Integrante C (Física de referencia y validación)  
+**Estado:** DEFINITIVO (Fuente Única de Verdad para Roles A, B, C, D y E)  
+
+> **Instrucción para uso con Modelos de Lenguaje (AI-to-AI):**  
+> Si vas a utilizar una IA (ChatGPT, Claude, Gemini, Copilot, etc.) para programar tu módulo en las Misiones 2 o 3, adjunta este archivo completo al inicio de tu prompt con la siguiente orden:  
+> *"Actúa como ingeniero aeroespacial y desarrollador. Respeta estrictamente todas las convenciones físicas, unidades, fórmulas y nombres exactos de claves JSON definidos en este documento `convenciones.md`. No inventes ni renombres ninguna clave."*
+
+---
+
+## 1. Sistema de Coordenadas y Constantes Físicas
+
+* **Marco de referencia lunar:** Coordenadas selenográficas estándar IAU (*Mean Earth / Polar Axis*).
+* **Latitud (`lat_deg`):** Grados decimales en el intervalo $[-90.0, +90.0]$. Los valores negativos representan el hemisferio sur (Polo Sur lunar: $-90.0^\circ$).
+* **Longitud (`lon_deg`):** Grados decimales en el intervalo $[0.0, 360.0)$ medidos positivamente hacia el **Este**.
+  * *Regla obligatoria de normalización:* Si una fuente externa (como LOLA o JPL Horizons) entrega longitudes en $[-180.0, +180.0]$, debe convertirse antes de exportar a JSON mediante:
+    $$\text{lon\_deg} = (\lambda + 360.0) \bmod 360.0$$
+
+### Tabla de Constantes Oficiales del Proyecto
+
+| Parámetro | Clave / Símbolo | Valor fijo | Unidades | Roles que lo usan |
+| :--- | :--- | :--- | :--- | :--- |
+| Radio medio lunar | $R_{\text{Luna}}$ | `1737.4` | $\text{km}$ | A, B, C |
+| Constante solar a $1\text{ UA}$ | $S_0$ | `1361.0` | $\text{W/m}^2$ | C, D |
+| Radio angular aparente del Sol | $R_{\odot}$ | `0.267` | grados ($^\circ$) | B, C, D |
+| Radio angular aparente de la Tierra | $R_{\oplus}$ | `0.950` | grados ($^\circ$) | B, C, D |
+| Altura del observador / sensor | `h_obs_m` | `2.0` *(ajustable por A)* | $\text{m}$ | A, C |
+| Radio máximo de trazado topográfico | `d_max_km` | `100.0` *(ajustable por A)* | $\text{km}$ | A, C |
+| Paso angular de azimut | `paso_azimut_deg` | `1.0` ($360$ puntos) | grados ($^\circ$) | A, B, C, E |
+
+---
+
+## 2. Convención de Azimut, Elevación y Tiempo
+
+* **Azimut (`azimut_deg`):** Ángulo en grados decimales dentro de $[0.0, 360.0)$, medido en **sentido horario desde el Norte lunar verdadero**:
+  * $0.0^\circ = \text{Norte}$
+  * $90.0^\circ = \text{Este}$
+  * $180.0^\circ = \text{Sur}$
+  * $270.0^\circ = \text{Oeste}$
+  * *Caso límite del Polo Sur exacto ($\text{lat\_deg} = -90.0$):* Dado que todas las direcciones apuntan al Norte, se fija $Az = 0.0^\circ$ a lo largo del meridiano $\text{lon\_deg} = 0.0$ (dirección media hacia la Tierra).
+* **Elevación (`elevacion_deg`):** Ángulo en grados decimales dentro de $[-90.0, +90.0]$, medido desde el plano horizontal local (perpendicular al vector radial en el sitio de aterrizaje).
+  * $El > 0^\circ$: Por encima del horizonte matemático local.
+  * $El < 0^\circ$: Por debajo del horizonte matemático local (visible desde crestas elevadas).
+* **Refracción atmosférica:** **Nula ($0.0^\circ$)**. Todas las consultas a JPL Horizons (Rol B) deben ejecutarse estrictamente en modo geométrico sin refracción (*airless*).
+* **Estándar de tiempo:** Todas las marcas temporales (`timestamp_utc`) deben estar en **UTC** siguiendo **ISO 8601** estricto: `"YYYY-MM-DDTHH:MM:SSZ"`.
+* **Unidades en JSON y 3D:** Todos los archivos JSON almacenan ángulos en **grados decimales**. Si el motor 3D (Rol E) requiere radianes, debe realizar la conversión localmente ($\text{rad} = \text{deg} \cdot \frac{\pi}{180}$).
+
+---
+
+## 3. Modelos Físicos y Geométricos (Centro vs. Borde del Disco)
+
+En el Polo Sur lunar, el Sol y la Tierra se mantienen rasantes al horizonte, por lo que su tamaño angular aparente determina las transiciones de iluminación y comunicaciones.
+
+### 3.1. Interpolación del Horizonte Topográfico
+Dado el perfil discreto $El_{\text{hor}}(Az_i)$ para $Az_i \in \{0, 1, \dots, 359\}$ generado por el Rol A, la elevación del horizonte para cualquier azimut continuo $Az \in [0, 360)$ se obtiene por interpolación lineal circular (donde $Az_{360} \equiv Az_0$).
+
+### 3.2. Visibilidad Solar y Fracción de Disco $f(x)$ (Roles B, C y D)
+* Los archivos de efemérides (Rol B) reportan la elevación del **centro del disco solar** (`sol_elevacion_deg`).
+* **Primer contacto (borde superior visible):** $El_{\odot} + R_{\odot} > El_{\text{hor}}(Az)$
+* **Disco completo visible:** $El_{\odot} - R_{\odot} > El_{\text{hor}}(Az)$
+* **Parámetro normalizado de altura solar ($x$):**
+  $$x = \frac{El_{\odot} - El_{\text{hor}}(Az)}{R_{\odot}}$$
+* **Fracción visible del disco solar $f(x) \in [0, 1]$ (implementada por Rol C):**
+  $$f(x) = \begin{cases} 0 & \text{si } x \le -1 \\ \dfrac{1}{\pi}\left(\arccos(-x) + x\sqrt{1 - x^2}\right) & \text{si } -1 < x < 1 \\ 1 & \text{si } x \ge 1 \end{cases}$$
+
+### 3.3. Modelo de Potencia Eléctrica Solar (Rol D)
+$$P(t) = f(x) \cdot S_0 \cdot \eta \cdot A \cdot \sin(e_{\text{eff}})$$
+donde:
+* $S_0 = 1361.0\text{ W/m}^2$
+* $\eta$: eficiencia fotovoltaica adimensional (ej. `0.28`)
+* $A$: área del arreglo solar en $\text{m}^2$ (ej. `1.0` para potencia específica en $\text{W/m}^2$)
+* $e_{\text{eff}}$: ángulo de incidencia efectivo sobre el panel ($\sin(e_{\text{eff}}) = \max(0, \sin(El_{\odot}))$ para panel horizontal fijo, o $\sin(e_{\text{eff}}) = 1.0$ para panel vertical con seguimiento solar azimutal).
+
+### 3.4. Ventana de Comunicación Directa con la Tierra - DTE (Roles B, C y D)
+* Los archivos de efemérides (Rol B) reportan la elevación del **centro del disco terrestre** (`tierra_elevacion_deg`).
+* **Enlace nominal (`dte_nominal`):** $El_{\oplus} > El_{\text{hor}}(Az)$
+* **Enlace con margen de seguridad / disco completo despejado (`dte_margen`):** $El_{\oplus} - R_{\oplus} > El_{\text{hor}}(Az)$
+
+---
+
+## 4. Esquemas JSON Obligatorios entre Integrantes
+
+Todos los nombres de archivo deben usar identificadores limpios en minúsculas sin espacios (`site_id`, por ejemplo: `shackleton_rim`, `shackleton_floor`, `malapert_peak`, `apollo_11`, `cabeus_rim`).
+
+### 4.1. Salida del Rol A $\rightarrow$ `horizonte_<site_id>.json`
+```json
+{
+  "site_id": "shackleton_rim",
+  "nombre": "Borde del Cráter Shackleton",
+  "lat_deg": -89.68,
+  "lon_deg": 230.80,
+  "elevacion_sitio_m": 1950.0,
+  "parametros": {
+    "h_obs_m": 2.0,
+    "d_max_km": 100.0,
+    "paso_azimut_deg": 1.0
+  },
+  "perfil_horizonte": [
+    { "azimut_deg": 0.0, "elevacion_maxima_deg": 1.12 },
+    { "azimut_deg": 1.0, "elevacion_maxima_deg": 1.15 }
+  ]
+}
+```
+
+### 4.2. Salida del Rol B $\rightarrow$ `efemerides_<site_id>.json`
+```json
+{
+  "site_id": "shackleton_rim",
+  "lat_deg": -89.68,
+  "lon_deg": 230.80,
+  "refraccion_aplicada": false,
+  "datos": [
+    {
+      "timestamp_utc": "2026-11-15T00:00:00Z",
+      "sol_azimut_deg": 120.45,
+      "sol_elevacion_deg": 1.38,
+      "tierra_azimut_deg": 0.52,
+      "tierra_elevacion_deg": 4.10
+    }
+  ]
+}
+```
+
+### 4.3. Salida Integrada de Métricas (Roles B, C y D $\rightarrow$ Rol E) `metricas_<site_id>.json`
+```json
+{
+  "site_id": "shackleton_rim",
+  "resumen": {
+    "iluminacion_solar_pct": 84.5,
+    "horas_luz_total": 608.4,
+    "elevacion_solar_max_deg": 1.82,
+    "visibilidad_tierra_nominal_pct": 52.0,
+    "visibilidad_tierra_margen_pct": 44.5,
+    "energia_especifica_wh_m2": 14250.0
+  },
+  "serie_temporal": [
+    {
+      "timestamp_utc": "2026-11-15T00:00:00Z",
+      "horizonte_sol_deg": 0.85,
+      "fraccion_disco_solar": 1.0,
+      "sol_visible": true,
+      "horizonte_tierra_deg": 1.12,
+      "tierra_visible_nominal": true,
+      "tierra_visible_margen": true,
+      "potencia_especifica_w_m2": 43.2,
+      "tiempo_hasta_ocaso_solar_h": 148.5,
+      "tiempo_hasta_ocaso_tierra_h": 92.0
+    }
+  ]
+}
+```
