@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LunarWindow · Panel de energía y comunicación (demo)</title>
+<style>
+  :root{--bg:#F3F6FA;--ink:#14213D;--mut:#5B6577;--line:#DDE3EC;--acc:#1F3A5F}
+  @media (prefers-color-scheme:dark){:root{--bg:#0B1530;--ink:#EAF0FF;--mut:#A8B4D4;--line:#2A3A6B;--acc:#9CC0FF}}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  main{max-width:1100px;margin:0 auto;padding:24px 16px 48px}
+  h1{font-size:22px;margin:0 0 4px}.sub{color:var(--mut);margin:0 0 16px}
+  .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+  select,button{font:inherit;padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--ink)}
+  button[aria-pressed=true]{background:var(--acc);color:var(--bg);border-color:var(--acc)}
+  .aviso{color:var(--mut);font-size:12px;margin-top:20px}
+</style>
+</head>
+<body>
+<main>
+  <h1>LunarWindow · Energía y comunicación</h1>
+  <p class="sub">Panel del rol D con datos sintéticos de prueba (no son resultados reales).</p>
+  <div class="bar">
+    <button id="b1" aria-pressed="true">Un sitio</button>
+    <button id="b2" aria-pressed="false">Comparar A/B</button>
+    <label>Sitio <select id="sel"></select></label>
+  </div>
+  <div id="panel"></div>
+  <p class="aviso">Datos generados con generar_datos_prueba.py. Con las efemérides de Horizons (rol B) y el horizonte de LOLA (rol A) se reemplazan sin cambiar el panel.</p>
+</main>
+<script>
+/*__PANEL_JS__*/
+</script>
+<script>
+const DATOS = /*__DATOS__*/;
+const nombres = Object.keys(DATOS);
+const sel = document.getElementById("sel"), panel = document.getElementById("panel");
+nombres.forEach(n => sel.add(new Option(n.replace(/_/g, " "), n)));
+let modo = "uno";
+function pintar() {
+  if (modo === "uno") LunarWindowPanel.render(panel, DATOS[sel.value]);
+  else LunarWindowPanel.renderComparacion(panel, DATOS[nombres[0]], DATOS[nombres[1]]);
+  sel.parentElement.style.display = modo === "uno" ? "" : "none";
+  document.getElementById("b1").setAttribute("aria-pressed", modo === "uno");
+  document.getElementById("b2").setAttribute("aria-pressed", modo === "ab");
+}
+sel.onchange = pintar;
+document.getElementById("b1").onclick = () => { modo = "uno"; pintar(); };
+document.getElementById("b2").onclick = () => { modo = "ab"; pintar(); };
+pintar();
+</script>
+</body>
+</html>
