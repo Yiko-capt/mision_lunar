@@ -6,7 +6,7 @@
  "elevacion_sitio_m": -2868.8,
  "parametros": {
   "h_obs_m": 2.0,
-  "d_max_km": 100.0,
+  "d_max_km": 250.0,
   "paso_azimut_deg": 1.0
  },
  "perfil_horizonte": [
