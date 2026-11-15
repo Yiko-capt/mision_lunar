@@ -1,9 +1,10 @@
 import { sunState, earthState } from '../../lib/solar';
+import CelestialSun from './CelestialSun';
+import CelestialEarth from './CelestialEarth';
 
-const R_SUN = 120;
-const R_EARTH = 200;
+const R_SUN = 90;
+const R_EARTH = 130;
 
-// Convierte (dirección, elevación) en posición de la escena
 function toPos(theta: number, el: number, r: number): [number, number, number] {
   return [
     Math.cos(theta) * Math.cos(el) * r,
@@ -12,31 +13,42 @@ function toPos(theta: number, el: number, r: number): [number, number, number] {
   ];
 }
 
-export function SunLight({ days }: { days: number }) {
+export function SunLight({
+  days,
+  targetPos = [0, 0, 0],
+}: {
+  days: number;
+  targetPos?: [number, number, number];
+}) {
   const st = sunState(days);
-  const [x, y, z] = toPos(st.theta, st.el, R_SUN);
+  const pos = toPos(st.theta, st.el, R_SUN);
+
   return (
-    <directionalLight
-      position={[x, y, z]}
-      intensity={st.el > 0 ? 3 : 0}
-      castShadow
-      shadow-mapSize={[2048, 2048]}
-      shadow-camera-left={-60}
-      shadow-camera-right={60}
-      shadow-camera-top={60}
-      shadow-camera-bottom={-60}
-      shadow-camera-far={400}
+    <CelestialSun
+      position={pos}
+      radius={7.5}
+      targetPos={targetPos}
+      showVector={true}
     />
   );
 }
 
-export function EarthMarker({ days }: { days: number }) {
+export function EarthMarker({
+  days,
+  targetPos = [0, 0, 0],
+}: {
+  days: number;
+  targetPos?: [number, number, number];
+}) {
   const st = earthState(days);
-  const [x, y, z] = toPos(0, st.el, R_EARTH);
+  const pos = toPos(0, st.el, R_EARTH);
+
   return (
-    <mesh position={[x, y, z]}>
-      <sphereGeometry args={[6, 32, 32]} />
-      <meshStandardMaterial color="#3b82f6" emissive="#1e3a8a" />
-    </mesh>
+    <CelestialEarth
+      position={pos}
+      radius={5.5}
+      targetPos={targetPos}
+      showVector={true}
+    />
   );
 }

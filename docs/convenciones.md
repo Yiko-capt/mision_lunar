@@ -16,7 +16,7 @@
 * **Latitud (`lat_deg`):** Grados decimales en el intervalo $[-90.0, +90.0]$. Los valores negativos representan el hemisferio sur (Polo Sur lunar: $-90.0^\circ$).
 * **Longitud (`lon_deg`):** Grados decimales en el intervalo $[0.0, 360.0)$ medidos positivamente hacia el **Este**.
   * *Regla obligatoria de normalización:* Si una fuente externa (como LOLA, USGS o JPL Horizons) entrega longitudes en $[-180.0, +180.0]$ (Oeste negativo), debe convertirse antes de exportar a JSON mediante:
-    $$\text{lon\_deg} = (\lambda + 360.0) \bmod 360.0$$
+    $$lon\_deg = (\lambda + 360.0) \bmod 360.0$$
 * **Altitud topográfica (`alt_km` o `elevacion_sitio_m`):** Medida respecto al radio medio esférico de referencia lunar ($R_{\text{Luna}} = 1737.4\text{ km}$).
 
 ### Tabla de Constantes Oficiales del Proyecto
@@ -67,10 +67,11 @@ Dado el perfil discreto $El_{\text{hor}}(Az_i)$ para $Az_i \in \{0, 1, \dots, 35
 * **Parámetro normalizado de altura solar ($x$):**
   $$x = \frac{El_{\odot} - El_{\text{hor}}(Az)}{R_{\odot}}$$
 * **Fracción visible del disco solar $f(x) \in [0, 1]$ (programada por Rol C en Misión 2):**
-  $$f(x) = \begin{cases} 0 & \text{si } x \le -1 \\ \dfrac{1}{\pi}\left(\arccos(-x) + x\sqrt{1 - x^2}\right) & \text{si } -1 < x < 1 \\ 1 & \text{si } x \ge 1 \end{cases}$$
+  $$f(x) = \begin{cases} 0 \& \text{si } x \le -1 \\ \dfrac{1}{\pi}\left(\arccos(-x) + x\sqrt{1 - x^2}\right) \& \text{si } -1 < x < 1 \\ 1 \& \text{si } x \ge 1 \end{cases}$$
 
 ### 3.3. Modelo de Potencia Eléctrica Solar (Rol D)
 $$P(t) = f(x) \cdot S_0 \cdot \eta \cdot A \cdot \sin(e_{\text{eff}})$$
+
 donde:
 * $S_0 = 1361.0\text{ W/m}^2$
 * $\eta$: eficiencia fotovoltaica adimensional (ej. `0.28`)

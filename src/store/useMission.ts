@@ -14,6 +14,11 @@ export interface MissionState {
   minEarth: number;
   selected: number | null; // índice de celda
 
+  // Coordenadas globales seleccionadas sincronizadas entre Globo 3D y Parche
+  selectedLat: number;
+  selectedLon: number;
+  selectedAltKm: number;
+
   // Navegación de sitios e interfaz
   activeSiteId: string;
   selectedSiteBId: string | null;
@@ -31,7 +36,12 @@ export const useMission = create<MissionState>((set) => ({
   maxSlope: 10,
   requireEarth: false,
   minEarth: 50,
-  selected: null,
+  selected: 2048, // Centro de la malla 64x64
+
+  // Coordenadas seleccionadas iniciales (Borde Shackleton)
+  selectedLat: -89.684,
+  selectedLon: 196.739,
+  selectedAltKm: 1.52,
 
   activeSiteId: 'shackleton_rim',
   selectedSiteBId: 'shackleton_floor',

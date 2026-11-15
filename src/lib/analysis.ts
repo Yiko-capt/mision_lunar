@@ -1,5 +1,6 @@
 import { AZ } from './horizon';
 import { sunState, earthState } from './solar';
+import { R_SOL_DEG } from './constants';
 import type { Terrain } from './terrain';
 
 export interface MissionParams {
@@ -34,7 +35,8 @@ export function analyze(t: Terrain, hor: Float32Array, p: MissionParams): Analys
     const d = p.startDays + ((s + 0.5) * p.durationDays) / N;
     const sun = sunState(d);
     sunK[s] = azIndex(sun.theta);
-    sunDeg[s] = sun.el * R2D + 0.27; // +0.27°: radio aparente del disco solar
+    // Elevación del centro del disco solar + radio angular del Sol (en grados)
+    sunDeg[s] = sun.el * R2D + R_SOL_DEG; // use constant from conventions
     const e = earthState(d);
     eK[s] = azIndex(e.theta);
     eDeg[s] = e.el * R2D;
