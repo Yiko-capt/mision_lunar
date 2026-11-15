@@ -1,0 +1,36 @@
+{
+  "site": "apollo_11_landing",
+  "horizonte_fuente": "esferico",
+  "horas_luz_por_dia": {
+    "1969-07-20": 2
+  },
+  "horas_tierra_por_dia": {
+    "1969-07-20": 2
+  },
+  "ventanas_sol": [
+    {
+      "inicio": "1969-07-20T20:17:00+00:00",
+      "fin": "1969-07-20T20:18:00+00:00",
+      "horas": 0.02
+    }
+  ],
+  "ventanas_tierra": [
+    {
+      "inicio": "1969-07-20T20:17:00+00:00",
+      "fin": "1969-07-20T20:18:00+00:00",
+      "horas": 0.02
+    }
+  ],
+  "t": [
+    "1969-07-20T20:17:00+00:00",
+    "1969-07-20T20:18:00+00:00"
+  ],
+  "horas_hasta_cambio_sol": [
+    null,
+    null
+  ],
+  "horas_hasta_cambio_tierra": [
+    null,
+    null
+  ]
+}
