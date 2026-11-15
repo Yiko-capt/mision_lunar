@@ -25,8 +25,8 @@ const SRC = join(__dir, '..', '..');
 const FILES: string[] = [
   join(SRC, 'App.tsx'),
   ...readdirSync(join(SRC, 'components', 'ui'))
-    .filter((f) => f.endsWith('.tsx'))
-    .map((f) => join(SRC, 'components', 'ui', f)),
+    .filter((f: string) => f.endsWith('.tsx'))
+    .map((f: string) => join(SRC, 'components', 'ui', f)),
 ];
 
 // Marcas de unidad aceptadas en la misma línea del número
@@ -43,7 +43,7 @@ describe('unidades en la interfaz', () => {
     const offenders: string[] = [];
     for (const file of FILES) {
       const lines = readFileSync(file, 'utf8').split('\n');
-      lines.forEach((line, i) => {
+      lines.forEach((line: string, i: number) => {
         if (!line.includes('.toFixed(')) return;
         if (EXEMPT.test(line)) return;
         if (UNIT.test(line)) return;
