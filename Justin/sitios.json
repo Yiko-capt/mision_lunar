@@ -1,0 +1,73 @@
+{
+  "version": "3.0-SSOT",
+  "descripcion": "Catálogo oficial de los 6 sitios de aterrizaje lunar sincronizado con cris/ (LOLA DEM) y horizons_b/ (JPL Horizons)",
+  "constantes_fisicas": {
+    "R_luna_km": 1737.4,
+    "S0_wm2": 1361.0,
+    "R_sol_deg": 0.267,
+    "R_tierra_deg": 0.950,
+    "margen_dte_deg": 0.500
+  },
+  "sitios": [
+    {
+      "site_id": "shackleton_rim",
+      "nombre": "Borde del Cráter Shackleton",
+      "lat_deg": -89.6863,
+      "lon_deg": 197.3684,
+      "alt_m": 1728.7,
+      "archivo_efemerides": "horizons_b/efemerides_shackleton_rim.json",
+      "archivo_horizonte": "cris/horizonte_shackleton_rim.json",
+      "tipo": "Cresta polar de luz casi continua"
+    },
+    {
+      "site_id": "shackleton_floor",
+      "nombre": "Interior del Cráter Shackleton (PSR)",
+      "lat_deg": -89.6251,
+      "lon_deg": 118.8196,
+      "alt_m": -2868.8,
+      "archivo_efemerides": "horizons_b/efemerides_shackleton_floor.json",
+      "archivo_horizonte": "cris/horizonte_shackleton_floor.json",
+      "tipo": "Región Permanentemente Sombreada (PSR)"
+    },
+    {
+      "site_id": "malapert_peak",
+      "nombre": "Cima del Macizo Malapert",
+      "lat_deg": -85.9876,
+      "lon_deg": 2.0528,
+      "alt_m": 5172.5,
+      "archivo_efemerides": "horizons_b/efemerides_malapert_peak.json",
+      "archivo_horizonte": "cris/horizonte_malapert_peak.json",
+      "tipo": "Macizo elevado con enlace DTE continuo"
+    },
+    {
+      "site_id": "de_gerlache_rim",
+      "nombre": "Borde del Cráter de Gerlache",
+      "lat_deg": -88.6648,
+      "lon_deg": 291.6227,
+      "alt_m": 1813.8,
+      "archivo_efemerides": "horizons_b/efemerides_de_gerlache_rim.json",
+      "archivo_horizonte": "cris/horizonte_de_gerlache_rim.json",
+      "tipo": "Cresta polar candidata Artemis"
+    },
+    {
+      "site_id": "peak_near_cabeus_b",
+      "nombre": "Peak Near Cabeus B (Artemis III)",
+      "lat_deg": -83.5808,
+      "lon_deg": 291.5459,
+      "alt_m": 4599.6,
+      "archivo_efemerides": "horizons_b/efemerides_peak_near_cabeus_b.json",
+      "archivo_horizonte": "cris/horizonte_peak_near_cabeus_b.json",
+      "tipo": "Región candidata oficial NASA Artemis III"
+    },
+    {
+      "site_id": "apollo_11",
+      "nombre": "Base Tranquilidad (Apolo 11)",
+      "lat_deg": 0.67416,
+      "lon_deg": 23.47315,
+      "alt_m": 0.0,
+      "archivo_efemerides": "horizons_b/efemerides_apollo_11.json",
+      "archivo_horizonte": "cris/horizonte_apollo_11.json",
+      "tipo": "Sitio histórico de control ecuatorial"
+    }
+  ]
+}
