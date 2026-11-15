@@ -18,7 +18,7 @@ SITIOS = {
     "shackleton_rim":   ("Borde del Cráter Shackleton (cresta de conexión)", -89.684, 196.739, "max", 1500),
     "malapert_peak":    ("Cima del Macizo Malapert", -85.98, 358.33, "max", 10000),
     "de_gerlache_rim":  ("Borde del Cráter de Gerlache", -88.5, 272.9, "anillo", 20000),
-    "cabeus_rim":       ("Borde del Cráter Cabeus (Peak near Cabeus B)", -83.6, 291.2, "max", 3000),
+    "peak_near_cabeus_b": ("Peak Near Cabeus B (candidato Artemis III, centro LROC)", -83.6, 291.2, "max", 3000),
 }
 
 def a_xy(lat, lon):
