@@ -25,6 +25,8 @@ interface MoonGlobeProps {
   earthEl: number;
   isSpinning: boolean;
   zoomLevel: number;
+  earthRotationRad?: number;
+  isEarthOccluded?: boolean;
   onSelectSite: (siteId: string) => void;
   onMapClick?: (lat: number, lon: number) => void;
   controlsRef?: React.RefObject<OrbitControlsImpl | null>;
@@ -41,6 +43,8 @@ export default function MoonGlobe({
   earthEl,
   isSpinning,
   zoomLevel,
+  earthRotationRad,
+  isEarthOccluded = false,
   onSelectSite,
   onMapClick,
   controlsRef: externalControlsRef,
@@ -51,7 +55,7 @@ export default function MoonGlobe({
   const moonGroupRef = useRef<THREE.Group>(null);
   const pulseRef = useRef<THREE.Mesh>(null);
 
-  // 1. Textura albedo fotorrealista de la NASA LRO/LROC WAC
+  // 1. Textura albedo fotorrealista de la NASA LRO/LROC WAC (2K)
   const [moonAlbedo, setMoonAlbedo] = useState<THREE.Texture | null>(null);
 
   useEffect(() => {
@@ -60,6 +64,8 @@ export default function MoonGlobe({
       '/assets/moon_texture.jpg',
       (tex) => {
         tex.colorSpace = THREE.SRGBColorSpace;
+        tex.generateMipmaps = true;
+        tex.minFilter = THREE.LinearMipmapLinearFilter;
         tex.anisotropy = 8;
         setMoonAlbedo(tex);
       },
@@ -70,16 +76,15 @@ export default function MoonGlobe({
     );
   }, []);
 
-  // 2. Bump Map topográfico marcado (bumpScale={0.08}) para micro-relieve y sombras en el terminador
+  // 2. Bump Map topográfico para micro-relieve y sombras en el terminador
   const moonBumpMap = useMemo(() => createLunarBumpMap(), []);
 
-  // 3. Marco topocéntrico y posiciones astronómicas
+  // 3. Marco topocéntrico y posiciones astronómicas del instante
   const frame = useMemo(
     () => getTopocentricFrame(selectedLat, selectedLon),
     [selectedLat, selectedLon]
   );
 
-  // Posición del punto seleccionado sobre la esfera lunar
   const selectedTargetSpherePos = useMemo<[number, number, number]>(
     () => getSiteSpherePosition(selectedLat, selectedLon, 1.015),
     [selectedLat, selectedLon]
@@ -176,11 +181,12 @@ export default function MoonGlobe({
       {/* 1. Fondo espacial fotorrealista Solar System Scope */}
       <SpaceBackground showEclipticGrid={true} />
 
-      {/* 2. Luz cenicienta (Earthshine): luz azulada muy tenue sobre el lado oscuro */}
-      <ambientLight color="#1e293b" intensity={0.22} />
-      <directionalLight position={earthPos} intensity={0.16} color="#93c5fd" />
+      {/* 2. Iluminación físicamente realista: 
+             Luz ambiental casi nula (0.015) para que el lado nocturno de la Luna
+             quede verdaderamente oscuro en el vacío del espacio */}
+      <ambientLight color="#0f172a" intensity={0.018} />
 
-      {/* 3. El Sol volumétrico con corona radial y luz física coincidente */}
+      {/* 3. El Sol volumétrico con fotosfera nuclear, corona suave y luz direccional */}
       <CelestialSun
         position={sunPos}
         radius={0.38}
@@ -188,15 +194,17 @@ export default function MoonGlobe({
         showVector={true}
       />
 
-      {/* 4. La Tierra concéntrica (superficie, nubes y atmósfera Fresnel) */}
+      {/* 4. La Tierra concéntrica (superficie, nubes y atmósfera Fresnel con rotación axial) */}
       <CelestialEarth
         position={earthPos}
         radius={0.25}
         targetPos={selectedTargetSpherePos}
         showVector={true}
+        earthRotationRad={earthRotationRad}
+        isOccluded={isEarthOccluded}
       />
 
-      {/* 5. GLOBO LUNAR FOTORREALISTA (Sin cuadrículas sobrepuestas) */}
+      {/* 5. GLOBO LUNAR FOTORREALISTA */}
       <group ref={moonGroupRef}>
         <mesh castShadow receiveShadow onClick={handleMoonClick}>
           <sphereGeometry args={[1.0, 128, 96]} />

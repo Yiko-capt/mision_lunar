@@ -10,15 +10,21 @@ import { computeTrajectory, type ComputedTrajectory } from './lib/physics';
 import { useMission } from './store/useMission';
 import { useAnalysis } from './hooks/useAnalysis';
 import { estimateLunarPhase } from './lib/celestial';
+import { getCelestialInstant } from './lib/ephemerisService';
+import { computeCountdowns } from './lib/eventCountdown';
 
 import MoonGlobe from './components/3d/MoonGlobe';
 import LunarTerrain from './components/3d/LunarTerrain';
 import { SunLight, EarthMarker } from './components/3d/Bodies';
 import SpaceBackground from './components/3d/SpaceBackground';
+import PatchErrorBoundary from './components/3d/PatchErrorBoundary';
 import ElevationChart from './components/ui/ElevationChart';
 import MetricCards from './components/ui/MetricCards';
 import ComparisonPanel from './components/ui/ComparisonPanel';
 import BenchmarkPanel from './components/ui/BenchmarkPanel';
+import BestDaysModal from './components/ui/BestDaysModal';
+import EnergyCommsWidget from './components/ui/EnergyCommsWidget';
+import CabinView from './components/ui/CabinView';
 import ErrorBoundary from './components/ErrorBoundary';
 
 export default function App() {
@@ -37,21 +43,21 @@ export default function App() {
   // Nivel de zoom (slider inferior derecho)
   const [zoomLevel, setZoomLevel] = useState(29);
 
-  // Pestaña activa en el panel de filtros izquierdo: 'filtros' | 'metricas'
-  const [panelTab, setPanelTab] = useState<'filtros' | 'metricas'>('filtros');
+  // Pestaña activa en el panel de filtros izquierdo: 'filtros' | 'metricas' | 'cabina'
+  const [panelTab, setPanelTab] = useState<'filtros' | 'metricas' | 'cabina'>('filtros');
 
   // Sitios de trabajo
   const [activeSiteId, setActiveSiteId] = useState<string>('shackleton_rim');
   const [siteBId, setSiteBId] = useState<string>('shackleton_floor');
 
   // Base temporal de la misión
-  const [baseDate, setBaseDate] = useState('2026-11-27');
-  const [baseTime, setBaseTime] = useState('23:57');
+  const [baseDate, setBaseDate] = useState('2026-11-15');
+  const [baseTime, setBaseTime] = useState('00:00');
   const [simDayOffset, setSimDayOffset] = useState(0.0);
   const [isAnimating, setIsAnimating] = useState(false);
 
   // Modales de herramientas científicas
-  const [modalOpen, setModalOpen] = useState<'chart' | 'compare' | 'benchmark' | null>(null);
+  const [modalOpen, setModalOpen] = useState<'chart' | 'compare' | 'benchmark' | 'bestDays' | null>(null);
 
   // Caché de conjuntos de datos
   const [siteDataMap, setSiteDataMap] = useState<Record<string, SiteDataSet>>({});
@@ -119,9 +125,9 @@ export default function App() {
     return computeTrajectory(siteBData.horizonte, siteBData.efemerides);
   }, [siteBData]);
 
-  // Calcular fecha/hora actual formateada en UTC
+  // Fecha y hora UTC instantánea
   const currentUtcDate = useMemo(() => {
-    const baseMs = Date.parse(`${baseDate}T${baseTime}:00Z`) || Date.UTC(2026, 10, 27, 23, 57);
+    const baseMs = Date.parse(`${baseDate}T${baseTime}:00Z`) || Date.UTC(2026, 10, 15, 0, 0);
     const totalMs = baseMs + simDayOffset * 86400000;
     return new Date(totalMs);
   }, [baseDate, baseTime, simDayOffset]);
@@ -135,55 +141,27 @@ export default function App() {
     return `${y}-${m}-${d} ${hh}:${mm} UTC`;
   }, [currentUtcDate]);
 
-  // Posición instantánea del Sol y de la Tierra
-  const { sunAz, sunEl, earthAz, earthEl, hoursToSunset, solarEfficiencyPct, hasDte } = useMemo(() => {
-    if (currentSiteData?.efemerides && currentSiteData.efemerides.datos.length > 0) {
-      const datos = currentSiteData.efemerides.datos;
-      const stepIdx = Math.min(
-        datos.length - 1,
-        Math.max(0, Math.floor(simDayOffset * 24))
-      );
-      const pt = datos[stepIdx];
-      const trajPt = trajA?.points[stepIdx];
+  // Posición astronómica instantánea (JPL Horizons con fallback analítico etiquetado)
+  const celestial = useMemo(() => {
+    return getCelestialInstant(
+      currentSiteData,
+      currentUtcDate,
+      activeSite.lat_deg,
+      activeSite.lon_deg
+    );
+  }, [currentSiteData, currentUtcDate, activeSite.lat_deg, activeSite.lon_deg]);
 
-      const sEl = pt.sol_elevacion_deg;
-      const sAz = pt.sol_azimut_deg;
-      const eEl = pt.tierra_elevacion_deg;
-      const eAz = pt.tierra_azimut_deg;
-      const hToSunset = trajPt ? trajPt.hours_to_sun_sunset : null;
-      const dteOk = trajPt ? trajPt.earth_nominal : eEl > 0;
-      const eff = trajPt && trajPt.sun_visible ? 0.28 * Math.sin(Math.max(0, (sEl * Math.PI) / 180)) * 100 : 0;
+  // Cálculo en tiempo real de horas restantes de luz y visibilidad terrestre
+  const countdowns = useMemo(() => {
+    return computeCountdowns(trajA, simDayOffset);
+  }, [trajA, simDayOffset]);
 
-      return {
-        sunAz: sAz,
-        sunEl: sEl,
-        earthAz: eAz,
-        earthEl: eEl,
-        hoursToSunset: hToSunset,
-        solarEfficiencyPct: eff,
-        hasDte: dteOk,
-      };
-    }
+  const lunarPhase = estimateLunarPhase(celestial.sunAz);
 
-    // Modelo analítico topocéntrico de respaldo
-    const H = ((simDayOffset * 2 * Math.PI) / 29.530589) * (180 / Math.PI);
-    const sAz = (H + 120.7) % 360;
-    const sEl = 1.49 + 0.3 * Math.sin(simDayOffset * 0.2);
-    const eAz = 5.3 + 1.2 * Math.sin((simDayOffset * 2 * Math.PI) / 27.321661);
-    const eEl = 5.58 + 2.5 * Math.cos((simDayOffset * 2 * Math.PI) / 27.321661);
-
-    return {
-      sunAz: sAz,
-      sunEl: sEl,
-      earthAz: eAz,
-      earthEl: eEl,
-      hoursToSunset: null,
-      solarEfficiencyPct: 2.59,
-      hasDte: eEl > 0,
-    };
-  }, [currentSiteData, simDayOffset, trajA]);
-
-  const lunarPhase = estimateLunarPhase(sunAz);
+  const solarEfficiencyPct = useMemo(() => {
+    if (!celestial.isSunVisible) return 0;
+    return 0.28 * Math.sin(Math.max(0, (celestial.sunEl * Math.PI) / 180)) * 100;
+  }, [celestial.isSunVisible, celestial.sunEl]);
 
   const handleResetCamera = () => {
     if (controlsRef.current) {
@@ -218,10 +196,13 @@ export default function App() {
             BARRA DE NAVEGACIÓN SUPERIOR (KILLALAND)
             ======================================================== */}
         <header className="h-12 border-b border-slate-800/80 bg-[#05070d]/95 backdrop-blur-md px-5 flex items-center justify-between z-30 shrink-0">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <span className="text-xl text-amber-400">🌙</span>
             <span className="font-bold text-lg tracking-wide text-white font-sans">
               KillaLand
+            </span>
+            <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 font-mono hidden sm:inline-block">
+              NASA Space Apps 2026
             </span>
           </div>
 
@@ -285,8 +266,8 @@ export default function App() {
             </div>
           </div>
 
-          {/* 2. PANEL FLOTANTE DE FILTROS A LA IZQUIERDA (REQUISITOS + LÍNEA DE TIEMPO) */}
-          <div className="absolute top-24 left-6 z-20 w-80 bg-[#09111e]/92 border border-slate-700/70 rounded-2xl p-4 shadow-2xl backdrop-blur-md pointer-events-auto font-sans text-xs space-y-3.5 max-h-[82vh] overflow-y-auto">
+          {/* 2. PANEL FLOTANTE DE FILTROS A LA IZQUIERDA */}
+          <div className="absolute top-24 left-6 z-20 w-84 bg-[#09111e]/92 border border-slate-700/70 rounded-2xl p-4 shadow-2xl backdrop-blur-md pointer-events-auto font-sans text-xs space-y-3 max-h-[78vh] overflow-y-auto">
             {/* Selector de Sitio de Aterrizaje */}
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
@@ -324,40 +305,41 @@ export default function App() {
                   ))}
                 </optgroup>
               </select>
-              <p className="text-[10px] text-slate-400 leading-tight pt-0.5 italic">
-                {activeSite.descripcion}
-              </p>
             </div>
 
-            {/* Pestañas: Filtros Misión vs Métricas 3D */}
-            <div className="grid grid-cols-2 gap-1 p-1 bg-[#060b14] rounded-xl border border-slate-800 text-xs font-semibold">
+            {/* Pestañas: Filtros Misión vs Métricas 3D vs Cabina */}
+            <div className="grid grid-cols-3 gap-1 p-1 bg-[#060b14] rounded-xl border border-slate-800 text-[11px] font-semibold">
               <button
                 onClick={() => setPanelTab('filtros')}
-                className={`py-1.5 rounded-lg transition cursor-pointer text-center ${
-                  panelTab === 'filtros'
-                    ? 'bg-cyan-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
+                className={`py-1 rounded-lg transition cursor-pointer text-center ${
+                  panelTab === 'filtros' ? 'bg-cyan-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                Filtros Misión
+                Filtros
               </button>
               <button
                 onClick={() => setPanelTab('metricas')}
-                className={`py-1.5 rounded-lg transition cursor-pointer text-center ${
-                  panelTab === 'metricas'
-                    ? 'bg-cyan-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
+                className={`py-1 rounded-lg transition cursor-pointer text-center ${
+                  panelTab === 'metricas' ? 'bg-cyan-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                Métricas 3D
+                Métricas
+              </button>
+              <button
+                onClick={() => setPanelTab('cabina')}
+                className={`py-1 rounded-lg transition cursor-pointer text-center ${
+                  panelTab === 'cabina' ? 'bg-cyan-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                Cabina
               </button>
             </div>
 
             {/* PESTAÑA A: REQUISITOS DE MISIÓN */}
             {panelTab === 'filtros' && (
               <div className="space-y-3 pt-1">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-1.5">
-                  <span className="font-bold text-slate-300 uppercase tracking-wider text-[11px]">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-1">
+                  <span className="font-bold text-slate-300 uppercase tracking-wider text-[10px]">
                     REQUISITOS DE MISIÓN
                   </span>
                   <span className="text-[9px] text-cyan-400 font-mono px-1.5 py-0.5 bg-cyan-950/60 rounded border border-cyan-800">
@@ -441,57 +423,64 @@ export default function App() {
                 </label>
 
                 {/* Contador de celdas aptas */}
-                <div className="p-2.5 rounded-xl bg-[#070e1b] border border-slate-800 text-xs flex items-center justify-between">
+                <div className="p-2 rounded-xl bg-[#070e1b] border border-slate-800 text-xs flex items-center justify-between">
                   <span className="text-slate-300">Celdas aptas:</span>
                   <span className="font-mono font-bold">
                     <span className="text-emerald-400">{aptCellsCount}</span>{' '}
                     <span className="text-slate-500">/ {totalCells}</span>
                   </span>
                 </div>
+
+                {/* Apartado de Energía y Comunicación (Problema 4C) */}
+                <EnergyCommsWidget
+                  trajectory={trajA}
+                  minLightPct={mission.minLight}
+                  loading={loadingSite}
+                />
               </div>
             )}
 
             {/* PESTAÑA B: MÉTRICAS 3D EN TIEMPO REAL */}
             {panelTab === 'metricas' && (
               <div className="space-y-2 pt-1 font-mono text-xs">
+                {/* Etiqueta de fuente astronómica */}
+                <div className="p-1.5 rounded bg-[#070e1a] border border-slate-800 text-[10px] text-slate-300 flex items-center gap-1.5">
+                  <span>{celestial.isSynthetic ? '⚠️' : '✓'}</span>
+                  <span className="truncate">{celestial.sourceLabel}</span>
+                </div>
+
                 <div className="flex justify-between text-slate-300">
                   <span className="text-slate-400 font-sans">Elevación Sol</span>
-                  <span className={`font-bold ${sunEl > 0 ? 'text-amber-400' : 'text-slate-500'}`}>
-                    {sunEl > 0 ? `+${sunEl.toFixed(2)}` : sunEl.toFixed(2)}°
+                  <span className={`font-bold ${celestial.sunEl > 0 ? 'text-amber-400' : 'text-slate-500'}`}>
+                    {celestial.sunEl > 0 ? `+${celestial.sunEl.toFixed(2)}` : celestial.sunEl.toFixed(2)}°
                   </span>
                 </div>
                 <div className="flex justify-between text-slate-300">
                   <span className="text-slate-400 font-sans">Azimut Sol</span>
-                  <span>+{sunAz.toFixed(1)}°</span>
+                  <span>+{celestial.sunAz.toFixed(1)}°</span>
                 </div>
                 <div className="flex justify-between text-slate-300">
                   <span className="text-slate-400 font-sans">Elevación Tierra</span>
-                  <span className={`font-bold ${earthEl > 0 ? 'text-blue-400' : 'text-slate-500'}`}>
-                    {earthEl > 0 ? `+${earthEl.toFixed(2)}` : earthEl.toFixed(2)}°
+                  <span className={`font-bold ${celestial.earthEl > 0 ? 'text-blue-400' : 'text-slate-500'}`}>
+                    {celestial.earthEl > 0 ? `+${celestial.earthEl.toFixed(2)}` : celestial.earthEl.toFixed(2)}°
                   </span>
                 </div>
                 <div className="flex justify-between text-slate-300">
                   <span className="text-slate-400 font-sans">Azimut Tierra</span>
-                  <span>+{earthAz.toFixed(1)}°</span>
+                  <span>+{celestial.earthAz.toFixed(1)}°</span>
                 </div>
                 <div className="flex justify-between pt-1 border-t border-slate-800 text-slate-300">
                   <span className="text-slate-400 font-sans">Fase lunar</span>
                   <span>{lunarPhase}</span>
                 </div>
                 <div className="flex justify-between text-slate-300">
-                  <span className="text-slate-400 font-sans">Horas al ocaso</span>
-                  <span className={hoursToSunset != null && hoursToSunset <= 24 ? 'text-amber-300 font-bold' : 'text-slate-300'}>
-                    {hoursToSunset != null ? `${hoursToSunset.toFixed(1)} h` : '—'}
-                  </span>
-                </div>
-                <div className="flex justify-between text-slate-300">
-                  <span className="text-slate-400 font-sans">η solar</span>
+                  <span className="text-slate-400 font-sans">η solar instantánea</span>
                   <span className="text-emerald-400">{solarEfficiencyPct.toFixed(2)}%</span>
                 </div>
                 <div className="flex justify-between pt-1 border-t border-slate-800">
                   <span className="text-slate-400 font-sans">Visibilidad DTE</span>
-                  <span className={hasDte ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
-                    {hasDte ? '✓ Directa' : '❌ Oculta'}
+                  <span className={celestial.isEarthVisible ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
+                    {celestial.isEarthVisible ? '✓ Directa' : '❌ Oculta'}
                   </span>
                 </div>
 
@@ -507,8 +496,15 @@ export default function App() {
               </div>
             )}
 
+            {/* PESTAÑA C: VISTA CABINA 360° */}
+            {panelTab === 'cabina' && (
+              <div className="pt-1">
+                <CabinView siteData={currentSiteData} celestial={celestial} />
+              </div>
+            )}
+
             {/* ========================================================
-                3. LÍNEA DE TIEMPO INTERACTIVA POR DÍAS (Día 1, 2, 3...)
+                LÍNEA DE TIEMPO INTERACTIVA Y CUENTAS REGRESIVAS (4B)
                 ======================================================== */}
             <div className="pt-2.5 border-t border-slate-800 space-y-2">
               <div className="flex items-center justify-between text-[11px]">
@@ -520,11 +516,21 @@ export default function App() {
                 </span>
               </div>
 
+              {/* Cuentas regresivas de eventos astronómicos (Problema 4B) */}
+              <div className="p-2 bg-[#050b14] rounded-lg border border-slate-800 text-[10px] font-mono space-y-1">
+                <div className="text-amber-300 truncate" title={countdowns.sunDetailText}>
+                  {countdowns.sunStatusText}
+                </div>
+                <div className="text-cyan-300 truncate" title={countdowns.earthDetailText}>
+                  {countdowns.earthStatusText}
+                </div>
+              </div>
+
               {/* Controles de reproducción y salto por días */}
               <div className="flex items-center gap-1.5 font-sans">
                 <button
                   onClick={() => setSimDayOffset((prev) => Math.max(0, Math.floor(prev - 1)))}
-                  className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-[11px] font-semibold transition"
+                  className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-[11px] font-semibold transition cursor-pointer"
                   title="Retroceder 1 día"
                 >
                   -1 d
@@ -541,14 +547,14 @@ export default function App() {
                 </button>
                 <button
                   onClick={() => setSimDayOffset((prev) => Math.min(mission.durationDays, Math.floor(prev + 1)))}
-                  className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-[11px] font-semibold transition"
+                  className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-[11px] font-semibold transition cursor-pointer"
                   title="Avanzar 1 día"
                 >
                   +1 d
                 </button>
                 <button
                   onClick={() => setSimDayOffset(0)}
-                  className="px-2 py-1 bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-slate-200 rounded text-[11px]"
+                  className="px-2 py-1 bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-slate-200 rounded text-[11px] cursor-pointer"
                   title="Reiniciar a Día 1"
                 >
                   Día 1
@@ -577,7 +583,16 @@ export default function App() {
 
           {/* 3. BOTONES DE ACCESO RÁPIDO SUPERIORES DERECHOS */}
           <div className="absolute top-4 right-6 z-20 space-y-2 pointer-events-auto flex flex-col items-end">
-            <div className="flex flex-col gap-1.5 w-60">
+            <div className="flex flex-col gap-1.5 w-64">
+              {/* Botón de Optimización: Mejores Días (Problema 4A) */}
+              <button
+                onClick={() => setModalOpen('bestDays')}
+                className="w-full text-xs font-semibold py-1.5 px-3 rounded-xl bg-gradient-to-r from-emerald-950/90 to-[#09111e]/90 hover:from-emerald-900 text-emerald-300 border border-emerald-600/70 backdrop-blur-md flex items-center justify-between transition cursor-pointer shadow-lg"
+              >
+                <span>🏆 Mejores Días (Ventanas)</span>
+                <span className="text-[10px] text-emerald-400 font-mono">Ranking</span>
+              </button>
+
               <button
                 onClick={() => setModalOpen('chart')}
                 className="w-full text-xs font-semibold py-1.5 px-3 rounded-xl bg-[#09111e]/90 hover:bg-[#121e33] text-cyan-200 border border-slate-700/80 backdrop-blur-md flex items-center justify-between transition cursor-pointer shadow-lg"
@@ -603,7 +618,7 @@ export default function App() {
               </button>
             </div>
 
-            {/* TARJETA FLOTANTE "OBJETIVO LUNAR" (Sincronizada en ambas vistas) */}
+            {/* TARJETA FLOTANTE "OBJETIVO LUNAR" (Sincronizada) */}
             <div className="w-68 bg-[#09111e]/92 border border-cyan-500/40 rounded-2xl p-3.5 text-xs shadow-2xl backdrop-blur-md space-y-1 mt-1 text-slate-200">
               <div className="flex items-center justify-between pb-1 border-b border-slate-800">
                 <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider font-mono">
@@ -615,11 +630,11 @@ export default function App() {
               </div>
               <div className="font-bold text-white text-sm">{activeSite.nombre}</div>
               <div className="text-[11px] text-slate-400 space-y-0.5 font-mono pt-0.5">
-                <div>Latitud: <span className="text-slate-200">{(mission.selectedLat ?? -89.684).toFixed(3)}°</span></div>
-                <div>Longitud: <span className="text-slate-200">{(mission.selectedLon ?? 196.739).toFixed(3)}° E</span></div>
-                <div>Altitud (DEM): <span className="text-slate-200">{(mission.selectedAltKm ?? 1.52).toFixed(2)} km</span></div>
+                <div>Latitud: <span className="text-slate-200">{Number(mission.selectedLat ?? -89.684).toFixed(3)}°</span></div>
+                <div>Longitud: <span className="text-slate-200">{Number(mission.selectedLon ?? 196.739).toFixed(3)}° E</span></div>
+                <div>Altitud (DEM): <span className="text-slate-200">{Number(mission.selectedAltKm ?? 1.52).toFixed(2)} km</span></div>
                 <div className="text-cyan-300 pt-0.5 text-[10px]">
-                  Coordenadas seleccionadas: {(mission.selectedLat ?? -89.684).toFixed(2)}°, {(mission.selectedLon ?? 196.739).toFixed(2)}°
+                  Coordenadas: {Number(mission.selectedLat ?? -89.684).toFixed(2)}°, {Number(mission.selectedLon ?? 196.739).toFixed(2)}°
                 </div>
               </div>
               <div className="text-[10px] text-amber-300 pt-1 leading-tight flex items-center gap-1 font-sans">
@@ -631,6 +646,7 @@ export default function App() {
 
           {/* 4. CANVAS 3D (LUNA, TIERRA Y SOL ULTRA-REALISTAS / PARCHE LUNAR PBR) */}
           <Canvas
+            key={viewMode}
             shadows
             camera={
               viewMode === 'globo'
@@ -645,10 +661,12 @@ export default function App() {
                 candidateSites={SITES}
                 selectedLat={mission.selectedLat}
                 selectedLon={mission.selectedLon}
-                sunAz={sunAz}
-                sunEl={sunEl}
-                earthAz={earthAz}
-                earthEl={earthEl}
+                sunAz={celestial.sunAz}
+                sunEl={celestial.sunEl}
+                earthAz={celestial.earthAz}
+                earthEl={celestial.earthEl}
+                earthRotationRad={celestial.earthRotationRad}
+                isEarthOccluded={celestial.isEarthOccluded}
                 isSpinning={isSpinning}
                 zoomLevel={zoomLevel}
                 controlsRef={controlsRef}
@@ -666,40 +684,48 @@ export default function App() {
                 }}
                 onMapClick={(lat, lon) => {
                   mission.update({
-                    selectedLat: Number(lat.toFixed(4)),
-                    selectedLon: Number(lon.toFixed(4)),
+                    selectedLat: lat,
+                    selectedLon: lon,
                   });
                 }}
               />
             ) : (
-              <>
+              <PatchErrorBoundary onReset={() => mission.resetCoordinates()}>
                 <SpaceBackground showEclipticGrid={true} />
-                <ambientLight intensity={0.25} color="#1e293b" />
+                <ambientLight intensity={0.20} color="#1e293b" />
                 <SunLight
-                  days={mission.startDays + simDayOffset}
+                  sunAz={celestial.sunAz}
+                  sunEl={celestial.sunEl}
                   targetPos={terrainTargetPos}
                 />
                 <LunarTerrain analysis={analysis} />
                 <EarthMarker
-                  days={mission.startDays + simDayOffset}
+                  earthAz={celestial.earthAz}
+                  earthEl={celestial.earthEl}
                   targetPos={terrainTargetPos}
+                  earthRotationRad={celestial.earthRotationRad}
+                  isOccluded={celestial.isEarthOccluded}
                 />
                 <OrbitControls minDistance={15} maxDistance={400} maxPolarAngle={Math.PI / 2.05} />
-              </>
+              </PatchErrorBoundary>
             )}
           </Canvas>
 
           {/* 5. BARRA INFERIOR DE ESTADO Y CONTROL DE ZOOM */}
-          <div className="absolute bottom-0 left-0 right-0 h-10 bg-[#05070d]/85 backdrop-blur-md border-t border-slate-800/80 px-6 flex items-center justify-between text-xs z-20 pointer-events-auto">
-            {/* Texto de Sitio Activo y Fecha */}
-            <div className="text-[11px] text-slate-300 font-mono">
+          <div className="absolute bottom-6 left-0 right-0 h-10 bg-[#05070d]/85 backdrop-blur-md border-t border-slate-800/80 px-6 flex items-center justify-between text-xs z-20 pointer-events-auto">
+            {/* Texto de Sitio Activo, Cobertura y Fecha */}
+            <div className="text-[11px] text-slate-300 font-mono flex items-center gap-2">
               <span className="text-slate-500">Sitio activo:</span>{' '}
               <span className="text-white font-semibold">{activeSite.nombre}</span>{' '}
               <span className="text-cyan-400">
-                ({(mission.selectedLat ?? -89.684).toFixed(3)}° Lat, {(mission.selectedLon ?? 196.739).toFixed(3)}° Lon)
+                ({Number(mission.selectedLat ?? -89.684).toFixed(3)}° Lat, {Number(mission.selectedLon ?? 196.739).toFixed(3)}° Lon)
               </span>{' '}
               <span className="text-slate-600">|</span>{' '}
               <span className="text-amber-300">{formattedUtcString}</span>
+              <span className="text-slate-600">|</span>{' '}
+              <span className="text-[10px] text-slate-400">
+                {celestial.isSynthetic ? '⚠️ ' : '✓ '}{celestial.sourceLabel}
+              </span>
             </div>
 
             {/* Slider de Zoom con Porcentaje */}
@@ -718,10 +744,22 @@ export default function App() {
               </span>
             </div>
           </div>
+
+          {/* 6. PIE DE PÁGINA CON CRÉDITOS OFICIALES DE TEXTURAS Y DATOS (Problema 1) */}
+          <footer className="absolute bottom-0 left-0 right-0 h-6 bg-[#020409] border-t border-slate-850 px-6 flex items-center justify-between text-[9px] text-slate-400 font-mono z-20 pointer-events-auto select-text">
+            <div className="flex items-center gap-4">
+              <span><b>Texturas:</b> Luna (NASA/LRO/LROC ASU QuickMap) · Tierra (NASA Blue Marble) · Sol (NASA/SDO/AIA)</span>
+              <span className="text-slate-600">|</span>
+              <span><b>Datos:</b> Topografía DEM LOLA (Rol A) · Efemérides JPL Horizons (Rol B) · Fórmulas SSOT (Rol C/D)</span>
+            </div>
+            <div className="text-slate-500">
+              NASA Space Apps Challenge 2026 · Dominio Público
+            </div>
+          </footer>
         </div>
 
         {/* ========================================================
-            MODALES CIENTÍFICOS (GRÁFICA LOLA, COMPARADOR A/B, BENCHMARK)
+            MODALES CIENTÍFICOS
             ======================================================== */}
         {modalOpen && (
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -765,6 +803,20 @@ export default function App() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Modal de Optimización de Mejores Días (Problema 4A) */}
+        {modalOpen === 'bestDays' && (
+          <BestDaysModal
+            siteData={currentSiteData}
+            siteName={activeSite.nombre}
+            missionDurationDays={mission.durationDays}
+            onSelectDay={(dayStr) => {
+              setBaseDate(dayStr);
+              setSimDayOffset(0);
+            }}
+            onClose={() => setModalOpen(null)}
+          />
         )}
       </div>
     </ErrorBoundary>

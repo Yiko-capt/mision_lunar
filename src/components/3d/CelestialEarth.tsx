@@ -14,6 +14,8 @@ interface CelestialEarthProps {
   radius?: number;
   targetPos?: [number, number, number];
   showVector?: boolean;
+  earthRotationRad?: number;
+  isOccluded?: boolean;
 }
 
 export default function CelestialEarth({
@@ -21,6 +23,8 @@ export default function CelestialEarth({
   radius = 0.25,
   targetPos,
   showVector = true,
+  earthRotationRad,
+  isOccluded = false,
 }: CelestialEarthProps) {
   const earthMeshRef = useRef<THREE.Mesh>(null);
   const cloudsMeshRef = useRef<THREE.Mesh>(null);
@@ -30,34 +34,38 @@ export default function CelestialEarth({
   const nightLightsMap = useMemo(() => createEarthNightLightsTexture(), []);
   const cloudsTexture = useMemo(() => createRealisticCloudsTexture(), []);
 
+  // Rotación de la Tierra: sincronizada con el tiempo de misión (1 vuelta cada 24 h)
   useFrame((_, delta) => {
-    if (earthMeshRef.current) {
-      earthMeshRef.current.rotation.y += delta * 0.12;
-    }
-    if (cloudsMeshRef.current) {
-      cloudsMeshRef.current.rotation.y += delta * 0.15;
+    if (earthRotationRad !== undefined) {
+      if (earthMeshRef.current) earthMeshRef.current.rotation.y = earthRotationRad;
+      if (cloudsMeshRef.current) cloudsMeshRef.current.rotation.y = earthRotationRad * 1.04;
+    } else {
+      if (earthMeshRef.current) earthMeshRef.current.rotation.y += delta * 0.08;
+      if (cloudsMeshRef.current) cloudsMeshRef.current.rotation.y += delta * 0.10;
     }
   });
 
   return (
     <group position={position}>
-      {/* 1. Vector Tierra (Línea punteada celeste directa hacia el sitio lunar) */}
+      {/* 1. Vector Tierra (Línea punteada: celeste si hay visión directa, tenue/roja si está oculta tras el horizonte) */}
       {showVector && targetPos && (
         <Line
           points={[
             [0, 0, 0],
             [targetPos[0] - position[0], targetPos[1] - position[1], targetPos[2] - position[2]],
           ]}
-          color="#38bdf8"
-          lineWidth={2.2}
+          color={isOccluded ? '#f43f5e' : '#38bdf8'}
+          lineWidth={isOccluded ? 1.5 : 2.2}
           dashed
           dashScale={12}
           dashSize={0.16}
           gapSize={0.08}
+          transparent
+          opacity={isOccluded ? 0.35 : 0.9}
         />
       )}
 
-      {/* 2. Capa 1: Superficie de la Tierra (océanos azul profundo #0b2d5b, continentes y luces nocturnas) */}
+      {/* 2. Capa 1: Superficie de la Tierra (NASA Blue Marble: océanos, continentes y luces nocturnas) */}
       <mesh ref={earthMeshRef} receiveShadow>
         <sphereGeometry args={[radius, 64, 64]} />
         <meshStandardMaterial
@@ -71,7 +79,7 @@ export default function CelestialEarth({
         />
       </mesh>
 
-      {/* 3. Capa 2: Esfera de nubes blancas translúcidas (scale={1.012}) en rotación lenta */}
+      {/* 3. Capa 2: Esfera de nubes blancas translúcidas (scale={1.012}) en rotación */}
       <mesh ref={cloudsMeshRef} scale={[1.012, 1.012, 1.012]}>
         <sphereGeometry args={[radius, 48, 48]} />
         <meshStandardMaterial
@@ -95,6 +103,14 @@ export default function CelestialEarth({
           depthWrite={false}
         />
       </mesh>
+
+      {/* 5. Indicador si está oculta tras el horizonte local */}
+      {isOccluded && (
+        <mesh scale={[1.05, 1.05, 1.05]}>
+          <ringGeometry args={[radius * 1.02, radius * 1.15, 32]} />
+          <meshBasicMaterial color="#f43f5e" transparent opacity={0.6} side={THREE.DoubleSide} />
+        </mesh>
+      )}
     </group>
   );
 }

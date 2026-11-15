@@ -173,7 +173,7 @@ export default function LunarTerrain({ analysis: _analysis }: LunarTerrainProps)
     update({
       selected: cellIdx,
       selectedLat: Number(lat.toFixed(4)),
-      selectedLon: Number(((lon % 360) + 360) % 360).toFixed(4) as any,
+      selectedLon: Number((((lon % 360) + 360) % 360).toFixed(4)),
       selectedAltKm: Number(altKm.toFixed(3)),
     });
   };

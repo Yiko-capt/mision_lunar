@@ -1,27 +1,22 @@
-import { sunState, earthState } from '../../lib/solar';
+import { topocentricToScenePosition } from '../../lib/ephemerisService';
 import CelestialSun from './CelestialSun';
 import CelestialEarth from './CelestialEarth';
 
 const R_SUN = 90;
 const R_EARTH = 130;
 
-function toPos(theta: number, el: number, r: number): [number, number, number] {
-  return [
-    Math.cos(theta) * Math.cos(el) * r,
-    Math.sin(el) * r,
-    Math.sin(theta) * Math.cos(el) * r,
-  ];
+interface SunLightProps {
+  sunAz: number;
+  sunEl: number;
+  targetPos?: [number, number, number];
 }
 
 export function SunLight({
-  days,
+  sunAz,
+  sunEl,
   targetPos = [0, 0, 0],
-}: {
-  days: number;
-  targetPos?: [number, number, number];
-}) {
-  const st = sunState(days);
-  const pos = toPos(st.theta, st.el, R_SUN);
+}: SunLightProps) {
+  const pos = topocentricToScenePosition(sunAz, Math.max(-5, sunEl), R_SUN);
 
   return (
     <CelestialSun
@@ -33,15 +28,22 @@ export function SunLight({
   );
 }
 
-export function EarthMarker({
-  days,
-  targetPos = [0, 0, 0],
-}: {
-  days: number;
+interface EarthMarkerProps {
+  earthAz: number;
+  earthEl: number;
   targetPos?: [number, number, number];
-}) {
-  const st = earthState(days);
-  const pos = toPos(0, st.el, R_EARTH);
+  earthRotationRad?: number;
+  isOccluded?: boolean;
+}
+
+export function EarthMarker({
+  earthAz,
+  earthEl,
+  targetPos = [0, 0, 0],
+  earthRotationRad,
+  isOccluded = false,
+}: EarthMarkerProps) {
+  const pos = topocentricToScenePosition(earthAz, Math.max(-8, earthEl), R_EARTH);
 
   return (
     <CelestialEarth
@@ -49,6 +51,8 @@ export function EarthMarker({
       radius={5.5}
       targetPos={targetPos}
       showVector={true}
+      earthRotationRad={earthRotationRad}
+      isOccluded={isOccluded}
     />
   );
 }
