@@ -1,4 +1,5 @@
 import type { ComputedTrajectory } from './physics';
+import { indexAtTime } from './trajectoryWindow';
 
 export interface CountdownInfo {
   sunStatusText: string;
@@ -9,128 +10,89 @@ export interface CountdownInfo {
   isEarthVisible: boolean;
 }
 
+const NO_DATA: CountdownInfo = {
+  sunStatusText: 'Sin datos para esta fecha',
+  sunDetailText: 'La fecha simulada queda fuera del periodo con efemérides',
+  isSunLit: false,
+  earthStatusText: 'Sin datos para esta fecha',
+  earthDetailText: 'La fecha simulada queda fuera del periodo con efemérides',
+  isEarthVisible: false,
+};
+
 /**
- * Calcula en tiempo real las horas restantes hasta el próximo evento solar (ocaso o salida)
- * y evento terrestre (pérdida o recuperación de visión directa DTE).
+ * Cuentas regresivas del instante simulado (ms UTC): cuánto falta para que el Sol y la Tierra
+ * crucen el horizonte del sitio. Si están ocultos, dice cuándo reaparecen (no un guion).
+ * Usa los mismos puntos y criterios que computeTrajectory.
  */
-export function computeCountdowns(
-  trajectory: ComputedTrajectory | null,
-  simDayOffset: number
-): CountdownInfo {
+export function computeCountdowns(trajectory: ComputedTrajectory | null, currentMs: number): CountdownInfo {
   if (!trajectory || trajectory.points.length === 0) {
-    return {
-      sunStatusText: 'Sin datos de horizonte',
-      sunDetailText: '—',
-      isSunLit: false,
-      earthStatusText: 'Sin datos de horizonte',
-      earthDetailText: '—',
-      isEarthVisible: false,
-    };
+    return { ...NO_DATA, sunStatusText: 'Sin datos de este sitio', earthStatusText: 'Sin datos de este sitio' };
   }
+  const currentIdx = indexAtTime(trajectory, currentMs);
+  if (currentIdx == null) return NO_DATA;
 
   const pts = trajectory.points;
   const N = pts.length;
   const stepHours = trajectory.stepHours || 1.0;
-
-  // Determinar índice actual según el día simulado
-  const currentIdx = Math.min(
-    N - 1,
-    Math.max(0, Math.floor((simDayOffset * 24) / stepHours))
-  );
-
   const current = pts[currentIdx];
-  const isSunLit = current.sun_visible;
-  const isEarthVis = current.earth_nominal;
+  const remainingDays = (((N - 1 - currentIdx) * stepHours) / 24).toFixed(1);
 
-  // 1. Análisis del Sol
-  let sunStatusText = '';
-  let sunDetailText = '';
-
-  if (isSunLit) {
-    let sunsetIdx = -1;
+  /** Horas hasta el próximo cambio de estado de `flag`, o null si no cambia en los datos. */
+  const hoursToFlip = (flag: (i: number) => boolean): number | null => {
+    const now = flag(currentIdx);
     for (let j = currentIdx + 1; j < N; j++) {
-      if (!pts[j].sun_visible) {
-        sunsetIdx = j;
-        break;
-      }
+      if (flag(j) !== now) return (j - currentIdx) * stepHours;
     }
-
-    if (sunsetIdx !== -1) {
-      const h = (sunsetIdx - currentIdx) * stepHours;
-      sunStatusText = `☀️ Sol visible (${h.toFixed(1)} h restantes de luz)`;
-      sunDetailText = `Ocaso solar previsto en ${h.toFixed(1)} horas`;
-    } else {
-      const remainingDays = ((N - currentIdx) * stepHours) / 24;
-      sunStatusText = `☀️ Sol continuo durante ${remainingDays.toFixed(1)} días`;
-      sunDetailText = 'Sin puesta de Sol en el período analizado (luz casi eterna)';
-    }
-  } else {
-    let sunriseIdx = -1;
-    for (let j = currentIdx + 1; j < N; j++) {
-      if (pts[j].sun_visible) {
-        sunriseIdx = j;
-        break;
-      }
-    }
-
-    if (sunriseIdx !== -1) {
-      const h = (sunriseIdx - currentIdx) * stepHours;
-      sunStatusText = `🌑 Bajo el horizonte (${h.toFixed(1)} h hasta el amanecer)`;
-      sunDetailText = `Salida del Sol estimada en ${h.toFixed(1)} horas`;
-    } else {
-      const remainingDays = ((N - currentIdx) * stepHours) / 24;
-      sunStatusText = `🌑 Noche continua durante ${remainingDays.toFixed(1)} días`;
-      sunDetailText = 'Región en sombra permanente o noche lunar extendida';
-    }
-  }
-
-  // 2. Análisis de la Tierra (DTE)
-  let earthStatusText = '';
-  let earthDetailText = '';
-
-  if (isEarthVis) {
-    let lossIdx = -1;
-    for (let j = currentIdx + 1; j < N; j++) {
-      if (!pts[j].earth_nominal) {
-        lossIdx = j;
-        break;
-      }
-    }
-
-    if (lossIdx !== -1) {
-      const h = (lossIdx - currentIdx) * stepHours;
-      earthStatusText = `🌍 DTE activo (${h.toFixed(1)} h de visión restante)`;
-      earthDetailText = `Pérdida de enlace directo estimada en ${h.toFixed(1)} horas`;
-    } else {
-      const remainingDays = ((N - currentIdx) * stepHours) / 24;
-      earthStatusText = `🌍 Visibilidad DTE continua (${remainingDays.toFixed(1)} días)`;
-      earthDetailText = 'Enlace directo ininterrumpido gracias a libración favorable';
-    }
-  } else {
-    let riseIdx = -1;
-    for (let j = currentIdx + 1; j < N; j++) {
-      if (pts[j].earth_nominal) {
-        riseIdx = j;
-        break;
-      }
-    }
-
-    if (riseIdx !== -1) {
-      const h = (riseIdx - currentIdx) * stepHours;
-      earthStatusText = `📡 DTE bloqueado (${h.toFixed(1)} h para recuperación)`;
-      earthDetailText = `Reaparición sobre el horizonte en ${h.toFixed(1)} horas`;
-    } else {
-      earthStatusText = '📡 Tierra oculta tras el horizonte local';
-      earthDetailText = 'Sin enlace directo con la Tierra en el horizonte de misión';
-    }
-  }
-
-  return {
-    sunStatusText,
-    sunDetailText,
-    isSunLit,
-    earthStatusText,
-    earthDetailText,
-    isEarthVisible: isEarthVis,
+    return null;
   };
+
+  const isSunLit = current.sun_visible;
+  const sunH = hoursToFlip((i) => pts[i].sun_visible);
+  let sunStatusText: string;
+  let sunDetailText: string;
+  if (isSunLit) {
+    sunStatusText =
+      sunH != null
+        ? `☀️ Sol visible (se pone en ${sunH.toFixed(1)} h)`
+        : `☀️ Sol visible sin ocaso (${remainingDays} días con datos)`;
+    sunDetailText =
+      sunH != null
+        ? `Ocaso solar en ${sunH.toFixed(1)} horas`
+        : 'El Sol no se pone en lo que queda del periodo con datos';
+  } else {
+    sunStatusText =
+      sunH != null
+        ? `🌑 Sol oculto (sale en ${sunH.toFixed(1)} h)`
+        : `🌑 Sol oculto sin amanecer (${remainingDays} días con datos)`;
+    sunDetailText =
+      sunH != null
+        ? `Salida del Sol en ${sunH.toFixed(1)} horas`
+        : 'El Sol no sale en lo que queda del periodo con datos';
+  }
+
+  const isEarthVisible = current.earth_nominal;
+  const earthH = hoursToFlip((i) => pts[i].earth_nominal);
+  let earthStatusText: string;
+  let earthDetailText: string;
+  if (isEarthVisible) {
+    earthStatusText =
+      earthH != null
+        ? `🌍 Tierra visible (se oculta en ${earthH.toFixed(1)} h)`
+        : `🌍 Tierra visible sin puesta (${remainingDays} días con datos)`;
+    earthDetailText =
+      earthH != null
+        ? `Puesta de la Tierra en ${earthH.toFixed(1)} horas`
+        : 'La Tierra no se oculta en lo que queda del periodo con datos';
+  } else {
+    earthStatusText =
+      earthH != null
+        ? `📡 Tierra oculta (reaparece en ${earthH.toFixed(1)} h)`
+        : `📡 Tierra oculta (${remainingDays} días con datos)`;
+    earthDetailText =
+      earthH != null
+        ? `La Tierra reaparece sobre el horizonte en ${earthH.toFixed(1)} horas`
+        : 'La Tierra no asoma en lo que queda del periodo con datos';
+  }
+
+  return { sunStatusText, sunDetailText, isSunLit, earthStatusText, earthDetailText, isEarthVisible };
 }

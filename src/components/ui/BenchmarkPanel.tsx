@@ -17,7 +17,7 @@ export default function BenchmarkPanel({ siteDataMap }: BenchmarkPanelProps) {
           <span className="text-[10px] text-slate-400 font-normal">5 Casos Científicos Oficiales (Rol C)</span>
         </h2>
         <span className="text-xs font-mono text-slate-400">
-          Criterio: Pasa / No Pasa / Sin Datos
+          Pasa / No pasa / No comparable / Sin datos
         </span>
       </div>
 
@@ -25,7 +25,9 @@ export default function BenchmarkPanel({ siteDataMap }: BenchmarkPanelProps) {
         {results.map((res: BenchmarkCaseResult) => {
           let badgeColor = 'bg-emerald-950/80 text-emerald-300 border-emerald-700';
           if (res.estado === 'NO PASA') {
-            badgeColor = 'bg-rose-950/80 text-rose-300 border-rose-700 font-bold animate-pulse';
+            badgeColor = 'bg-rose-950/80 text-rose-300 border-rose-700 font-bold';
+          } else if (res.estado === 'NO COMPARABLE') {
+            badgeColor = 'bg-amber-950/70 text-amber-300 border-amber-700';
           } else if (res.estado === 'SIN DATOS') {
             badgeColor = 'bg-slate-800 text-slate-300 border-slate-600';
           }

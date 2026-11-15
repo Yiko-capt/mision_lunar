@@ -97,6 +97,8 @@ export interface SiteDataSet {
   site_id: string;
   horizonte: UnifiedHorizon | null;
   efemerides: UnifiedEphemeris | null;
+  /** Efemérides puntuales de una época histórica (p. ej. alunizaje del Apolo 11, 1969). */
+  efemeridesLanding?: UnifiedEphemeris | null;
   metricas: UnifiedMetrics | null;
   cargando: boolean;
   error?: string | null;

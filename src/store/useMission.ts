@@ -4,6 +4,31 @@ import { normalizeLon } from '../lib/io/normalizers';
 
 export type UIMode = 'public' | 'technical';
 export type MainViewTab = 'dashboard' | 'compare' | 'benchmark' | 'patch';
+/** Modo de vista de la interfaz (barra superior). No afecta a la escena 3D. */
+export type ViewMode = 'student' | 'professional';
+
+const VIEW_MODE_KEY = 'killaland_view_mode';
+/** Respaldo en memoria: la elección sobrevive aunque sessionStorage no esté disponible. */
+let viewModeMemory: ViewMode = 'professional';
+
+function loadViewMode(): ViewMode {
+  try {
+    const v = typeof window !== 'undefined' ? window.sessionStorage?.getItem(VIEW_MODE_KEY) : null;
+    if (v === 'student' || v === 'professional') viewModeMemory = v;
+  } catch {
+    // sessionStorage bloqueado (modo privado, iframe): se usa la memoria
+  }
+  return viewModeMemory;
+}
+
+function saveViewMode(mode: ViewMode): void {
+  viewModeMemory = mode;
+  try {
+    if (typeof window !== 'undefined') window.sessionStorage?.setItem(VIEW_MODE_KEY, mode);
+  } catch {
+    // sin almacenamiento: la elección queda solo en memoria durante la sesión
+  }
+}
 
 export interface MissionState {
   startDays: number;
@@ -25,7 +50,9 @@ export interface MissionState {
   selectedSiteBId: string | null;
   uiMode: UIMode;
   mainTab: MainViewTab;
+  viewMode: ViewMode;
 
+  setViewMode: (mode: ViewMode) => void;
   update: (p: Partial<MissionState>) => void;
   resetCoordinates: () => void;
 }
@@ -111,8 +138,15 @@ export const useMission = create<MissionState>((set, get) => ({
 
   activeSiteId: persisted.activeSiteId ?? 'shackleton_rim',
   selectedSiteBId: 'shackleton_floor',
-  uiMode: 'public',
+  uiMode: viewModeMemory === 'student' ? 'public' : 'technical',
   mainTab: 'dashboard',
+  viewMode: loadViewMode(),
+
+  setViewMode: (mode) => {
+    saveViewMode(mode);
+    // uiMode es el interruptor antiguo que aún leen la gráfica y las tarjetas: se mantiene alineado
+    set({ viewMode: mode, uiMode: mode === 'student' ? 'public' : 'technical' });
+  },
 
   update: (partial) => {
     const cleanUpdate: Partial<MissionState> = { ...partial };

@@ -26,6 +26,23 @@ import BestDaysModal from './components/ui/BestDaysModal';
 import EnergyCommsWidget from './components/ui/EnergyCommsWidget';
 import CabinView from './components/ui/CabinView';
 import ErrorBoundary from './components/ErrorBoundary';
+import ViewModeToggle from './components/ui/ViewModeToggle';
+import ToolsMenu, { toolTitle, isToolAllowed, type ToolId } from './components/ui/ToolsMenu';
+import StudentPanel from './components/ui/StudentPanel';
+import ObjectivePanel from './components/ui/ObjectivePanel';
+import SkyView from './components/ui/SkyView';
+import SiteMetricsPanel from './components/ui/SiteMetricsPanel';
+import SitesComparisonTable from './components/ui/SitesComparisonTable';
+import TimelinePanel from './components/ui/TimelinePanel';
+import MethodologyPanel from './components/ui/MethodologyPanel';
+import InfoTip from './components/ui/InfoTip';
+import { help } from './config/glossary';
+import type { StudentScenario } from './config/studentScenarios';
+import { derivePointStatus } from './lib/siteStatus';
+import { horizonSourceLabel } from './lib/io/dataLoader';
+
+const DAY_MS = 86400000;
+const isKnownSite = (id: string | undefined): id is string => !!id && SITES.some((s) => s.site_id === id);
 
 export default function App() {
   const mission = useMission();
@@ -33,8 +50,9 @@ export default function App() {
   const totalCells = TERRAIN.n * TERRAIN.n;
   const aptCellsCount = analysis.viable ? analysis.viable.reduce((acc, v) => acc + v, 0) : 0;
 
-  // Modo de vista: 'globo' o 'parche' (Polo Sur)
-  const [viewMode, setViewMode] = useState<'globo' | 'parche'>('globo');
+  // Vista de la escena 3D: 'globo' o 'parche' (Polo Sur). Es independiente del Modo de Vista
+  // (Estudiante / Profesional), que vive en el store y solo cambia los paneles.
+  const [sceneView, setSceneView] = useState<'globo' | 'parche'>('globo');
 
   // Control de rotación del globo
   const [isSpinning, setIsSpinning] = useState(false);
@@ -47,7 +65,13 @@ export default function App() {
   const [panelTab, setPanelTab] = useState<'filtros' | 'metricas' | 'cabina'>('filtros');
 
   // Sitios de trabajo
-  const [activeSiteId, setActiveSiteId] = useState<string>('shackleton_rim');
+  const viewMode = mission.viewMode;
+  const isStudent = viewMode === 'student';
+  const [activeSiteId, setActiveSiteId] = useState<string>(() =>
+    isKnownSite(mission.activeSiteId) ? mission.activeSiteId : 'shackleton_rim'
+  );
+  // Escenario de un clic activo en modo Estudiante (null si el usuario cambió algo a mano)
+  const [activeScenarioId, setActiveScenarioId] = useState<string | null>(null);
   const [siteBId, setSiteBId] = useState<string>('shackleton_floor');
 
   // Base temporal de la misión
@@ -57,46 +81,52 @@ export default function App() {
   const [isAnimating, setIsAnimating] = useState(false);
 
   // Modales de herramientas científicas
-  const [modalOpen, setModalOpen] = useState<'chart' | 'compare' | 'benchmark' | 'bestDays' | null>(null);
+  const [modalOpen, setModalOpen] = useState<ToolId | null>(null);
 
   // Caché de conjuntos de datos
   const [siteDataMap, setSiteDataMap] = useState<Record<string, SiteDataSet>>({});
-  const [loadingSite, setLoadingSite] = useState(false);
 
-  // Cargar datos del sitio activo y sitio B
+  // Cargar una sola vez los datos de todos los sitios del catálogo (los usan el Benchmark,
+  // el Comparador A/B y la Comparación entre sitios). Solo se piden archivos que existen.
+  const requestedSites = useRef<Set<string>>(new Set());
   useEffect(() => {
-    let isMounted = true;
-    async function fetchSite(id: string) {
-      if (siteDataMap[id]) return;
-      setLoadingSite(true);
-      const data = await loadSiteDataSet(id);
-      if (isMounted) {
-        setSiteDataMap((prev) => ({ ...prev, [id]: data }));
-        setLoadingSite(false);
-      }
-    }
-
-    fetchSite(activeSiteId);
-    if (siteBId && !siteDataMap[siteBId]) {
-      fetchSite(siteBId);
-    }
-
-    return () => {
-      isMounted = false;
-    };
-  }, [activeSiteId, siteBId, siteDataMap]);
-
-  // Precargar los 5 sitios oficiales para el Benchmark
-  useEffect(() => {
-    const officialIds = ['shackleton_rim', 'shackleton_floor', 'malapert_peak', 'cabeus_rim', 'apollo_11'];
-    officialIds.forEach((id) => {
-      if (!siteDataMap[id]) {
-        loadSiteDataSet(id).then((data) => {
-          setSiteDataMap((prev) => ({ ...prev, [id]: data }));
-        });
-      }
+    let alive = true;
+    SITES.forEach((site) => {
+      if (requestedSites.current.has(site.site_id)) return;
+      requestedSites.current.add(site.site_id);
+      loadSiteDataSet(site.site_id).then((data) => {
+        if (alive) setSiteDataMap((prev) => ({ ...prev, [site.site_id]: data }));
+      });
     });
-  }, [siteDataMap]);
+    return () => {
+      alive = false;
+      requestedSites.current.clear(); // StrictMode monta dos veces en desarrollo
+    };
+  }, []);
+
+  const selectSite = (id: string, keepScenario = false) => {
+    const found = SITES.find((x) => x.site_id === id);
+    if (!found) return;
+    setActiveSiteId(id);
+    if (!keepScenario) setActiveScenarioId(null);
+    mission.update({
+      activeSiteId: id,
+      selectedLat: found.lat_deg,
+      selectedLon: found.lon_deg,
+      selectedAltKm: found.alt_km,
+    });
+  };
+
+  // Al arrancar, las coordenadas mostradas deben ser las del sitio activo (no restos de otra sesión)
+  useEffect(() => {
+    selectSite(activeSiteId, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Si se cambia a un modo que no ofrece la herramienta abierta, se cierra
+  useEffect(() => {
+    if (modalOpen && !isToolAllowed(modalOpen, viewMode)) setModalOpen(null);
+  }, [viewMode, modalOpen]);
 
   // Animación continua del tiempo
   useEffect(() => {
@@ -113,6 +143,7 @@ export default function App() {
   const activeSite = SITES.find((s) => s.site_id === activeSiteId) || SITES[0];
   const currentSiteData = siteDataMap[activeSiteId] || null;
   const siteBData = siteDataMap[siteBId] || null;
+  const loadingSite = !currentSiteData;
 
   // Trayectoria calculada
   const trajA: ComputedTrajectory | null = useMemo(() => {
@@ -128,9 +159,40 @@ export default function App() {
   // Fecha y hora UTC instantánea
   const currentUtcDate = useMemo(() => {
     const baseMs = Date.parse(`${baseDate}T${baseTime}:00Z`) || Date.UTC(2026, 10, 15, 0, 0);
-    const totalMs = baseMs + simDayOffset * 86400000;
+    const totalMs = baseMs + simDayOffset * DAY_MS;
     return new Date(totalMs);
   }, [baseDate, baseTime, simDayOffset]);
+  const currentMs = currentUtcDate.getTime();
+  const missionStartMs = currentMs - simDayOffset * DAY_MS;
+
+  /** Salta a un instante (ms UTC). Si cae fuera de la misión, mueve el inicio de misión a ese día. */
+  const jumpTo = (ms: number) => {
+    const off = (ms - missionStartMs) / DAY_MS;
+    if (off >= 0 && off <= mission.durationDays) {
+      setSimDayOffset(off);
+      return;
+    }
+    const dayStart = Math.floor(ms / DAY_MS) * DAY_MS;
+    setBaseDate(new Date(dayStart).toISOString().slice(0, 10));
+    setBaseTime('00:00');
+    setSimDayOffset((ms - dayStart) / DAY_MS);
+    setActiveScenarioId(null);
+  };
+
+  const applyScenario = (sc: StudentScenario) => {
+    selectSite(sc.siteId, true);
+    setActiveScenarioId(sc.id);
+    setBaseDate(sc.baseDate);
+    setBaseTime(sc.baseTime);
+    setSimDayOffset(0);
+    setIsAnimating(false);
+    mission.update({
+      durationDays: sc.durationDays,
+      minLight: sc.minLight,
+      maxSlope: sc.maxSlope,
+      requireEarth: sc.requireEarth,
+    });
+  };
 
   const formattedUtcString = useMemo(() => {
     const y = currentUtcDate.getUTCFullYear();
@@ -153,20 +215,34 @@ export default function App() {
 
   // Cálculo en tiempo real de horas restantes de luz y visibilidad terrestre
   const countdowns = useMemo(() => {
-    return computeCountdowns(trajA, simDayOffset);
-  }, [trajA, simDayOffset]);
+    return computeCountdowns(trajA, currentMs);
+  }, [trajA, currentMs]);
 
   const lunarPhase = estimateLunarPhase(celestial.sunAz);
 
-  const solarEfficiencyPct = useMemo(() => {
-    if (!celestial.isSunVisible) return 0;
-    return 0.28 * Math.sin(Math.max(0, (celestial.sunEl * Math.PI) / 180)) * 100;
-  }, [celestial.isSunVisible, celestial.sunEl]);
+  // Estado del punto seleccionado: ÚNICA fuente de los dos modos de vista
+  const selectedCell = mission.selected ?? 2048;
+  const status = useMemo(
+    () =>
+      derivePointStatus({
+        siteId: activeSite.site_id,
+        siteName: activeSite.nombre,
+        lat: Number(mission.selectedLat ?? activeSite.lat_deg),
+        lon: Number(mission.selectedLon ?? activeSite.lon_deg),
+        altKm: Number(mission.selectedAltKm ?? activeSite.alt_km),
+        slopeDeg: TERRAIN.slopeDeg[selectedCell] ?? 0,
+        maxSlopeDeg: mission.maxSlope,
+        celestial,
+        hasData: !!currentSiteData?.efemerides,
+      }),
+    [activeSite, mission.selectedLat, mission.selectedLon, mission.selectedAltKm, selectedCell, mission.maxSlope, celestial, currentSiteData]
+  );
+  const solarEfficiencyPct = status.etaPct;
 
   const handleResetCamera = () => {
     if (controlsRef.current) {
       controlsRef.current.reset();
-      if (viewMode === 'globo') {
+      if (sceneView === 'globo') {
         controlsRef.current.object.position.set(0, 0, 3.4);
       } else {
         controlsRef.current.object.position.set(0, 50, 95);
@@ -206,12 +282,15 @@ export default function App() {
             </span>
           </div>
 
-          {/* Toggle de Modo de Vista */}
+          {/* Selector "Modo de Vista": Estudiante / Profesional */}
+          <ViewModeToggle />
+
+          {/* Vista de la escena 3D */}
           <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
             <button
-              onClick={() => setViewMode('globo')}
+              onClick={() => setSceneView('globo')}
               className={`px-3 py-1 rounded-lg transition flex items-center gap-1.5 cursor-pointer font-medium ${
-                viewMode === 'globo'
+                sceneView === 'globo'
                   ? 'bg-[#0e2a47] text-cyan-300 border border-cyan-700/60 shadow-sm'
                   : 'text-slate-400 hover:text-white'
               }`}
@@ -220,9 +299,9 @@ export default function App() {
               <span>Globo 3D</span>
             </button>
             <button
-              onClick={() => setViewMode('parche')}
+              onClick={() => setSceneView('parche')}
               className={`px-3 py-1 rounded-lg transition flex items-center gap-1.5 cursor-pointer font-medium ${
-                viewMode === 'parche'
+                sceneView === 'parche'
                   ? 'bg-[#0e2a47] text-cyan-300 border border-cyan-700/60 shadow-sm'
                   : 'text-slate-400 hover:text-white'
               }`}
@@ -249,7 +328,7 @@ export default function App() {
             </div>
 
             <div className="flex gap-2 pt-0.5">
-              {viewMode === 'globo' && (
+              {sceneView === 'globo' && (
                 <button
                   onClick={() => setIsSpinning(!isSpinning)}
                   className="bg-[#0b1320]/85 hover:bg-[#121e33] text-slate-200 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs font-medium backdrop-blur-sm transition cursor-pointer shadow-lg flex items-center gap-1.5"
@@ -268,6 +347,23 @@ export default function App() {
 
           {/* 2. PANEL FLOTANTE DE FILTROS A LA IZQUIERDA */}
           <div className="absolute top-24 left-6 z-20 w-84 bg-[#09111e]/92 border border-slate-700/70 rounded-2xl p-4 shadow-2xl backdrop-blur-md pointer-events-auto font-sans text-xs space-y-3 max-h-[78vh] overflow-y-auto">
+            {isStudent ? (
+              <StudentPanel
+                siteName={activeSite.nombre}
+                activeScenarioId={activeScenarioId}
+                onApplyScenario={applyScenario}
+                durationDays={mission.durationDays}
+                simDayOffset={simDayOffset}
+                onSetDay={(d) => {
+                  setIsAnimating(false);
+                  setSimDayOffset(d);
+                }}
+                isAnimating={isAnimating}
+                onToggleAnimation={() => setIsAnimating((v) => !v)}
+                countdowns={countdowns}
+              />
+            ) : (
+              <>
             {/* Selector de Sitio de Aterrizaje */}
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
@@ -275,19 +371,7 @@ export default function App() {
               </label>
               <select
                 value={activeSite.site_id}
-                onChange={(e) => {
-                  const newId = e.target.value;
-                  setActiveSiteId(newId);
-                  const found = SITES.find((s) => s.site_id === newId);
-                  if (found) {
-                    mission.update({
-                      activeSiteId: newId,
-                      selectedLat: found.lat_deg,
-                      selectedLon: found.lon_deg,
-                      selectedAltKm: found.alt_km,
-                    });
-                  }
-                }}
+                onChange={(e) => selectSite(e.target.value)}
                 className="w-full bg-[#111a2d] text-slate-100 text-xs rounded-lg px-2.5 py-2 border border-slate-700 focus:outline-none focus:border-cyan-400"
               >
                 <optgroup label="Sitios Oficiales (Benchmark)">
@@ -297,7 +381,7 @@ export default function App() {
                     </option>
                   ))}
                 </optgroup>
-                <optgroup label="Sitios Adicionales (DEM LOLA)">
+                <optgroup label="Sitios adicionales">
                   {SITES.filter((s) => !s.isOfficial).map((site) => (
                     <option key={site.site_id} value={site.site_id}>
                       {site.nombre} ({site.lat_deg.toFixed(1)}°, {site.lon_deg.toFixed(1)}°)
@@ -355,7 +439,10 @@ export default function App() {
                   <input
                     type="date"
                     value={baseDate}
-                    onChange={(e) => setBaseDate(e.target.value)}
+                    onChange={(e) => {
+                      setBaseDate(e.target.value);
+                      setActiveScenarioId(null);
+                    }}
                     className="w-full bg-[#111a2d] text-slate-100 text-xs rounded-lg px-2.5 py-1.5 border border-slate-700 font-mono focus:outline-none focus:border-cyan-400"
                   />
                 </div>
@@ -424,7 +511,9 @@ export default function App() {
 
                 {/* Contador de celdas aptas */}
                 <div className="p-2 rounded-xl bg-[#070e1b] border border-slate-800 text-xs flex items-center justify-between">
-                  <span className="text-slate-300">Celdas aptas:</span>
+                  <span className="text-slate-300 flex items-center gap-1">
+                    Celdas aptas (parche demo): <InfoTip term="Celdas aptas" text={help('aptCells')} />
+                  </span>
                   <span className="font-mono font-bold">
                     <span className="text-emerald-400">{aptCellsCount}</span>{' '}
                     <span className="text-slate-500">/ {totalCells}</span>
@@ -476,6 +565,10 @@ export default function App() {
                 <div className="flex justify-between text-slate-300">
                   <span className="text-slate-400 font-sans">η solar instantánea</span>
                   <span className="text-emerald-400">{solarEfficiencyPct.toFixed(2)}%</span>
+                </div>
+                <div className="flex justify-between text-slate-300">
+                  <span className="text-slate-400 font-sans">Potencia (W, panel 1 m²)</span>
+                  <span className="text-amber-300">{status.powerW.toFixed(1)} W</span>
                 </div>
                 <div className="flex justify-between pt-1 border-t border-slate-800">
                   <span className="text-slate-400 font-sans">Visibilidad DTE</span>
@@ -579,83 +672,31 @@ export default function App() {
                 </div>
               </div>
             </div>
+              </>
+            )}
           </div>
 
           {/* 3. BOTONES DE ACCESO RÁPIDO SUPERIORES DERECHOS */}
           <div className="absolute top-4 right-6 z-20 space-y-2 pointer-events-auto flex flex-col items-end">
-            <div className="flex flex-col gap-1.5 w-64">
-              {/* Botón de Optimización: Mejores Días (Problema 4A) */}
-              <button
-                onClick={() => setModalOpen('bestDays')}
-                className="w-full text-xs font-semibold py-1.5 px-3 rounded-xl bg-gradient-to-r from-emerald-950/90 to-[#09111e]/90 hover:from-emerald-900 text-emerald-300 border border-emerald-600/70 backdrop-blur-md flex items-center justify-between transition cursor-pointer shadow-lg"
-              >
-                <span>🏆 Mejores Días (Ventanas)</span>
-                <span className="text-[10px] text-emerald-400 font-mono">Ranking</span>
-              </button>
+            {/* Menú de herramientas: las entradas dependen del Modo de Vista */}
+            <ToolsMenu onOpen={setModalOpen} />
 
-              <button
-                onClick={() => setModalOpen('chart')}
-                className="w-full text-xs font-semibold py-1.5 px-3 rounded-xl bg-[#09111e]/90 hover:bg-[#121e33] text-cyan-200 border border-slate-700/80 backdrop-blur-md flex items-center justify-between transition cursor-pointer shadow-lg"
-              >
-                <span>📊 Ver Gráfica de Elevación</span>
-                <span className="text-[10px] text-cyan-400 font-mono">LOLA</span>
-              </button>
-
-              <button
-                onClick={() => setModalOpen('compare')}
-                className="w-full text-xs font-semibold py-1.5 px-3 rounded-xl bg-[#09111e]/90 hover:bg-[#121e33] text-slate-200 border border-slate-700/80 backdrop-blur-md flex items-center justify-between transition cursor-pointer shadow-lg"
-              >
-                <span>⚖️ Comparador A/B</span>
-                <span className="text-[10px] text-slate-400 font-mono">Sensibilidad</span>
-              </button>
-
-              <button
-                onClick={() => setModalOpen('benchmark')}
-                className="w-full text-xs font-semibold py-1.5 px-3 rounded-xl bg-[#09111e]/90 hover:bg-[#121e33] text-slate-200 border border-slate-700/80 backdrop-blur-md flex items-center justify-between transition cursor-pointer shadow-lg"
-              >
-                <span>📋 Benchmark Físico</span>
-                <span className="text-[10px] text-slate-400 font-mono">5 Casos</span>
-              </button>
-            </div>
-
-            {/* TARJETA FLOTANTE "OBJETIVO LUNAR" (Sincronizada) */}
-            <div className="w-68 bg-[#09111e]/92 border border-cyan-500/40 rounded-2xl p-3.5 text-xs shadow-2xl backdrop-blur-md space-y-1 mt-1 text-slate-200">
-              <div className="flex items-center justify-between pb-1 border-b border-slate-800">
-                <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider font-mono">
-                  OBJETIVO LUNAR
-                </span>
-                <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800 font-mono font-bold">
-                  ENLACE 3D
-                </span>
-              </div>
-              <div className="font-bold text-white text-sm">{activeSite.nombre}</div>
-              <div className="text-[11px] text-slate-400 space-y-0.5 font-mono pt-0.5">
-                <div>Latitud: <span className="text-slate-200">{Number(mission.selectedLat ?? -89.684).toFixed(3)}°</span></div>
-                <div>Longitud: <span className="text-slate-200">{Number(mission.selectedLon ?? 196.739).toFixed(3)}° E</span></div>
-                <div>Altitud (DEM): <span className="text-slate-200">{Number(mission.selectedAltKm ?? 1.52).toFixed(2)} km</span></div>
-                <div className="text-cyan-300 pt-0.5 text-[10px]">
-                  Coordenadas: {Number(mission.selectedLat ?? -89.684).toFixed(2)}°, {Number(mission.selectedLon ?? 196.739).toFixed(2)}°
-                </div>
-              </div>
-              <div className="text-[10px] text-amber-300 pt-1 leading-tight flex items-center gap-1 font-sans">
-                <span>💡</span>
-                <span>Haz clic en la luna para seleccionar el sitio más cercano.</span>
-              </div>
-            </div>
+            {/* TARJETA "OBJETIVO LUNAR": ambos modos leen el mismo estado del punto */}
+            <ObjectivePanel status={status} />
           </div>
 
           {/* 4. CANVAS 3D (LUNA, TIERRA Y SOL ULTRA-REALISTAS / PARCHE LUNAR PBR) */}
           <Canvas
-            key={viewMode}
+            key={sceneView}
             shadows
             camera={
-              viewMode === 'globo'
+              sceneView === 'globo'
                 ? { position: [0, 0, 3.4], fov: 42, near: 0.1, far: 1000 }
                 : { position: [0, 45, 80], fov: 45, near: 0.1, far: 1000 }
             }
             className="w-full h-full"
           >
-            {viewMode === 'globo' ? (
+            {sceneView === 'globo' ? (
               <MoonGlobe
                 activeSite={activeSite}
                 candidateSites={SITES}
@@ -670,18 +711,7 @@ export default function App() {
                 isSpinning={isSpinning}
                 zoomLevel={zoomLevel}
                 controlsRef={controlsRef}
-                onSelectSite={(id) => {
-                  setActiveSiteId(id);
-                  const found = SITES.find((s) => s.site_id === id);
-                  if (found) {
-                    mission.update({
-                      activeSiteId: id,
-                      selectedLat: found.lat_deg,
-                      selectedLon: found.lon_deg,
-                      selectedAltKm: found.alt_km,
-                    });
-                  }
-                }}
+                onSelectSite={(id) => selectSite(id)}
                 onMapClick={(lat, lon) => {
                   mission.update({
                     selectedLat: lat,
@@ -748,12 +778,12 @@ export default function App() {
           {/* 6. PIE DE PÁGINA CON CRÉDITOS OFICIALES DE TEXTURAS Y DATOS (Problema 1) */}
           <footer className="absolute bottom-0 left-0 right-0 h-6 bg-[#020409] border-t border-slate-850 px-6 flex items-center justify-between text-[9px] text-slate-400 font-mono z-20 pointer-events-auto select-text">
             <div className="flex items-center gap-4">
-              <span><b>Texturas:</b> Luna (NASA/LRO/LROC ASU QuickMap) · Tierra (NASA Blue Marble) · Sol (NASA/SDO/AIA)</span>
+              <span><b>Texturas:</b> Luna: mosaico global equirectangular (ver Metodología) · Tierra y Sol: generadas por código</span>
               <span className="text-slate-600">|</span>
-              <span><b>Datos:</b> Topografía DEM LOLA (Rol A) · Efemérides JPL Horizons (Rol B) · Fórmulas SSOT (Rol C/D)</span>
+              <span><b>Datos:</b> Horizontes sobre DEM LOLA 80 m (Rol A) · Efemérides JPL Horizons (Rol B) · Parche 3D: terreno de demostración</span>
             </div>
             <div className="text-slate-500">
-              NASA Space Apps Challenge 2026 · Dominio Público
+              NASA Space Apps Challenge 2026
             </div>
           </footer>
         </div>
@@ -761,14 +791,12 @@ export default function App() {
         {/* ========================================================
             MODALES CIENTÍFICOS
             ======================================================== */}
-        {modalOpen && (
+        {modalOpen && modalOpen !== 'bestDays' && (
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="bg-[#0b1222] border border-slate-700 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden">
               <div className="flex items-center justify-between px-5 py-3 border-b border-slate-800 bg-[#0f172a]">
                 <div className="text-xs font-bold text-cyan-400 uppercase tracking-wider font-mono">
-                  {modalOpen === 'chart' && '📊 Perfil de Elevación y Horizonte Topográfico LOLA'}
-                  {modalOpen === 'compare' && '⚖️ Comparador de Sitios A / B (Sensibilidad Espacial)'}
-                  {modalOpen === 'benchmark' && '📋 Auditoría Física de Referencia (5 Casos Oficiales)'}
+                  {toolTitle(modalOpen)} <span className="text-slate-400 normal-case">· {activeSite.nombre}</span>
                 </div>
                 <button
                   onClick={() => setModalOpen(null)}
@@ -779,10 +807,55 @@ export default function App() {
               </div>
 
               <div className="p-5 overflow-y-auto space-y-4">
+                {modalOpen === 'sky' && (
+                  <SkyView siteData={currentSiteData} trajectory={trajA} celestial={celestial} currentMs={currentMs} />
+                )}
+
+                {modalOpen === 'siteMetrics' && (
+                  <SiteMetricsPanel
+                    site={activeSite}
+                    siteData={currentSiteData}
+                    trajectory={trajA}
+                    missionStartMs={missionStartMs}
+                    durationDays={mission.durationDays}
+                    countdowns={countdowns}
+                    loading={loadingSite}
+                  />
+                )}
+
+                {modalOpen === 'sitesTable' && (
+                  <SitesComparisonTable
+                    siteDataMap={siteDataMap}
+                    activeSiteId={activeSiteId}
+                    missionStartMs={missionStartMs}
+                    durationDays={mission.durationDays}
+                    onSelectSite={(id) => selectSite(id)}
+                  />
+                )}
+
+                {modalOpen === 'timeline' && (
+                  <TimelinePanel
+                    trajectory={trajA}
+                    currentMs={currentMs}
+                    missionStartMs={missionStartMs}
+                    durationDays={mission.durationDays}
+                    onJump={jumpTo}
+                  />
+                )}
+
                 {modalOpen === 'chart' && (
                   <>
-                    <ElevationChart trajectory={trajA} loading={loadingSite} />
-                    <MetricCards siteData={currentSiteData} trajectory={trajA} />
+                    <ElevationChart
+                      trajectory={trajA}
+                      loading={loadingSite}
+                      currentMs={currentMs}
+                      horizonLabel="Horizonte local"
+                      onJump={jumpTo}
+                    />
+                    <div className="text-[10px] text-slate-400 font-mono">
+                      {horizonSourceLabel(currentSiteData?.horizonte)} · {celestial.sourceLabel}
+                    </div>
+                    <MetricCards siteData={currentSiteData} trajectory={trajA} currentMs={currentMs} />
                   </>
                 )}
 
@@ -792,14 +865,14 @@ export default function App() {
                     trajA={trajA}
                     siteDataB={siteBData}
                     trajB={trajB}
-                    onSelectA={(id) => setActiveSiteId(id)}
+                    onSelectA={(id) => selectSite(id)}
                     onSelectB={(id) => setSiteBId(id)}
                   />
                 )}
 
-                {modalOpen === 'benchmark' && (
-                  <BenchmarkPanel siteDataMap={siteDataMap} />
-                )}
+                {modalOpen === 'benchmark' && <BenchmarkPanel siteDataMap={siteDataMap} />}
+
+                {modalOpen === 'method' && <MethodologyPanel />}
               </div>
             </div>
           </div>
@@ -814,6 +887,7 @@ export default function App() {
             onSelectDay={(dayStr) => {
               setBaseDate(dayStr);
               setSimDayOffset(0);
+              setActiveScenarioId(null);
             }}
             onClose={() => setModalOpen(null)}
           />

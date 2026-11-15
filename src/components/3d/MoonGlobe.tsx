@@ -9,7 +9,14 @@ import {
   topocentricToCartesian,
   getSiteSpherePosition,
 } from '../../lib/celestial';
-import { createLunarBumpMap } from '../../lib/textures';
+import {
+  MOON_ALBEDO_URL,
+  MOON_BUMP_URL,
+  MOON_TEXTURE_U_OFFSET,
+  MOON_BUMP_SCALE_LDEM,
+  MOON_BUMP_SCALE_ALBEDO,
+  MOON_ALBEDO_TINT,
+} from '../../config/moonTexture';
 import SpaceBackground from './SpaceBackground';
 import CelestialSun from './CelestialSun';
 import CelestialEarth from './CelestialEarth';
@@ -55,29 +62,56 @@ export default function MoonGlobe({
   const moonGroupRef = useRef<THREE.Group>(null);
   const pulseRef = useRef<THREE.Mesh>(null);
 
-  // 1. Textura albedo fotorrealista de la NASA LRO/LROC WAC (2K)
+  // 1. Textura de la Luna: mosaico equirectangular empaquetado por Vite (src/assets/moon).
+  //    La ruta lleva hash y es relativa al despliegue, así que no puede dar 404 en producción.
   const [moonAlbedo, setMoonAlbedo] = useState<THREE.Texture | null>(null);
+  const [moonRelief, setMoonRelief] = useState<THREE.Texture | null>(null);
 
   useEffect(() => {
     const loader = new THREE.TextureLoader();
-    loader.load(
-      '/assets/moon_texture.jpg',
-      (tex) => {
-        tex.colorSpace = THREE.SRGBColorSpace;
-        tex.generateMipmaps = true;
-        tex.minFilter = THREE.LinearMipmapLinearFilter;
-        tex.anisotropy = 8;
-        setMoonAlbedo(tex);
-      },
-      undefined,
-      (err) => {
-        console.warn('Carga de textura lunar:', err);
-      }
-    );
+    let cancelled = false;
+    const orient = (tex: THREE.Texture) => {
+      // Lleva la longitud 0° del mapa al eje +Z de la escena (ver config/moonTexture.ts)
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.offset.x = MOON_TEXTURE_U_OFFSET;
+      tex.generateMipmaps = true;
+      tex.minFilter = THREE.LinearMipmapLinearFilter;
+      tex.anisotropy = 8;
+      tex.needsUpdate = true;
+    };
+    if (MOON_ALBEDO_URL) {
+      loader.load(
+        MOON_ALBEDO_URL,
+        (tex) => {
+          if (cancelled) return;
+          tex.colorSpace = THREE.SRGBColorSpace;
+          orient(tex);
+          setMoonAlbedo(tex);
+        },
+        undefined,
+        (err) => console.warn('No se pudo cargar la textura lunar:', err)
+      );
+    }
+    if (MOON_BUMP_URL) {
+      loader.load(
+        MOON_BUMP_URL,
+        (tex) => {
+          if (cancelled) return;
+          orient(tex);
+          setMoonRelief(tex);
+        },
+        undefined,
+        () => undefined
+      );
+    }
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  // 2. Bump Map topográfico para micro-relieve y sombras en el terminador
-  const moonBumpMap = useMemo(() => createLunarBumpMap(), []);
+  // 2. Relieve suave: mapa de alturas LOLA si está instalado; si no, se deriva del propio albedo.
+  const moonBumpMap = moonRelief ?? moonAlbedo;
+  const moonBumpScale = moonRelief ? MOON_BUMP_SCALE_LDEM : MOON_BUMP_SCALE_ALBEDO;
 
   // 3. Marco topocéntrico y posiciones astronómicas del instante
   const frame = useMemo(
@@ -208,11 +242,14 @@ export default function MoonGlobe({
       <group ref={moonGroupRef}>
         <mesh castShadow receiveShadow onClick={handleMoonClick}>
           <sphereGeometry args={[1.0, 128, 96]} />
+          {/* La key recrea el material cuando llega la textura: si no, three.js no recompila
+              el shader con el mapa y la Luna se queda como una esfera lisa. */}
           <meshStandardMaterial
+            key={`${moonAlbedo ? 'albedo' : 'liso'}-${moonRelief ? 'ldem' : 'bump'}`}
             map={moonAlbedo || undefined}
-            bumpMap={moonBumpMap}
-            bumpScale={0.08}
-            color={moonAlbedo ? 0xffffff : 0x7c8494}
+            bumpMap={moonBumpMap || undefined}
+            bumpScale={moonBumpScale}
+            color={moonAlbedo ? MOON_ALBEDO_TINT : 0x7c8494}
             roughness={0.95}
             metalness={0.0}
           />

@@ -1,13 +1,17 @@
 import type { SiteDataSet } from '../../lib/io/schemas';
+import { indexAtTime } from '../../lib/trajectoryWindow';
+import { horizonSourceLabel } from '../../lib/io/dataLoader';
 import type { ComputedTrajectory } from '../../lib/physics';
 import { useMission } from '../../store/useMission';
 
 interface MetricCardsProps {
   siteData: SiteDataSet | null;
   trajectory: ComputedTrajectory | null;
+  /** Instante simulado (ms UTC) para las alertas en tiempo real. */
+  currentMs?: number;
 }
 
-export default function MetricCards({ siteData, trajectory }: MetricCardsProps) {
+export default function MetricCards({ siteData, trajectory, currentMs }: MetricCardsProps) {
   const uiMode = useMission((s) => s.uiMode);
   const simDay = useMission((s) => s.simDay);
   const durationDays = useMission((s) => s.durationDays);
@@ -15,7 +19,12 @@ export default function MetricCards({ siteData, trajectory }: MetricCardsProps) 
   const pts = trajectory?.points || [];
   const N = pts.length;
   const progressFrac = Math.max(0, Math.min(1, simDay / Math.max(1, durationDays)));
-  const curIdx = N > 0 ? Math.min(N - 1, Math.floor(progressFrac * N)) : null;
+  const curIdx =
+    currentMs != null
+      ? indexAtTime(trajectory, currentMs)
+      : N > 0
+      ? Math.min(N - 1, Math.floor(progressFrac * N))
+      : null;
   const curPt = curIdx !== null ? pts[curIdx] : null;
 
   const summary = trajectory?.summary;
@@ -60,7 +69,7 @@ export default function MetricCards({ siteData, trajectory }: MetricCardsProps) 
           </span>
         )}
         <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
-          Fuente H: {siteData?.horizonte?.fuenteFormato || 'LOLA DEM'}
+          {horizonSourceLabel(siteData?.horizonte)}
         </span>
         <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
           Efemérides: {siteData?.efemerides?.fuenteFormato || 'Horizons'}

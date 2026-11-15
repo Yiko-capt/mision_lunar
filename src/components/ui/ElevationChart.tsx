@@ -1,4 +1,5 @@
 import { useMemo, useRef } from 'react';
+import { indexAtTime, trajectoryTimes } from '../../lib/trajectoryWindow';
 import type { ComputedTrajectory } from '../../lib/physics';
 import { useMission } from '../../store/useMission';
 
@@ -13,9 +14,15 @@ const yMax = 14;
 interface ElevationChartProps {
   trajectory: ComputedTrajectory | null;
   loading?: boolean;
+  /** Instante simulado (ms UTC). El cursor de la gráfica marca este instante. */
+  currentMs?: number;
+  /** Etiqueta del origen del horizonte (DEM LOLA, plano, sintético). */
+  horizonLabel?: string;
+  /** Al hacer clic en la gráfica, salta a ese instante. */
+  onJump?: (ms: number) => void;
 }
 
-export default function ElevationChart({ trajectory, loading }: ElevationChartProps) {
+export default function ElevationChart({ trajectory, loading, currentMs, horizonLabel, onJump }: ElevationChartProps) {
   const simDay = useMission((s) => s.simDay);
   const durationDays = useMission((s) => s.durationDays);
   const uiMode = useMission((s) => s.uiMode);
@@ -58,13 +65,19 @@ export default function ElevationChart({ trajectory, loading }: ElevationChartPr
     }
 
     // Calcular índice actual sincronizado con simDay
-    const progressFrac = Math.max(0, Math.min(1, simDay / Math.max(1, durationDays)));
-    const curIdx = Math.min(N - 1, Math.floor(progressFrac * N));
-    const curPt = points[curIdx];
-    const cX = toX(curIdx);
+    let curIdx: number | null;
+    if (currentMs != null) {
+      // Mismo instante que el resto de la interfaz (null si la fecha queda fuera de los datos)
+      curIdx = indexAtTime(trajectory, currentMs);
+    } else {
+      const progressFrac = Math.max(0, Math.min(1, simDay / Math.max(1, durationDays)));
+      curIdx = Math.min(N - 1, Math.floor(progressFrac * N));
+    }
+    const curPt = curIdx == null ? null : points[curIdx];
+    const cX = curIdx == null ? -100 : toX(curIdx);
 
     return { sunPath: sPath, earthPath: ePath, horSunPath: hsPath, curPoint: curPt, curX: cX };
-  }, [points, simDay, durationDays]);
+  }, [points, simDay, durationDays, currentMs, trajectory]);
 
   // Manejar clic / scrub sobre la gráfica
   const handleSvgClick = (e: React.MouseEvent<SVGSVGElement>) => {
@@ -73,7 +86,12 @@ export default function ElevationChart({ trajectory, loading }: ElevationChartPr
     const clickX = e.clientX - rect.left;
     const normX = (clickX - (PADDING.left / W) * rect.width) / ((plotW / W) * rect.width);
     const clamped = Math.max(0, Math.min(1, normX));
-    update({ simDay: clamped * durationDays });
+    if (onJump && trajectory) {
+      const t = trajectoryTimes(trajectory);
+      onJump(t[Math.round(clamped * (numPoints - 1))]);
+    } else {
+      update({ simDay: clamped * durationDays });
+    }
   };
 
   if (loading) {
@@ -104,7 +122,7 @@ export default function ElevationChart({ trajectory, loading }: ElevationChartPr
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold text-cyan-400 uppercase tracking-wide">
-            {uiMode === 'public' ? 'Perfil de Elevación respecto al Horizonte' : 'Efemérides Topocéntricas y Horizonte LOLA'}
+            {uiMode === 'public' ? 'Perfil de Elevación respecto al Horizonte' : 'Efemérides topocéntricas y horizonte local'}
           </span>
           <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">
             Paso: {trajectory?.stepHours || 1} h · Total: {trajectory?.totalHours || 0} h
@@ -123,7 +141,7 @@ export default function ElevationChart({ trajectory, loading }: ElevationChartPr
           </span>
           <span className="flex items-center gap-1.5 text-slate-400">
             <span className="w-3 h-0.5 border-t-2 border-dashed border-slate-400 inline-block" />
-            Horizonte LOLA {curPoint ? `(${curPoint.hor_sun.toFixed(1)}°)` : ''}
+            {horizonLabel ?? 'Horizonte local'} {curPoint ? `(${curPoint.hor_sun.toFixed(1)}°)` : ''}
           </span>
         </div>
       </div>
