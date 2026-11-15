@@ -16,11 +16,19 @@ PASO_AZ = 1.0        # paso de azimut (grados)
 
 # site_id: (nombre, lat, lon Este 0-360, modo, radio de búsqueda en m)
 SITIOS = {
-    "shackleton_floor": ("Fondo del Cráter Shackleton (interior)", -89.66, 129.20, "min", 3000),
-    "shackleton_rim":   ("Borde del Cráter Shackleton (cresta de conexión)", -89.684, 196.739, "max", 1500),
-    "malapert_peak":    ("Cima del Macizo Malapert", -85.98, 358.33, "max", 10000),
-    "de_gerlache_rim":  ("Borde del Cráter de Gerlache", -88.5, 272.9, "anillo", 20000),
-    "peak_near_cabeus_b": ("Peak Near Cabeus B (candidato Artemis III, centro LROC)", -83.6, 291.2, "max", 3000),
+    "shackleton_floor":    ("Fondo del Cráter Shackleton (interior)", -89.66, 129.20, "min", 3000),
+    "shackleton_rim":      ("Borde del Cráter Shackleton (cresta de conexión)", -89.684, 196.739, "max", 1500),
+    "malapert_peak":       ("Cima del Macizo Malapert", -85.98, 358.33, "max", 10000),
+    "de_gerlache_rim":     ("Borde del Cráter de Gerlache", -88.5, 272.9, "anillo", 20000),
+    "peak_near_cabeus_b":  ("Peak Near Cabeus B (candidato Artemis III, centro LROC)", -83.6, 291.2, "max", 3000),
+
+    # --- Vecinos para sensibilidad espacial (pedido por C) ---
+    "shackleton_rim_N500": ("Shackleton Rim desplazado 500 m Norte",  -89.6781, 197.3684, "exact", 200),
+    "shackleton_rim_S500": ("Shackleton Rim desplazado 500 m Sur",    -89.6945, 197.3684, "exact", 200),
+    "shackleton_rim_E500": ("Shackleton Rim desplazado 500 m Este",   -89.6863, 197.4890, "exact", 200),
+    "malapert_N500":       ("Malapert Peak desplazado 500 m Norte",   -85.9831,   2.0528, "exact", 200),
+    "malapert_S500":       ("Malapert Peak desplazado 500 m Sur",     -85.9921,   2.0528, "exact", 200),
+    "malapert_E500":       ("Malapert Peak desplazado 500 m Este",    -85.9876,   2.1079, "exact", 200),
 }
 
 def a_xy(lat, lon):
@@ -45,7 +53,17 @@ def leer_ventana(ds, x0, y0, radio_m):
     Y = t.f + t.e * (filas + 0.5)
     return Z, X, Y
 
+def ajustar_sitio_exact(ds, x0, y0):
+    """Usa la coordenada tal cual, sin buscar max/min — toma el píxel más cercano."""
+    Z, X, Y = leer_ventana(ds, x0, y0, 200)
+    d = np.hypot(X - x0, Y - y0)
+    i = np.argmin(d)
+    fi, ci = np.unravel_index(i, d.shape)
+    return X[fi, ci], Y[fi, ci], Z[fi, ci]
+
 def ajustar_sitio(ds, x0, y0, modo, radio):
+    if modo == "exact":
+        return ajustar_sitio_exact(ds, x0, y0)
     Z, X, Y = leer_ventana(ds, x0, y0, radio)
     d = np.hypot(X - x0, Y - y0)
     if modo == "anillo":
