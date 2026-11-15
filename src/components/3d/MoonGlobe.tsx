@@ -17,6 +17,8 @@ import {
   MOON_BUMP_SCALE_ALBEDO,
   MOON_ALBEDO_TINT,
 } from '../../config/moonTexture';
+import { earthOrientation } from '../../lib/earthOrientation';
+import { GLOBE_SCALES, type ScaleMode } from '../../config/sceneScale';
 import SpaceBackground from './SpaceBackground';
 import CelestialSun from './CelestialSun';
 import CelestialEarth from './CelestialEarth';
@@ -32,7 +34,13 @@ interface MoonGlobeProps {
   earthEl: number;
   isSpinning: boolean;
   zoomLevel: number;
+  /** Escala de la escena: 'real' (Tierra a 221 radios lunares) o 'didactica' (comprimida). */
+  scaleMode?: ScaleMode;
+  /** 'realista' deja el lado nocturno casi negro; 'legible' sube la exposición. */
+  lightMode?: 'realista' | 'legible';
   earthRotationRad?: number;
+  /** Instante simulado (ms UTC): fija la inclinación del eje y el giro de la Tierra. */
+  utcMs?: number;
   isEarthOccluded?: boolean;
   onSelectSite: (siteId: string) => void;
   onMapClick?: (lat: number, lon: number) => void;
@@ -50,7 +58,10 @@ export default function MoonGlobe({
   earthEl,
   isSpinning,
   zoomLevel,
+  scaleMode = 'didactica',
+  lightMode = 'legible',
   earthRotationRad,
+  utcMs,
   isEarthOccluded = false,
   onSelectSite,
   onMapClick,
@@ -127,43 +138,69 @@ export default function MoonGlobe({
   const sunDir = useMemo(() => topocentricToCartesian(frame, sunAz, sunEl), [frame, sunAz, sunEl]);
   const earthDir = useMemo(() => topocentricToCartesian(frame, earthAz, earthEl), [frame, earthAz, earthEl]);
 
-  // Distancias de colocación visual en el viewport
-  const D_SUN = 3.6;
-  const D_EARTH = 2.4;
+  // Escala activa (real o didáctica): distancias y radios de Tierra y Sol (ver config/sceneScale.ts)
+  const scale = GLOBE_SCALES[scaleMode];
 
+  // El Sol está lejísimo: su posición se mide desde el centro de la Luna, y su dirección es la
+  // misma que ve el sitio (rayos casi paralelos). La Tierra sí se coloca respecto al sitio.
   const sunPos = useMemo<[number, number, number]>(
-    () => [
-      selectedTargetSpherePos[0] + sunDir[0] * D_SUN,
-      selectedTargetSpherePos[1] + sunDir[1] * D_SUN,
-      selectedTargetSpherePos[2] + sunDir[2] * D_SUN,
-    ],
-    [selectedTargetSpherePos, sunDir]
+    () => [sunDir[0] * scale.sunDistance, sunDir[1] * scale.sunDistance, sunDir[2] * scale.sunDistance],
+    [sunDir, scale.sunDistance]
   );
 
   const earthPos = useMemo<[number, number, number]>(
     () => [
-      selectedTargetSpherePos[0] + earthDir[0] * D_EARTH,
-      selectedTargetSpherePos[1] + earthDir[1] * D_EARTH,
-      selectedTargetSpherePos[2] + earthDir[2] * D_EARTH,
+      selectedTargetSpherePos[0] + earthDir[0] * scale.earthDistance,
+      selectedTargetSpherePos[1] + earthDir[1] * scale.earthDistance,
+      selectedTargetSpherePos[2] + earthDir[2] * scale.earthDistance,
     ],
-    [selectedTargetSpherePos, earthDir]
+    [selectedTargetSpherePos, earthDir, scale.earthDistance]
   );
 
-  // Animaciones por cuadro
-  useFrame((state, delta) => {
-    if (isSpinning && moonGroupRef.current) {
-      moonGroupRef.current.rotation.y += delta * 0.08;
-    }
+  // Fracción iluminada de la Tierra vista desde la Luna: k = (1 − cos γ)/2, donde γ es el ángulo
+  // Sol–Luna–Tierra. Gobierna la intensidad de la luz terrestre ("earthshine") del lado nocturno.
+  const earthLitFraction = useMemo(() => {
+    const cosG =
+      sunDir[0] * earthDir[0] + sunDir[1] * earthDir[1] + sunDir[2] * earthDir[2];
+    return (1 - Math.max(-1, Math.min(1, cosG))) / 2;
+  }, [sunDir, earthDir]);
+
+  // Orientación real de la Tierra (eje inclinado + giro por hora UTC); el polo lunar es +Y
+  const earthQuat = useMemo(() => {
+    if (utcMs === undefined) return undefined;
+    return earthOrientation({
+      poleDir: new THREE.Vector3(0, 1, 0),
+      sunDir: new THREE.Vector3(sunDir[0], sunDir[1], sunDir[2]),
+      utcMs,
+    }).quaternion;
+  }, [utcMs, sunDir]);
+
+  // Solo el marcador pulsa; la Luna no gira sobre sí misma (la luz es fija en el mundo y gira la
+  // cámara con autoRotate), para que la iluminación siempre corresponda a la posición real del Sol.
+  useFrame((state) => {
     if (pulseRef.current) {
       const s = 1.0 + 0.3 * Math.sin(state.clock.getElapsedTime() * 4.5);
       pulseRef.current.scale.set(s, s, s);
     }
   });
 
-  // Slider de zoom sobre la cámara
+  // El far de la cámara depende de la escala (en escala real el Sol está a 1200 radios lunares)
+  useEffect(() => {
+    const cam = controlsRef.current?.object as THREE.PerspectiveCamera | undefined;
+    if (cam && cam.far !== scale.cameraFar) {
+      cam.far = scale.cameraFar;
+      cam.updateProjectionMatrix();
+    }
+  }, [scale.cameraFar, controlsRef]);
+
+  // Slider de zoom: interpola exponencialmente entre el acercamiento mínimo y el máximo de la
+  // escala activa (en escala real permite alejarse hasta ver la Tierra a 221 radios lunares).
   useEffect(() => {
     if (controlsRef.current) {
-      const targetDist = 6.5 - (zoomLevel / 100) * 4.8;
+      const dMin = scale.minCameraDistance * 1.25;
+      const dMax = scale.maxCameraDistance * 0.95;
+      const t = 1 - zoomLevel / 100; // zoom 100 % = lo más cerca
+      const targetDist = dMin * Math.pow(dMax / dMin, t);
       const cam = controlsRef.current.object as THREE.PerspectiveCamera;
       if (cam) {
         const dir = cam.position.clone().normalize();
@@ -171,7 +208,7 @@ export default function MoonGlobe({
         controlsRef.current.update();
       }
     }
-  }, [zoomLevel, controlsRef]);
+  }, [zoomLevel, controlsRef, scale.minCameraDistance, scale.maxCameraDistance]);
 
   // Clic interactivo en cualquier punto de la Luna
   const handleMoonClick = (e: any) => {
@@ -213,28 +250,38 @@ export default function MoonGlobe({
   return (
     <>
       {/* 1. Fondo espacial fotorrealista Solar System Scope */}
-      <SpaceBackground showEclipticGrid={true} />
+      <SpaceBackground showEclipticGrid={scaleMode === 'didactica'} radius={scale.cameraFar * 0.8} />
 
-      {/* 2. Iluminación físicamente realista: 
-             Luz ambiental casi nula (0.015) para que el lado nocturno de la Luna
-             quede verdaderamente oscuro en el vacío del espacio */}
-      <ambientLight color="#0f172a" intensity={0.018} />
+      {/* 2. Iluminación físicamente coherente:
+             - 'realista': ambiente casi nulo; el lado nocturno solo recibe luz terrestre.
+             - 'legible':  un poco de ambiente para poder leer el relieve nocturno. */}
+      <ambientLight color="#1a2332" intensity={lightMode === 'legible' ? 0.14 : 0.012} />
+
+      {/* Luz terrestre ("earthshine"): débil, desde la Tierra, proporcional a su fase */}
+      <directionalLight
+        position={earthPos}
+        intensity={(lightMode === 'legible' ? 0.35 : 0.08) * earthLitFraction}
+        color="#9db8d9"
+      />
 
       {/* 3. El Sol volumétrico con fotosfera nuclear, corona suave y luz direccional */}
       <CelestialSun
         position={sunPos}
-        radius={0.38}
+        radius={scale.sunRadius}
         targetPos={selectedTargetSpherePos}
+        lightTargetPos={[0, 0, 0]}
         showVector={true}
       />
 
       {/* 4. La Tierra concéntrica (superficie, nubes y atmósfera Fresnel con rotación axial) */}
       <CelestialEarth
         position={earthPos}
-        radius={0.25}
+        radius={scale.earthRadius}
         targetPos={selectedTargetSpherePos}
         showVector={true}
         earthRotationRad={earthRotationRad}
+        orientation={earthQuat}
+        sunDir={sunDir}
         isOccluded={isEarthOccluded}
       />
 
@@ -295,13 +342,15 @@ export default function MoonGlobe({
         </group>
       </group>
 
-      {/* Controles de cámara orbitales */}
+      {/* Controles de cámara orbitales (límites según la escala activa) */}
       <OrbitControls
         ref={controlsRef}
         enableDamping
         dampingFactor={0.06}
-        minDistance={1.2}
-        maxDistance={10.0}
+        autoRotate={isSpinning}
+        autoRotateSpeed={0.4}
+        minDistance={scale.minCameraDistance}
+        maxDistance={scale.maxCameraDistance}
         target={[0, 0, 0]}
       />
     </>

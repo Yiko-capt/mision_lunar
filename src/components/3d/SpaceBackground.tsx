@@ -7,15 +7,17 @@ import {
 
 interface SpaceBackgroundProps {
   showEclipticGrid?: boolean;
+  /** Radio de la esfera de fondo (debe superar la distancia máxima de la cámara). */
+  radius?: number;
 }
 
-export default function SpaceBackground({ showEclipticGrid = true }: SpaceBackgroundProps) {
+export default function SpaceBackground({ showEclipticGrid = true, radius = 350 }: SpaceBackgroundProps) {
   // 1. Textura envolvente de la Vía Láctea y polvo cósmico
   const milkyWayTexture = useMemo(() => createMilkyWaySkyTexture(), []);
   const starSprite = useMemo(() => createCircularStarTexture(), []);
 
   // 2. 3800 estrellas circulares multicolores con magnitudes reales
-  const { starGeometry, constellationLines } = useMemo(() => {
+  const { starGeometry } = useMemo(() => {
     const COUNT = 3800;
     const positions = new Float32Array(COUNT * 3);
     const colors = new Float32Array(COUNT * 3);
@@ -36,8 +38,6 @@ export default function SpaceBackground({ showEclipticGrid = true }: SpaceBackgr
       [1.00, 0.65, 0.50], // Rojo M gigante
     ];
 
-    const majorStarPositions: THREE.Vector3[] = [];
-
     for (let i = 0; i < COUNT; i++) {
       const r = 180 + rng() * 120;
       const theta = rng() * Math.PI * 2;
@@ -57,26 +57,14 @@ export default function SpaceBackground({ showEclipticGrid = true }: SpaceBackgr
       colors[i * 3 + 1] = colorType[1] * brightness;
       colors[i * 3 + 2] = colorType[2] * brightness;
 
-      if (i < 80) {
-        majorStarPositions.push(new THREE.Vector3(x, y, z));
-      }
     }
 
     const geom = new THREE.BufferGeometry();
     geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-    // Generar líneas tenues de constelaciones estilo Solar System Scope
-    const linePoints: THREE.Vector3[] = [];
-    for (let i = 0; i < majorStarPositions.length - 1; i += 2) {
-      linePoints.push(majorStarPositions[i], majorStarPositions[i + 1]);
-      if (i + 2 < majorStarPositions.length && (i % 4 === 0)) {
-        linePoints.push(majorStarPositions[i + 1], majorStarPositions[i + 2]);
-      }
-    }
-    const constelGeom = new THREE.BufferGeometry().setFromPoints(linePoints);
 
-    return { starGeometry: geom, constellationLines: constelGeom };
+    return { starGeometry: geom };
   }, []);
 
   // 3. Cuadrícula orbital / eclíptica estilo Solar System Scope
@@ -105,7 +93,7 @@ export default function SpaceBackground({ showEclipticGrid = true }: SpaceBackgr
   return (
     <group>
       {/* Fondo espacial negro profundo (#03050a) con la Vía Láctea */}
-      <mesh>
+      <mesh scale={radius / 350}>
         <sphereGeometry args={[350, 48, 32]} />
         <meshBasicMaterial
           map={milkyWayTexture}
@@ -114,8 +102,8 @@ export default function SpaceBackground({ showEclipticGrid = true }: SpaceBackgr
         />
       </mesh>
 
-      {/* Estrellas circulares anti-aliased */}
-      <points geometry={starGeometry}>
+      {/* Estrellas circulares anti-aliased (la cáscara se escala con el radio del fondo) */}
+      <points geometry={starGeometry} scale={radius / 350}>
         <pointsMaterial
           size={1.6}
           map={starSprite}
@@ -127,17 +115,10 @@ export default function SpaceBackground({ showEclipticGrid = true }: SpaceBackgr
         />
       </points>
 
-      {/* Líneas tenues de constelaciones estilo Solar System Scope */}
-      <lineSegments geometry={constellationLines}>
-        <lineBasicMaterial
-          color="#38bdf8"
-          transparent
-          opacity={0.11}
-          depthWrite={false}
-        />
-      </lineSegments>
+      {/* Nota: no se dibujan "constelaciones" porque los patrones serían inventados
+          (las estrellas de este fondo son procedurales, no un catálogo real). */}
 
-      {/* Cuadrícula de referencia orbital Solar System Scope */}
+      {/* Cuadrícula de referencia orbital */}
       {showEclipticGrid && (
         <>
           <primitive object={eclipticGrid} />

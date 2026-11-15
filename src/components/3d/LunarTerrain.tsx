@@ -13,9 +13,11 @@ interface LunarTerrainProps {
   analysis: Analysis;
   sunPos?: [number, number, number];
   earthPos?: [number, number, number];
+  /** Ocultar el marcador del punto (en la vista "Desde el sitio" el observador ESTÁ en él). */
+  showMarker?: boolean;
 }
 
-export default function LunarTerrain({ analysis: _analysis }: LunarTerrainProps) {
+export default function LunarTerrain({ analysis: _analysis, showMarker = true }: LunarTerrainProps) {
   const { n, cellM, h, slopeDeg } = TERRAIN;
   const half = (n - 1) / 2;
 
@@ -202,7 +204,7 @@ export default function LunarTerrain({ analysis: _analysis }: LunarTerrainProps)
       </mesh>
 
       {/* 2. Marcador objetivo seleccionado (sincronizado con Globo 3D) */}
-      {markerPos && (
+      {showMarker && markerPos && (
         <group position={markerPos}>
           {/* Núcleo esférico brillante */}
           <mesh ref={selectedMarkerRef}>

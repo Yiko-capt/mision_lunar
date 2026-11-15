@@ -28,6 +28,14 @@ export default function MethodologyPanel() {
         <li>
           <b>Textura del globo:</b> mosaico global equirectangular de la Luna (ver archivo <code>src/assets/moon/README.md</code> para origen y licencia).
         </li>
+        <li>
+          <b>La Tierra y el Sol en la escena 3D:</b> la Tierra usa texturas de día, noche, océanos y nubes (ver{' '}
+          <code>src/assets/earth/README.md</code>; su origen primario no está documentado, así que no se acreditan como NASA).
+          Su eje está inclinado 23.44° y gira según la hora UTC, de modo que el mediodía cae hacia el Sol. La luz sobre la Luna
+          viene de la dirección real del Sol (rayos paralelos). Las distancias <b>no están a escala</b>: el Sol real está a unos
+          86 000 radios lunares y aquí se dibuja a 60, con un diámetro angular de 3° (real: 0.53°). La Tierra real está a unos 221 radios lunares
+          y mide 3.7 radios lunares; aquí está a 2.4 y mide 0.25.
+        </li>
       </ul>
 
       <H>Cómo se decide si algo se ve</H>

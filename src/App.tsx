@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, PerformanceMonitor } from '@react-three/drei';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { SITES } from './data/sites';
 import { TERRAIN } from './data/moon';
@@ -14,6 +14,11 @@ import { getCelestialInstant } from './lib/ephemerisService';
 import { computeCountdowns } from './lib/eventCountdown';
 
 import MoonGlobe from './components/3d/MoonGlobe';
+import SceneTuning from './components/3d/SceneTuning';
+import PatchSurround from './components/3d/PatchSurround';
+import { LookControls, CardinalMarkers, SkyTracks } from './components/3d/SurfaceView';
+import MiniMap from './components/ui/MiniMap';
+import { GLOBE_SCALES, type ScaleMode } from './config/sceneScale';
 import LunarTerrain from './components/3d/LunarTerrain';
 import { SunLight, EarthMarker } from './components/3d/Bodies';
 import SpaceBackground from './components/3d/SpaceBackground';
@@ -38,7 +43,8 @@ import MethodologyPanel from './components/ui/MethodologyPanel';
 import InfoTip from './components/ui/InfoTip';
 import { help } from './config/glossary';
 import type { StudentScenario } from './config/studentScenarios';
-import { derivePointStatus } from './lib/siteStatus';
+import { derivePointStatus, VIABILITY_LABEL } from './lib/siteStatus';
+import IntroOverlay, { TourOverlay, introAlreadyDone, markIntroDone } from './components/ui/IntroOverlay';
 import { horizonSourceLabel } from './lib/io/dataLoader';
 
 const DAY_MS = 86400000;
@@ -52,11 +58,19 @@ export default function App() {
 
   // Vista de la escena 3D: 'globo' o 'parche' (Polo Sur). Es independiente del Modo de Vista
   // (Estudiante / Profesional), que vive en el store y solo cambia los paneles.
-  const [sceneView, setSceneView] = useState<'globo' | 'parche'>('globo');
+  const [sceneView, setSceneView] = useState<'globo' | 'parche' | 'sitio'>('globo');
+
+  // Vista "Desde el sitio": altura del ojo (m) y marcadores didácticos del cielo
+  const [eyeHeightM, setEyeHeightM] = useState(2);
+  const [showSkyMarks, setShowSkyMarks] = useState(true);
 
   // Control de rotación del globo
   const [isSpinning, setIsSpinning] = useState(false);
   const controlsRef = useRef<OrbitControlsImpl>(null);
+
+  // Escala de la escena (real / didáctica) y modo de luz (realista / legible)
+  const [scaleMode, setScaleMode] = useState<ScaleMode>('didactica');
+  const [lightMode, setLightMode] = useState<'realista' | 'legible'>('legible');
 
   // Nivel de zoom (slider inferior derecho)
   const [zoomLevel, setZoomLevel] = useState(29);
@@ -82,6 +96,43 @@ export default function App() {
 
   // Modales de herramientas científicas
   const [modalOpen, setModalOpen] = useState<ToolId | null>(null);
+
+  // Portada (carga + elección de modo) y recorrido guiado
+  const [showIntro, setShowIntro] = useState(() => !introAlreadyDone());
+  const [tourStep, setTourStep] = useState<number | null>(null);
+
+  // Panel izquierdo plegable (recordado en la sesión) y modo enfoque (tecla F)
+  const [leftOpen, setLeftOpen] = useState(() => {
+    try {
+      return sessionStorage.getItem('killaland_left_open') !== '0';
+    } catch {
+      return true;
+    }
+  });
+  const toggleLeft = () =>
+    setLeftOpen((v) => {
+      try {
+        sessionStorage.setItem('killaland_left_open', v ? '0' : '1');
+      } catch {
+        /* sin sessionStorage */
+      }
+      return !v;
+    });
+  const [focusMode, setFocusMode] = useState(false);
+
+  // Calidad de render: limita devicePixelRatio y sombras; baja sola si el equipo no llega
+  const [quality, setQuality] = useState<'alta' | 'media' | 'baja'>('alta');
+  const dprRange: [number, number] =
+    quality === 'alta' ? [1, 2] : quality === 'media' ? [1, 1.5] : [0.75, 1];
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
+      if (e.key === 'f' || e.key === 'F') setFocusMode((v) => !v);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   // Caché de conjuntos de datos
   const [siteDataMap, setSiteDataMap] = useState<Record<string, SiteDataSet>>({});
@@ -265,6 +316,19 @@ export default function App() {
     ];
   }, [mission.selected]);
 
+  // Ojo de la vista "Desde el sitio": el suelo del punto seleccionado + altura del observador
+  const surfaceEyePos = useMemo<[number, number, number]>(() => {
+    const cell = mission.selected ?? 2048;
+    const i = cell % TERRAIN.n;
+    const j = Math.floor(cell / TERRAIN.n);
+    const half = (TERRAIN.n - 1) / 2;
+    return [
+      (i - half) * TERRAIN.cellM * (1 / 100),
+      TERRAIN.h[cell] * (1 / 100) * 2.8 + eyeHeightM / 100,
+      (j - half) * TERRAIN.cellM * (1 / 100),
+    ];
+  }, [mission.selected, eyeHeightM]);
+
   return (
     <ErrorBoundary>
       <div className="h-screen w-screen flex flex-col bg-black text-slate-200 select-none overflow-hidden font-sans">
@@ -309,6 +373,18 @@ export default function App() {
               <span>⛰️</span>
               <span>Polo Sur (Parche)</span>
             </button>
+            <button
+              onClick={() => setSceneView('sitio')}
+              title="Párate en el punto seleccionado: arrastra para mirar alrededor"
+              className={`px-3 py-1 rounded-lg transition flex items-center gap-1.5 cursor-pointer font-medium ${
+                sceneView === 'sitio'
+                  ? 'bg-[#0e2a47] text-cyan-300 border border-cyan-700/60 shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <span>👁️</span>
+              <span>Desde el sitio</span>
+            </button>
           </div>
         </header>
 
@@ -317,7 +393,7 @@ export default function App() {
             ======================================================== */}
         <div className="flex-1 relative min-h-0 bg-black">
           {/* 1. INFORMACIÓN SUPERIOR IZQUIERDA (SITIO, HORA Y BOTONES) */}
-          <div className="absolute top-4 left-6 z-20 space-y-2 pointer-events-auto">
+          <div className={`absolute top-4 left-6 z-20 space-y-2 pointer-events-auto ${focusMode ? 'hidden' : ''}`}>
             <div>
               <div className="text-xs text-slate-400 font-medium">
                 Sitio seleccionado · <span className="text-white font-bold">{activeSite.nombre}</span>
@@ -327,7 +403,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="flex gap-2 pt-0.5">
+            <div className="flex gap-2 pt-0.5 flex-wrap">
               {sceneView === 'globo' && (
                 <button
                   onClick={() => setIsSpinning(!isSpinning)}
@@ -336,17 +412,108 @@ export default function App() {
                   {isSpinning ? '⏸ Pausar rotación' : '▶ Reanudar rotación'}
                 </button>
               )}
+              {sceneView !== 'sitio' && (
+                <button
+                  onClick={handleResetCamera}
+                  className="bg-[#0b1320]/85 hover:bg-[#121e33] text-slate-200 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs font-medium backdrop-blur-sm transition cursor-pointer shadow-lg flex items-center gap-1.5"
+                >
+                  🔄 Resetear vista de frente
+                </button>
+              )}
+              {!leftOpen && sceneView !== 'sitio' && (
+                <button
+                  onClick={toggleLeft}
+                  title="Mostrar el panel de misión"
+                  className="bg-[#0b1320]/85 hover:bg-[#121e33] text-cyan-300 border border-cyan-800/80 px-3 py-1.5 rounded-lg text-xs font-medium backdrop-blur-sm transition cursor-pointer shadow-lg"
+                >
+                  ☰ Panel de misión
+                </button>
+              )}
               <button
-                onClick={handleResetCamera}
+                onClick={() =>
+                  setQuality((q) => (q === 'alta' ? 'media' : q === 'media' ? 'baja' : 'alta'))
+                }
+                title="Calidad de render: resolución y sombras (baja sola si el equipo no llega)"
+                className="bg-[#0b1320]/85 hover:bg-[#121e33] text-slate-200 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs font-medium backdrop-blur-sm transition cursor-pointer shadow-lg"
+              >
+                🎚 Calidad: {quality === 'alta' ? 'Alta' : quality === 'media' ? 'Media' : 'Baja'}
+              </button>
+              <button
+                onClick={() => setFocusMode(true)}
+                title="Modo enfoque: oculta los paneles (tecla F)"
+                className="bg-[#0b1320]/85 hover:bg-[#121e33] text-slate-200 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs font-medium backdrop-blur-sm transition cursor-pointer shadow-lg"
+              >
+                ⛶ Enfoque
+              </button>
+              <button
+                onClick={() => setTourStep(0)}
+                title="Ver de nuevo el recorrido guiado"
+                className="bg-[#0b1320]/85 hover:bg-[#121e33] text-slate-200 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs font-medium backdrop-blur-sm transition cursor-pointer shadow-lg"
+              >
+                ❓ Guía
+              </button>
+              {sceneView === 'sitio' && (
+                <>
+                  <button
+                    onClick={() => setShowSkyMarks((v) => !v)}
+                    title="Puntos cardinales y trayectorias del Sol y la Tierra (24 h)"
+                    className="bg-[#0b1320]/85 hover:bg-[#121e33] text-slate-200 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs font-medium backdrop-blur-sm transition cursor-pointer shadow-lg"
+                  >
+                    {showSkyMarks ? '🧭 Marcadores: Sí' : '🧭 Marcadores: No'}
+                  </button>
+                  <label className="bg-[#0b1320]/85 text-slate-200 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs font-medium backdrop-blur-sm shadow-lg flex items-center gap-1.5 cursor-pointer">
+                    👤 Altura del ojo
+                    <select
+                      value={eyeHeightM}
+                      onChange={(e) => setEyeHeightM(Number(e.target.value))}
+                      className="bg-transparent text-cyan-300 outline-none cursor-pointer"
+                    >
+                      <option className="bg-slate-900" value={2}>2 m</option>
+                      <option className="bg-slate-900" value={10}>10 m</option>
+                      <option className="bg-slate-900" value={50}>50 m</option>
+                    </select>
+                  </label>
+                </>
+              )}
+              {sceneView === 'globo' && (
+                <button
+                  onClick={() => setScaleMode((m) => (m === 'didactica' ? 'real' : 'didactica'))}
+                  title={GLOBE_SCALES[scaleMode].label}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium backdrop-blur-sm transition cursor-pointer shadow-lg border flex items-center gap-1.5 ${
+                    scaleMode === 'real'
+                      ? 'bg-emerald-950/85 text-emerald-300 border-emerald-700/80 hover:bg-emerald-900'
+                      : 'bg-[#0b1320]/85 text-slate-200 border-slate-700/80 hover:bg-[#121e33]'
+                  }`}
+                >
+                  📏 Escala: {scaleMode === 'real' ? 'Real' : 'Didáctica'}
+                </button>
+              )}
+              <button
+                onClick={() => setLightMode((m) => (m === 'legible' ? 'realista' : 'legible'))}
+                title={
+                  lightMode === 'legible'
+                    ? 'Exposición realzada (+45 %) para leer el relieve nocturno'
+                    : 'Exposición física: el lado nocturno queda casi negro'
+                }
                 className="bg-[#0b1320]/85 hover:bg-[#121e33] text-slate-200 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs font-medium backdrop-blur-sm transition cursor-pointer shadow-lg flex items-center gap-1.5"
               >
-                🔄 Resetear vista de frente
+                {lightMode === 'legible' ? '💡 Luz: Legible' : '🌑 Luz: Realista'}
               </button>
             </div>
           </div>
 
-          {/* 2. PANEL FLOTANTE DE FILTROS A LA IZQUIERDA */}
-          <div className="absolute top-24 left-6 z-20 w-84 bg-[#09111e]/92 border border-slate-700/70 rounded-2xl p-4 shadow-2xl backdrop-blur-md pointer-events-auto font-sans text-xs space-y-3 max-h-[78vh] overflow-y-auto">
+          {/* 2. PANEL FLOTANTE DE FILTROS A LA IZQUIERDA (oculto en la vista inmersiva) */}
+          <div className={`absolute top-24 left-6 z-20 w-84 bg-[#09111e]/92 border border-slate-700/70 rounded-2xl p-4 shadow-2xl backdrop-blur-md pointer-events-auto font-sans text-xs space-y-3 max-h-[72vh] overflow-y-auto ${sceneView === 'sitio' || focusMode || !leftOpen ? 'hidden' : ''}`}>
+            <div className="flex items-center justify-between -mb-1">
+              <span className="text-[10px] font-bold tracking-widest text-slate-400">PANEL DE MISIÓN</span>
+              <button
+                onClick={toggleLeft}
+                title="Plegar el panel (el lienzo 3D ocupa el espacio)"
+                className="text-slate-400 hover:text-white cursor-pointer text-[11px] px-1"
+              >
+                ▲ plegar
+              </button>
+            </div>
             {isStudent ? (
               <StudentPanel
                 siteName={activeSite.nombre}
@@ -516,7 +683,7 @@ export default function App() {
                   </span>
                   <span className="font-mono font-bold">
                     <span className="text-emerald-400">{aptCellsCount}</span>{' '}
-                    <span className="text-slate-500">/ {totalCells}</span>
+                    <span className="text-slate-500">/ {totalCells} celdas</span>
                   </span>
                 </div>
 
@@ -677,29 +844,77 @@ export default function App() {
           </div>
 
           {/* 3. BOTONES DE ACCESO RÁPIDO SUPERIORES DERECHOS */}
-          <div className="absolute top-4 right-6 z-20 space-y-2 pointer-events-auto flex flex-col items-end">
+          <div className={`absolute top-4 right-6 z-20 space-y-2 pointer-events-auto flex flex-col items-end ${focusMode ? 'hidden' : ''}`}>
             {/* Menú de herramientas: las entradas dependen del Modo de Vista */}
             <ToolsMenu onOpen={setModalOpen} />
 
-            {/* TARJETA "OBJETIVO LUNAR": ambos modos leen el mismo estado del punto */}
-            <ObjectivePanel status={status} />
+            {sceneView === 'sitio' ? (
+              /* Minimapa del polo sur: clic para saltar entre sitios sin salir de la vista */
+              <MiniMap activeSiteId={activeSiteId} onSelectSite={(id) => selectSite(id)} />
+            ) : (
+              /* TARJETA "OBJETIVO LUNAR": ambos modos leen el mismo estado del punto */
+              <ObjectivePanel status={status} />
+            )}
           </div>
+
+          {/* HUD compacto de la vista "Desde el sitio" */}
+          {sceneView === 'sitio' && (
+            <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+              <div className="flex items-center gap-4 px-4 py-2 rounded-xl bg-black/70 border border-slate-700/70 backdrop-blur-sm text-[11px] font-mono text-slate-200">
+                <span title="Azimut y elevación del Sol">
+                  ☀️ Az {celestial.sunAz.toFixed(1)}° · El {celestial.sunEl.toFixed(1)}°
+                </span>
+                <span className="text-slate-600">|</span>
+                <span title="Azimut y elevación de la Tierra">
+                  🌍 Az {celestial.earthAz.toFixed(1)}° · El {celestial.earthEl.toFixed(1)}°
+                  {celestial.isEarthOccluded ? ' (oculta)' : ''}
+                </span>
+                <span className="text-slate-600">|</span>
+                <span className="text-amber-300">{countdowns.sunStatusText}</span>
+                <span className="text-slate-600">|</span>
+                <span
+                  className={
+                    status.viability === 'apt'
+                      ? 'text-emerald-300'
+                      : status.viability === 'danger'
+                        ? 'text-red-300'
+                        : 'text-amber-300'
+                  }
+                >
+                  {VIABILITY_LABEL[status.viability]}
+                </span>
+              </div>
+              <div className="text-center text-[10px] text-slate-500 mt-1">
+                Arrastra para mirar alrededor · estás a {eyeHeightM} m del suelo en el punto seleccionado
+              </div>
+            </div>
+          )}
 
           {/* 4. CANVAS 3D (LUNA, TIERRA Y SOL ULTRA-REALISTAS / PARCHE LUNAR PBR) */}
           <Canvas
             key={sceneView}
-            shadows
+            shadows={quality !== 'baja'}
+            dpr={dprRange}
             camera={
               sceneView === 'globo'
                 ? { position: [0, 0, 3.4], fov: 42, near: 0.1, far: 1000 }
-                : { position: [0, 45, 80], fov: 45, near: 0.1, far: 1000 }
+                : sceneView === 'sitio'
+                  ? { position: surfaceEyePos, fov: 62, near: 0.01, far: 30000 }
+                  : { position: [0, 45, 80], fov: 45, near: 0.5, far: 30000 }
             }
             className="w-full h-full"
           >
+            <SceneTuning lightMode={lightMode} />
+            {/* Si el equipo no sostiene el ritmo, baja un escalón de calidad automáticamente */}
+            <PerformanceMonitor
+              onDecline={() => setQuality((q) => (q === 'alta' ? 'media' : 'baja'))}
+            />
             {sceneView === 'globo' ? (
               <MoonGlobe
                 activeSite={activeSite}
                 candidateSites={SITES}
+                scaleMode={scaleMode}
+                lightMode={lightMode}
                 selectedLat={mission.selectedLat}
                 selectedLon={mission.selectedLon}
                 sunAz={celestial.sunAz}
@@ -707,6 +922,7 @@ export default function App() {
                 earthAz={celestial.earthAz}
                 earthEl={celestial.earthEl}
                 earthRotationRad={celestial.earthRotationRad}
+                utcMs={currentMs}
                 isEarthOccluded={celestial.isEarthOccluded}
                 isSpinning={isSpinning}
                 zoomLevel={zoomLevel}
@@ -721,25 +937,67 @@ export default function App() {
               />
             ) : (
               <PatchErrorBoundary onReset={() => mission.resetCoordinates()}>
-                <SpaceBackground showEclipticGrid={true} />
-                <ambientLight intensity={0.20} color="#1e293b" />
+                <SpaceBackground showEclipticGrid={false} radius={24000} />
+                <ambientLight
+                  intensity={lightMode === 'legible' ? 0.2 : 0.03}
+                  color="#1e293b"
+                />
                 <SunLight
                   sunAz={celestial.sunAz}
                   sunEl={celestial.sunEl}
-                  targetPos={terrainTargetPos}
+                  targetPos={sceneView === 'sitio' ? surfaceEyePos : terrainTargetPos}
+                  showVector={sceneView !== 'sitio' || showSkyMarks}
                 />
-                <LunarTerrain analysis={analysis} />
+                <LunarTerrain analysis={analysis} showMarker={sceneView !== 'sitio'} />
+                {/* Entorno del parche: terreno hasta el horizonte curvo (fin del "rectángulo flotante") */}
+                <PatchSurround />
                 <EarthMarker
                   earthAz={celestial.earthAz}
                   earthEl={celestial.earthEl}
-                  targetPos={terrainTargetPos}
+                  sunAz={celestial.sunAz}
+                  sunEl={celestial.sunEl}
+                  siteLatDeg={mission.selectedLat}
+                  utcMs={currentMs}
+                  targetPos={sceneView === 'sitio' ? surfaceEyePos : terrainTargetPos}
                   earthRotationRad={celestial.earthRotationRad}
                   isOccluded={celestial.isEarthOccluded}
+                  showVector={sceneView !== 'sitio' || showSkyMarks}
                 />
-                <OrbitControls minDistance={15} maxDistance={400} maxPolarAngle={Math.PI / 2.05} />
+                {sceneView === 'sitio' ? (
+                  <>
+                    {/* Primera persona: parado en el punto seleccionado, arrastrar para mirar */}
+                    <LookControls eye={surfaceEyePos} initialAzDeg={celestial.sunAz} initialElDeg={6} />
+                    <CardinalMarkers eye={surfaceEyePos} visible={showSkyMarks} />
+                    <SkyTracks eye={surfaceEyePos} traj={trajA} currentMs={currentMs} visible={showSkyMarks} />
+                  </>
+                ) : (
+                  <OrbitControls minDistance={15} maxDistance={1200} maxPolarAngle={Math.PI / 2.05} />
+                )}
               </PatchErrorBoundary>
             )}
           </Canvas>
+
+          {/* Chip para salir del modo enfoque */}
+          {focusMode && (
+            <button
+              onClick={() => setFocusMode(false)}
+              className="absolute top-4 right-6 z-20 pointer-events-auto bg-black/70 hover:bg-black/90 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-full text-xs font-medium backdrop-blur-sm cursor-pointer shadow-lg"
+              title="Salir del modo enfoque (tecla F)"
+            >
+              ⛶ Salir del enfoque (F)
+            </button>
+          )}
+
+          {/* Etiqueta permanente de la escala activa (obligatoria: el espectador debe saber
+              siempre si las distancias están comprimidas o son reales) */}
+          {sceneView === 'globo' && (
+            <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 pointer-events-none max-w-[92%]">
+              <span className="inline-block px-3 py-1 rounded-full bg-black/70 border border-slate-700/70 text-[10px] text-slate-300 font-mono backdrop-blur-sm text-center">
+                {GLOBE_SCALES[scaleMode].label}
+                {lightMode === 'legible' ? ' · exposición realzada (modo Legible)' : ''}
+              </span>
+            </div>
+          )}
 
           {/* 5. BARRA INFERIOR DE ESTADO Y CONTROL DE ZOOM */}
           <div className="absolute bottom-6 left-0 right-0 h-10 bg-[#05070d]/85 backdrop-blur-md border-t border-slate-800/80 px-6 flex items-center justify-between text-xs z-20 pointer-events-auto">
@@ -778,7 +1036,7 @@ export default function App() {
           {/* 6. PIE DE PÁGINA CON CRÉDITOS OFICIALES DE TEXTURAS Y DATOS (Problema 1) */}
           <footer className="absolute bottom-0 left-0 right-0 h-6 bg-[#020409] border-t border-slate-850 px-6 flex items-center justify-between text-[9px] text-slate-400 font-mono z-20 pointer-events-auto select-text">
             <div className="flex items-center gap-4">
-              <span><b>Texturas:</b> Luna: mosaico global equirectangular (ver Metodología) · Tierra y Sol: generadas por código</span>
+              <span><b>Texturas:</b> Luna y Tierra: mosaicos equirectangulares (ver Metodología) · Sol: generado por código · escala rotulada sobre el lienzo (real o didáctica)</span>
               <span className="text-slate-600">|</span>
               <span><b>Datos:</b> Horizontes sobre DEM LOLA 80 m (Rol A) · Efemérides JPL Horizons (Rol B) · Parche 3D: terreno de demostración</span>
             </div>
@@ -890,6 +1148,29 @@ export default function App() {
               setActiveScenarioId(null);
             }}
             onClose={() => setModalOpen(null)}
+          />
+        )}
+
+        {/* Recorrido guiado (se abre desde la portada o con el botón "❓ Guía") */}
+        {tourStep !== null && !showIntro && (
+          <TourOverlay
+            step={tourStep}
+            onNext={() => setTourStep((s) => (s === null ? null : s + 1))}
+            onClose={() => setTourStep(null)}
+          />
+        )}
+
+        {/* Portada: pantalla de carga con progreso real + elección del modo de uso */}
+        {showIntro && (
+          <IntroOverlay
+            loaded={Object.keys(siteDataMap).length}
+            total={SITES.length}
+            onChoose={(mode, startTour) => {
+              mission.setViewMode(mode);
+              markIntroDone();
+              setShowIntro(false);
+              setTourStep(startTour ? 0 : null);
+            }}
           />
         )}
       </div>

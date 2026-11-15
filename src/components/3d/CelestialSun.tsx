@@ -8,14 +8,27 @@ interface CelestialSunProps {
   position: [number, number, number];
   radius?: number;
   targetPos?: [number, number, number];
+  /** Punto al que apunta la LUZ (por defecto `targetPos`). En el globo es el centro de la Luna,
+   *  para que los rayos sean exactamente paralelos a la dirección Luna→Sol. */
+  lightTargetPos?: [number, number, number];
   showVector?: boolean;
+  /** Si la luz solar proyecta sombras (útil en el parche; en el globo causa artefactos). */
+  castShadows?: boolean;
+  /** Semilado del volumen de sombras, en unidades de escena. */
+  shadowExtent?: number;
+  /** Intensidad de la luz directa. */
+  intensity?: number;
 }
 
 export default function CelestialSun({
   position,
   radius = 0.38,
   targetPos,
+  lightTargetPos,
   showVector = true,
+  castShadows = false,
+  shadowExtent = 5,
+  intensity = 3.4,
 }: CelestialSunProps) {
   const sunMeshRef = useRef<THREE.Mesh>(null);
   const coronaInnerRef = useRef<THREE.Mesh>(null);
@@ -40,16 +53,16 @@ export default function CelestialSun({
     }
   });
 
-  // Vector de dirección exacto Sol -> Sitio
+  // El objetivo de la luz vive DENTRO del grupo del Sol (que está en `position`), así que su
+  // posición local debe ser (targetPos − position) para que su posición en el mundo sea targetPos.
+  // (Antes se le asignaba targetPos tal cual y los rayos salían en una dirección que no
+  // dependía de dónde estuviera el Sol.)
   const lightTarget = useMemo(() => {
     const obj = new THREE.Object3D();
-    if (targetPos) {
-      obj.position.set(targetPos[0], targetPos[1], targetPos[2]);
-    } else {
-      obj.position.set(0, 0, 0);
-    }
+    const t = lightTargetPos ?? targetPos ?? [0, 0, 0];
+    obj.position.set(t[0] - position[0], t[1] - position[1], t[2] - position[2]);
     return obj;
-  }, [targetPos]);
+  }, [lightTargetPos, targetPos, position]);
 
   return (
     <group position={position}>
@@ -61,7 +74,9 @@ export default function CelestialSun({
             [targetPos[0] - position[0], targetPos[1] - position[1], targetPos[2] - position[2]],
           ]}
           color="#facc15"
-          lineWidth={2.4}
+          lineWidth={1.6}
+          transparent
+          opacity={0.75}
         />
       )}
 
@@ -100,18 +115,26 @@ export default function CelestialSun({
         />
       </mesh>
 
-      {/* 5. Iluminación física principal alineada con los rayos solares */}
+      {/* 5. Luz solar: direccional (rayos paralelos, como corresponde a una fuente a ~86 000 radios
+             lunares). Se coloca en el Sol y apunta al sitio, así que su dirección depende de dónde
+             esté el Sol. Sin luz puntual: con el Sol lejos no tendría alcance y sería redundante. */}
       <primitive object={lightTarget} />
       <directionalLight
         ref={dirLightRef}
         target={lightTarget}
         position={[0, 0, 0]}
-        intensity={4.2}
+        intensity={intensity}
         color="#fffbf0"
-        castShadow
+        castShadow={castShadows}
         shadow-mapSize={[2048, 2048]}
+        shadow-camera-left={-shadowExtent}
+        shadow-camera-right={shadowExtent}
+        shadow-camera-top={shadowExtent}
+        shadow-camera-bottom={-shadowExtent}
+        shadow-camera-near={1}
+        shadow-camera-far={Math.hypot(position[0], position[1], position[2]) * 2 + 50}
+        shadow-bias={-0.0004}
       />
-      <pointLight position={[0, 0, 0]} intensity={3.8} distance={50} color="#ffedd5" />
     </group>
   );
 }

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useMission, type ViewMode } from '../../store/useMission';
 
 export type ToolId =
@@ -45,13 +46,41 @@ export function isToolAllowed(id: ToolId, mode: ViewMode): boolean {
   return TOOL_ENTRIES.some((t) => t.id === id && t.modes.includes(mode));
 }
 
+const OPEN_KEY = 'killaland_tools_open';
+
 export default function ToolsMenu({ onOpen }: { onOpen: (id: ToolId) => void }) {
   const viewMode = useMission((s) => s.viewMode);
   const entries = TOOL_ENTRIES.filter((t) => t.modes.includes(viewMode));
+  // Plegable: recordado en la sesión para no tapar la parte gráfica
+  const [open, setOpen] = useState(() => {
+    try {
+      return sessionStorage.getItem(OPEN_KEY) !== '0';
+    } catch {
+      return true;
+    }
+  });
+  const toggle = () => {
+    setOpen((v) => {
+      try {
+        sessionStorage.setItem(OPEN_KEY, v ? '0' : '1');
+      } catch {
+        /* sin sessionStorage */
+      }
+      return !v;
+    });
+  };
 
   return (
     <nav aria-label="Herramientas" className="flex flex-col gap-1 w-64">
-      {entries.map((t) => (
+      <button
+        onClick={toggle}
+        aria-expanded={open}
+        className="w-full text-xs font-bold py-1 px-3 rounded-xl backdrop-blur-md flex items-center justify-between transition cursor-pointer shadow-lg border bg-[#0e1626]/95 hover:bg-[#15203a] text-slate-100 border-slate-600/80"
+      >
+        <span>🧰 Herramientas</span>
+        <span className="text-[10px] font-mono text-slate-400">{open ? '▲ plegar' : `▼ ${entries.length}`}</span>
+      </button>
+      {open && entries.map((t) => (
         <button
           key={t.id}
           onClick={() => onOpen(t.id)}
