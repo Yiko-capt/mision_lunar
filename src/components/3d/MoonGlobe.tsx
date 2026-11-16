@@ -1,0 +1,358 @@
+import { useRef, useMemo, useState, useEffect } from 'react';
+import * as THREE from 'three';
+import { useFrame } from '@react-three/fiber';
+import { OrbitControls } from '@react-three/drei';
+import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
+import { SITES, type LunarSite } from '../../data/sites';
+import {
+  getTopocentricFrame,
+  topocentricToCartesian,
+  getSiteSpherePosition,
+} from '../../lib/celestial';
+import {
+  MOON_ALBEDO_URL,
+  MOON_BUMP_URL,
+  MOON_TEXTURE_U_OFFSET,
+  MOON_BUMP_SCALE_LDEM,
+  MOON_BUMP_SCALE_ALBEDO,
+  MOON_ALBEDO_TINT,
+} from '../../config/moonTexture';
+import { earthOrientation } from '../../lib/earthOrientation';
+import { GLOBE_SCALES, type ScaleMode } from '../../config/sceneScale';
+import SpaceBackground from './SpaceBackground';
+import CelestialSun from './CelestialSun';
+import CelestialEarth from './CelestialEarth';
+
+interface MoonGlobeProps {
+  activeSite: LunarSite;
+  candidateSites?: LunarSite[];
+  selectedLat: number;
+  selectedLon: number;
+  sunAz: number;
+  sunEl: number;
+  earthAz: number;
+  earthEl: number;
+  isSpinning: boolean;
+  zoomLevel: number;
+  /** Escala de la escena: 'real' (Tierra a 221 radios lunares) o 'didactica' (comprimida). */
+  scaleMode?: ScaleMode;
+  /** 'realista' deja el lado nocturno casi negro; 'legible' sube la exposición. */
+  lightMode?: 'realista' | 'legible';
+  earthRotationRad?: number;
+  /** Instante simulado (ms UTC): fija la inclinación del eje y el giro de la Tierra. */
+  utcMs?: number;
+  isEarthOccluded?: boolean;
+  onSelectSite: (siteId: string) => void;
+  onMapClick?: (lat: number, lon: number) => void;
+  controlsRef?: React.RefObject<OrbitControlsImpl | null>;
+}
+
+export default function MoonGlobe({
+  activeSite,
+  candidateSites = SITES,
+  selectedLat,
+  selectedLon,
+  sunAz,
+  sunEl,
+  earthAz,
+  earthEl,
+  isSpinning,
+  zoomLevel,
+  scaleMode = 'didactica',
+  lightMode = 'legible',
+  earthRotationRad,
+  utcMs,
+  isEarthOccluded = false,
+  onSelectSite,
+  onMapClick,
+  controlsRef: externalControlsRef,
+}: MoonGlobeProps) {
+  const internalControlsRef = useRef<OrbitControlsImpl>(null);
+  const controlsRef = externalControlsRef || internalControlsRef;
+
+  const moonGroupRef = useRef<THREE.Group>(null);
+  const pulseRef = useRef<THREE.Mesh>(null);
+
+  // 1. Textura de la Luna: mosaico equirectangular empaquetado por Vite (src/assets/moon).
+  //    La ruta lleva hash y es relativa al despliegue, así que no puede dar 404 en producción.
+  const [moonAlbedo, setMoonAlbedo] = useState<THREE.Texture | null>(null);
+  const [moonRelief, setMoonRelief] = useState<THREE.Texture | null>(null);
+
+  useEffect(() => {
+    const loader = new THREE.TextureLoader();
+    let cancelled = false;
+    const orient = (tex: THREE.Texture) => {
+      // Lleva la longitud 0° del mapa al eje +Z de la escena (ver config/moonTexture.ts)
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.offset.x = MOON_TEXTURE_U_OFFSET;
+      tex.generateMipmaps = true;
+      tex.minFilter = THREE.LinearMipmapLinearFilter;
+      tex.anisotropy = 8;
+      tex.needsUpdate = true;
+    };
+    if (MOON_ALBEDO_URL) {
+      loader.load(
+        MOON_ALBEDO_URL,
+        (tex) => {
+          if (cancelled) return;
+          tex.colorSpace = THREE.SRGBColorSpace;
+          orient(tex);
+          setMoonAlbedo(tex);
+        },
+        undefined,
+        (err) => console.warn('No se pudo cargar la textura lunar:', err)
+      );
+    }
+    if (MOON_BUMP_URL) {
+      loader.load(
+        MOON_BUMP_URL,
+        (tex) => {
+          if (cancelled) return;
+          orient(tex);
+          setMoonRelief(tex);
+        },
+        undefined,
+        () => undefined
+      );
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // 2. Relieve suave: mapa de alturas LOLA si está instalado; si no, se deriva del propio albedo.
+  const moonBumpMap = moonRelief ?? moonAlbedo;
+  const moonBumpScale = moonRelief ? MOON_BUMP_SCALE_LDEM : MOON_BUMP_SCALE_ALBEDO;
+
+  // 3. Marco topocéntrico y posiciones astronómicas del instante
+  const frame = useMemo(
+    () => getTopocentricFrame(selectedLat, selectedLon),
+    [selectedLat, selectedLon]
+  );
+
+  const selectedTargetSpherePos = useMemo<[number, number, number]>(
+    () => getSiteSpherePosition(selectedLat, selectedLon, 1.015),
+    [selectedLat, selectedLon]
+  );
+
+  const sunDir = useMemo(() => topocentricToCartesian(frame, sunAz, sunEl), [frame, sunAz, sunEl]);
+  const earthDir = useMemo(() => topocentricToCartesian(frame, earthAz, earthEl), [frame, earthAz, earthEl]);
+
+  // Escala activa (real o didáctica): distancias y radios de Tierra y Sol (ver config/sceneScale.ts)
+  const scale = GLOBE_SCALES[scaleMode];
+
+  // El Sol está lejísimo: su posición se mide desde el centro de la Luna, y su dirección es la
+  // misma que ve el sitio (rayos casi paralelos). La Tierra sí se coloca respecto al sitio.
+  const sunPos = useMemo<[number, number, number]>(
+    () => [sunDir[0] * scale.sunDistance, sunDir[1] * scale.sunDistance, sunDir[2] * scale.sunDistance],
+    [sunDir, scale.sunDistance]
+  );
+
+  const earthPos = useMemo<[number, number, number]>(
+    () => [
+      selectedTargetSpherePos[0] + earthDir[0] * scale.earthDistance,
+      selectedTargetSpherePos[1] + earthDir[1] * scale.earthDistance,
+      selectedTargetSpherePos[2] + earthDir[2] * scale.earthDistance,
+    ],
+    [selectedTargetSpherePos, earthDir, scale.earthDistance]
+  );
+
+  // Fracción iluminada de la Tierra vista desde la Luna: k = (1 − cos γ)/2, donde γ es el ángulo
+  // Sol–Luna–Tierra. Gobierna la intensidad de la luz terrestre ("earthshine") del lado nocturno.
+  const earthLitFraction = useMemo(() => {
+    const cosG =
+      sunDir[0] * earthDir[0] + sunDir[1] * earthDir[1] + sunDir[2] * earthDir[2];
+    return (1 - Math.max(-1, Math.min(1, cosG))) / 2;
+  }, [sunDir, earthDir]);
+
+  // Orientación real de la Tierra (eje inclinado + giro por hora UTC); el polo lunar es +Y
+  const earthQuat = useMemo(() => {
+    if (utcMs === undefined) return undefined;
+    return earthOrientation({
+      poleDir: new THREE.Vector3(0, 1, 0),
+      sunDir: new THREE.Vector3(sunDir[0], sunDir[1], sunDir[2]),
+      utcMs,
+    }).quaternion;
+  }, [utcMs, sunDir]);
+
+  // Solo el marcador pulsa; la Luna no gira sobre sí misma (la luz es fija en el mundo y gira la
+  // cámara con autoRotate), para que la iluminación siempre corresponda a la posición real del Sol.
+  useFrame((state) => {
+    if (pulseRef.current) {
+      const s = 1.0 + 0.3 * Math.sin(state.clock.getElapsedTime() * 4.5);
+      pulseRef.current.scale.set(s, s, s);
+    }
+  });
+
+  // El far de la cámara depende de la escala (en escala real el Sol está a 1200 radios lunares)
+  useEffect(() => {
+    const cam = controlsRef.current?.object as THREE.PerspectiveCamera | undefined;
+    if (cam && cam.far !== scale.cameraFar) {
+      cam.far = scale.cameraFar;
+      cam.updateProjectionMatrix();
+    }
+  }, [scale.cameraFar, controlsRef]);
+
+  // Slider de zoom: interpola exponencialmente entre el acercamiento mínimo y el máximo de la
+  // escala activa (en escala real permite alejarse hasta ver la Tierra a 221 radios lunares).
+  useEffect(() => {
+    if (controlsRef.current) {
+      const dMin = scale.minCameraDistance * 1.25;
+      const dMax = scale.maxCameraDistance * 0.95;
+      const t = 1 - zoomLevel / 100; // zoom 100 % = lo más cerca
+      const targetDist = dMin * Math.pow(dMax / dMin, t);
+      const cam = controlsRef.current.object as THREE.PerspectiveCamera;
+      if (cam) {
+        const dir = cam.position.clone().normalize();
+        cam.position.copy(dir.multiplyScalar(targetDist));
+        controlsRef.current.update();
+      }
+    }
+  }, [zoomLevel, controlsRef, scale.minCameraDistance, scale.maxCameraDistance]);
+
+  // Clic interactivo en cualquier punto de la Luna
+  const handleMoonClick = (e: any) => {
+    e.stopPropagation();
+    if (!e.point || !moonGroupRef.current) return;
+
+    const localPoint = moonGroupRef.current.worldToLocal(e.point.clone());
+    const r = localPoint.length();
+    if (r === 0) return;
+
+    // Calcular latitud y longitud selenográficas exactas del clic
+    const lat = Math.asin(Math.max(-1, Math.min(1, localPoint.y / r))) * (180 / Math.PI);
+    let lon = (Math.atan2(localPoint.x, localPoint.z) * 180) / Math.PI;
+    lon = ((lon % 360) + 360) % 360;
+
+    onMapClick?.(lat, lon);
+
+    // Buscar sitio más cercano de la lista
+    let closestSite = candidateSites[0];
+    let minAngularDist = Infinity;
+
+    for (const site of candidateSites) {
+      const dLat = site.lat_deg - lat;
+      let dLon = Math.abs(site.lon_deg - lon);
+      if (dLon > 180) dLon = 360 - dLon;
+      const dist = Math.hypot(dLat, dLon);
+
+      if (dist < minAngularDist) {
+        minAngularDist = dist;
+        closestSite = site;
+      }
+    }
+
+    if (closestSite) {
+      onSelectSite(closestSite.site_id);
+    }
+  };
+
+  return (
+    <>
+      {/* 1. Fondo espacial fotorrealista Solar System Scope */}
+      <SpaceBackground showEclipticGrid={scaleMode === 'didactica'} radius={scale.cameraFar * 0.8} />
+
+      {/* 2. Iluminación físicamente coherente:
+             - 'realista': ambiente casi nulo; el lado nocturno solo recibe luz terrestre.
+             - 'legible':  un poco de ambiente para poder leer el relieve nocturno. */}
+      <ambientLight color="#1a2332" intensity={lightMode === 'legible' ? 0.14 : 0.012} />
+
+      {/* Luz terrestre ("earthshine"): débil, desde la Tierra, proporcional a su fase */}
+      <directionalLight
+        position={earthPos}
+        intensity={(lightMode === 'legible' ? 0.35 : 0.08) * earthLitFraction}
+        color="#9db8d9"
+      />
+
+      {/* 3. El Sol volumétrico con fotosfera nuclear, corona suave y luz direccional */}
+      <CelestialSun
+        position={sunPos}
+        radius={scale.sunRadius}
+        targetPos={selectedTargetSpherePos}
+        lightTargetPos={[0, 0, 0]}
+        showVector={true}
+      />
+
+      {/* 4. La Tierra concéntrica (superficie, nubes y atmósfera Fresnel con rotación axial) */}
+      <CelestialEarth
+        position={earthPos}
+        radius={scale.earthRadius}
+        targetPos={selectedTargetSpherePos}
+        showVector={true}
+        earthRotationRad={earthRotationRad}
+        orientation={earthQuat}
+        sunDir={sunDir}
+        isOccluded={isEarthOccluded}
+      />
+
+      {/* 5. GLOBO LUNAR FOTORREALISTA */}
+      <group ref={moonGroupRef}>
+        <mesh castShadow receiveShadow onClick={handleMoonClick}>
+          <sphereGeometry args={[1.0, 128, 96]} />
+          {/* La key recrea el material cuando llega la textura: si no, three.js no recompila
+              el shader con el mapa y la Luna se queda como una esfera lisa. */}
+          <meshStandardMaterial
+            key={`${moonAlbedo ? 'albedo' : 'liso'}-${moonRelief ? 'ldem' : 'bump'}`}
+            map={moonAlbedo || undefined}
+            bumpMap={moonBumpMap || undefined}
+            bumpScale={moonBumpScale}
+            color={moonAlbedo ? MOON_ALBEDO_TINT : 0x7c8494}
+            roughness={0.95}
+            metalness={0.0}
+          />
+        </mesh>
+
+        {/* Sitios candidatos (puntos rojos sutiles) */}
+        {candidateSites.map((site) => {
+          const isSelected = site.site_id === activeSite.site_id;
+          const pos = getSiteSpherePosition(site.lat_deg, site.lon_deg, 1.015);
+
+          if (isSelected) return null; // El seleccionado se dibuja con el marcador exacto
+
+          return (
+            <mesh
+              key={site.site_id}
+              position={pos}
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelectSite(site.site_id);
+              }}
+            >
+              <sphereGeometry args={[0.016, 16, 16]} />
+              <meshBasicMaterial color="#f87171" />
+            </mesh>
+          );
+        })}
+
+        {/* Marcador exacto del objetivo seleccionado (círculo objetivo esmeralda) */}
+        <group position={selectedTargetSpherePos}>
+          <mesh>
+            <sphereGeometry args={[0.024, 24, 24]} />
+            <meshBasicMaterial color="#22c55e" />
+          </mesh>
+          <mesh ref={pulseRef}>
+            <ringGeometry args={[0.028, 0.046, 32]} />
+            <meshBasicMaterial
+              color="#4ade80"
+              side={THREE.DoubleSide}
+              transparent
+              opacity={0.85}
+            />
+          </mesh>
+        </group>
+      </group>
+
+      {/* Controles de cámara orbitales (límites según la escala activa) */}
+      <OrbitControls
+        ref={controlsRef}
+        enableDamping
+        dampingFactor={0.06}
+        autoRotate={isSpinning}
+        autoRotateSpeed={0.4}
+        minDistance={scale.minCameraDistance}
+        maxDistance={scale.maxCameraDistance}
+        target={[0, 0, 0]}
+      />
+    </>
+  );
+}

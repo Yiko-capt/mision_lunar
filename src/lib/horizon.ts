@@ -1,9 +1,10 @@
 import type { Terrain } from './terrain';
+import { PASO_AZIMUT_DEG, D_MAX_KM, H_OBS_M } from './constants';
 
-export const AZ = 72;       // una dirección cada 5°
-const EYE_M = 2;            // altura de los ojos / antena sobre el suelo
+export const AZ = Math.round(360 / PASO_AZIMUT_DEG); // 360 directions
+const EYE_M = H_OBS_M; // observer height (m)
 
-export function computeHorizons(t: Terrain, maxDistM = 3000): Float32Array {
+export function computeHorizons(t: Terrain, maxDistM = D_MAX_KM * 1000): Float32Array {
   const { n, cellM, h } = t;
   const out = new Float32Array(n * n * AZ);
   const steps = Math.floor(maxDistM / cellM);

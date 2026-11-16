@@ -1,0 +1,101 @@
+import { useState } from 'react';
+import { useMission, type ViewMode } from '../../store/useMission';
+
+export type ToolId =
+  | 'bestDays'
+  | 'sky'
+  | 'siteMetrics'
+  | 'sitesTable'
+  | 'timeline'
+  | 'chart'
+  | 'compare'
+  | 'benchmark'
+  | 'method';
+
+interface ToolEntry {
+  id: ToolId;
+  icon: string;
+  text: string;
+  tag: string;
+  modes: ViewMode[];
+  accent?: boolean;
+}
+
+/**
+ * Entradas del menú de herramientas. `modes` decide en qué modo de vista aparece cada una:
+ * el modo Estudiante oculta el Benchmark, el Comparador A/B y la gráfica técnica.
+ */
+export const TOOL_ENTRIES: ToolEntry[] = [
+  { id: 'bestDays', icon: '🏆', text: 'Best Days', tag: 'Ranking', modes: ['student', 'professional'], accent: true },
+  { id: 'sky', icon: '🔭', text: 'Sky View from Site', tag: 'Az / El', modes: ['student', 'professional'] },
+  { id: 'siteMetrics', icon: '📈', text: 'Site Metrics', tag: 'Summary', modes: ['student', 'professional'] },
+  { id: 'sitesTable', icon: '🗺️', text: 'Site Comparison', tag: '10 sites', modes: ['student', 'professional'] },
+  { id: 'timeline', icon: '🕒', text: 'Timeline', tag: 'Sun / Earth', modes: ['student', 'professional'] },
+  { id: 'chart', icon: '📊', text: 'Elevation Chart', tag: 'Horizon', modes: ['professional'] },
+  { id: 'compare', icon: '⚖️', text: 'A/B Comparator', tag: 'Sensitivity', modes: ['professional'] },
+  { id: 'benchmark', icon: '📋', text: 'Physical Benchmark', tag: '5 cases', modes: ['professional'] },
+  { id: 'method', icon: 'ℹ️', text: 'Methodology & Sources', tag: 'Limits', modes: ['student', 'professional'] },
+];
+
+export function toolTitle(id: ToolId): string {
+  const e = TOOL_ENTRIES.find((t) => t.id === id);
+  return e ? `${e.icon} ${e.text}` : '';
+}
+
+export function isToolAllowed(id: ToolId, mode: ViewMode): boolean {
+  return TOOL_ENTRIES.some((t) => t.id === id && t.modes.includes(mode));
+}
+
+const OPEN_KEY = 'killaland_tools_open';
+
+export default function ToolsMenu({ onOpen }: { onOpen: (id: ToolId) => void }) {
+  const viewMode = useMission((s) => s.viewMode);
+  const entries = TOOL_ENTRIES.filter((t) => t.modes.includes(viewMode));
+  // Plegable: recordado en la sesión para no tapar la parte gráfica
+  const [open, setOpen] = useState(() => {
+    try {
+      return sessionStorage.getItem(OPEN_KEY) !== '0';
+    } catch {
+      return true;
+    }
+  });
+  const toggle = () => {
+    setOpen((v) => {
+      try {
+        sessionStorage.setItem(OPEN_KEY, v ? '0' : '1');
+      } catch {
+        /* sin sessionStorage */
+      }
+      return !v;
+    });
+  };
+
+  return (
+    <nav aria-label="Tools" className="flex flex-col gap-1 w-64">
+      <button
+        onClick={toggle}
+        aria-expanded={open}
+        className="w-full text-xs font-bold py-1 px-3 rounded-xl backdrop-blur-md flex items-center justify-between transition cursor-pointer shadow-lg border bg-[#0e1626]/95 hover:bg-[#15203a] text-slate-100 border-slate-600/80"
+      >
+        <span>🧰 Tools</span>
+        <span className="text-[10px] font-mono text-slate-400">{open ? '▲ collapse' : `▼ ${entries.length}`}</span>
+      </button>
+      {open && entries.map((t) => (
+        <button
+          key={t.id}
+          onClick={() => onOpen(t.id)}
+          className={`w-full text-xs font-semibold py-1 px-3 rounded-xl backdrop-blur-md flex items-center justify-between transition cursor-pointer shadow-lg border ${
+            t.accent
+              ? 'bg-gradient-to-r from-emerald-950/90 to-[#09111e]/90 hover:from-emerald-900 text-emerald-300 border-emerald-600/70'
+              : 'bg-[#09111e]/90 hover:bg-[#121e33] text-slate-200 border-slate-700/80'
+          }`}
+        >
+          <span>
+            {t.icon} {t.text}
+          </span>
+          <span className={`text-[10px] font-mono ${t.accent ? 'text-emerald-400' : 'text-slate-400'}`}>{t.tag}</span>
+        </button>
+      ))}
+    </nav>
+  );
+}
