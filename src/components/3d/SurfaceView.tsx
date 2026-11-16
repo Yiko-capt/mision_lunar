@@ -25,16 +25,22 @@ export function LookControls({ eye, initialAzDeg = 0, initialElDeg = 8 }: LookCo
   const camera = useThree((s) => s.camera);
   const gl = useThree((s) => s.gl);
   const yawPitch = useRef({ yaw: 0, pitch: 0 });
+  const initializedRef = useRef(false);
 
-  // Mantiene una referencia estable al ojo para los listeners
+  // Stable ref for the eye position so pointer listeners always read the latest
   const eyeRef = useRef(eye);
   eyeRef.current = eye;
 
+  // Set initial orientation ONLY on first mount (not when sun/earth azimuth changes
+  // due to timeline playback — that would hijack the user's camera every frame).
   useEffect(() => {
-    // Azimut → yaw de three: az 0° (Norte) mira hacia -Z; az 90° (Este) hacia +X
-    yawPitch.current.yaw = (-initialAzDeg * Math.PI) / 180;
-    yawPitch.current.pitch = (initialElDeg * Math.PI) / 180;
-  }, [initialAzDeg, initialElDeg]);
+    if (!initializedRef.current) {
+      yawPitch.current.yaw = (-initialAzDeg * Math.PI) / 180;
+      yawPitch.current.pitch = (initialElDeg * Math.PI) / 180;
+      initializedRef.current = true;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const dom = gl.domElement;
@@ -131,7 +137,7 @@ export function CardinalMarkers({ eye, visible }: CardinalMarkersProps) {
         { text: 'N', az: 0, color: '#f87171' },
         { text: 'E', az: 90, color: '#e2e8f0' },
         { text: 'S', az: 180, color: '#e2e8f0' },
-        { text: 'O', az: 270, color: '#e2e8f0' },
+        { text: 'W', az: 270, color: '#e2e8f0' },
       ].map((l) => ({ ...l, tex: makeLabelTexture(l.text, l.color) })),
     []
   );

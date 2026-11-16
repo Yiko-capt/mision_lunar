@@ -12,7 +12,7 @@ export default function SiteSelector({
   siteStatuses = {},
   selectedId,
   onSelect,
-  label = 'Seleccionar Sitio',
+  label = 'Select Site',
 }: SiteSelectorProps) {
   const [filter, setFilter] = useState<'all' | 'official'>('all');
 
@@ -29,7 +29,7 @@ export default function SiteSelector({
               filter === 'official' ? 'bg-cyan-600 text-white font-medium' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            Oficiales (5)
+            Official (5)
           </button>
           <button
             onClick={() => setFilter('all')}
@@ -37,7 +37,7 @@ export default function SiteSelector({
               filter === 'all' ? 'bg-cyan-600 text-white font-medium' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            Todos ({SITES.length})
+            All ({SITES.length})
           </button>
         </div>
       </div>
@@ -49,19 +49,19 @@ export default function SiteSelector({
 
           let statusBadge = (
             <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-950/70 border border-emerald-800 text-emerald-400 font-mono">
-              COMPLETO
+              COMPLETE
             </span>
           );
           if (status === 'parcial') {
             statusBadge = (
               <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-950/70 border border-amber-800 text-amber-400 font-mono">
-                PARCIAL
+                PARTIAL
               </span>
             );
           } else if (status === 'sin_datos') {
             statusBadge = (
               <span className="text-[10px] px-1.5 py-0.2 rounded bg-rose-950/70 border border-rose-800 text-rose-400 font-mono">
-                SIN DATOS
+                NO DATA
               </span>
             );
           }
@@ -81,7 +81,7 @@ export default function SiteSelector({
                   <span className="truncate">{site.nombre}</span>
                   {!site.isOfficial && (
                     <span className="text-[9px] px-1 rounded bg-slate-800 text-slate-400 border border-slate-700">
-                      No oficial
+                      Additional
                     </span>
                   )}
                 </div>

@@ -52,14 +52,14 @@ export default function SitesComparisonTable({
   return (
     <div className="space-y-2" data-testid="sites-table">
       <div className="text-[11px] text-slate-400">
-        Misma ventana para todos: {durationDays} días desde {new Date(missionStartMs).toISOString().slice(0, 10)} (UTC).
-        Haz clic en una fila para ir a ese sitio.
+        Same window for all: {durationDays} days starting {new Date(missionStartMs).toISOString().slice(0, 10)} (UTC).
+        Click a row to navigate to that site.
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-xs border-collapse">
           <thead>
             <tr className="text-[10px] uppercase tracking-wider text-slate-400 text-left">
-              <th className="py-2 pr-2 font-semibold">Sitio</th>
+              <th className="py-2 pr-2 font-semibold">Site</th>
               {isPro && <th className="py-2 px-2 font-semibold text-right">Lat / Lon</th>}
               <th className="py-2 px-2 font-semibold">
                 <span className="inline-flex items-center gap-1">{label('sunPct', viewMode)} <InfoTip term={label('sunPct', viewMode)} text={help('sunPct')} /></span>
@@ -67,11 +67,11 @@ export default function SitesComparisonTable({
               <th className="py-2 px-2 font-semibold">
                 <span className="inline-flex items-center gap-1">{label('earthPct', viewMode)} <InfoTip term={label('earthPct', viewMode)} text={help('earthPct')} /></span>
               </th>
-              <th className="py-2 px-2 font-semibold">Ambos</th>
+              <th className="py-2 px-2 font-semibold">Both</th>
               <th className="py-2 px-2 font-semibold text-right">
                 <span className="inline-flex items-center gap-1">{label('blackout', viewMode)} <InfoTip term={label('blackout', viewMode)} text={help('blackout')} /></span>
               </th>
-              {isPro && <th className="py-2 pl-2 font-semibold">Horizonte</th>}
+              {isPro && <th className="py-2 pl-2 font-semibold">Horizon</th>}
             </tr>
           </thead>
           <tbody>
@@ -85,7 +85,7 @@ export default function SitesComparisonTable({
                 >
                   <td className="py-2 pr-2">
                     <div className={`font-semibold ${sel ? 'text-cyan-200' : 'text-slate-100'}`}>{r.site.nombre}</div>
-                    <div className="text-[10px] text-slate-500">{r.site.isOfficial ? 'Oficial (benchmark)' : 'Adicional'}</div>
+                    <div className="text-[10px] text-slate-500">{r.site.isOfficial ? 'Official (benchmark)' : 'Additional'}</div>
                   </td>
                   {isPro && (
                     <td className="py-2 px-2 text-right font-mono text-slate-300 whitespace-nowrap">
@@ -102,7 +102,7 @@ export default function SitesComparisonTable({
                     </>
                   ) : (
                     <td colSpan={isPro ? 5 : 4} className="py-2 px-2 text-slate-500">
-                      {r.state === 'loading' ? 'Cargando…' : 'Sin efemérides para este sitio'}
+                      {r.state === 'loading' ? 'Loading…' : 'No ephemerides for this site'}
                     </td>
                   )}
                 </tr>
@@ -112,7 +112,7 @@ export default function SitesComparisonTable({
         </table>
       </div>
       <div className="text-[10px] text-slate-500">
-        Los sitios con "horizonte esférico liso" no tienen perfil de terreno: sus porcentajes no consideran montañas y son orientativos.
+        Sites with "smooth spherical horizon" lack a detailed DEM profile: their percentages do not account for terrain topography and are indicative.
       </div>
     </div>
   );

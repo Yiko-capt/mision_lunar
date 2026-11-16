@@ -468,8 +468,10 @@ export function createLunarBumpMap(): THREE.CanvasTexture {
 }
 
 /**
- * Genera una textura de fondo de espacio profundo con la Vía Láctea,
- * nebulosas cósmicas y polvo interestelar (Solar System Scope background).
+ * Deep-space void background: almost pure black with sparse, sharp, punctual
+ * stars — inspired by real astrophotography of the night sky.
+ * The Milky Way band is extremely subtle (barely visible warmth in one corner).
+ * Stars are tiny sharp dots, not glowy halos, spread well apart.
  */
 export function createMilkyWaySkyTexture(): THREE.CanvasTexture {
   const width = 2048;
@@ -481,32 +483,105 @@ export function createMilkyWaySkyTexture(): THREE.CanvasTexture {
 
   if (!ctx) return new THREE.CanvasTexture(canvas);
 
-  // Espacio negro azabache
-  ctx.fillStyle = '#010308';
+  // Pure black void
+  ctx.fillStyle = '#000000';
   ctx.fillRect(0, 0, width, height);
 
-  // Banda inclinada de la Vía Láctea y nubes moleculares
+  // Very subtle Milky Way warmth in the lower-right (barely perceptible)
   ctx.save();
-  ctx.translate(width * 0.5, height * 0.5);
-  ctx.rotate(-0.35); // Inclinación galáctica
-
-  // Polvo cósmico y resplandor de fondo
-  const nebGrad = ctx.createRadialGradient(0, 0, 80, 0, 0, width * 0.6);
-  nebGrad.addColorStop(0, 'rgba(49, 46, 129, 0.25)'); // Índigo galáctico
-  nebGrad.addColorStop(0.3, 'rgba(126, 34, 206, 0.15)'); // Púrpura nebulosa
-  nebGrad.addColorStop(0.6, 'rgba(14, 116, 144, 0.1)'); // Cian cósmico
+  ctx.translate(width * 0.7, height * 0.8);
+  ctx.rotate(-0.4);
+  const nebGrad = ctx.createRadialGradient(0, 0, 40, 0, 0, width * 0.35);
+  nebGrad.addColorStop(0, 'rgba(45, 20, 15, 0.12)');
+  nebGrad.addColorStop(0.4, 'rgba(30, 15, 10, 0.06)');
   nebGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
   ctx.fillStyle = nebGrad;
   ctx.fillRect(-width, -height, width * 2, height * 2);
+  ctx.restore();
 
-  // Núcleo estelar brillante de la Vía Láctea
-  const coreGrad = ctx.createLinearGradient(0, -90, 0, 90);
-  coreGrad.addColorStop(0, 'rgba(255, 255, 255, 0)');
-  coreGrad.addColorStop(0.5, 'rgba(240, 240, 255, 0.18)');
-  coreGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-  ctx.fillStyle = coreGrad;
-  ctx.fillRect(-width, -90, width * 2, 180);
+  // ── Stars: sharp punctual dots on pure black ──
+  let seed = 31415;
+  const rng = () => {
+    seed = (seed * 16807) % 2147483647;
+    return (seed - 1) / 2147483646;
+  };
 
+  // Mostly white/blue-white with rare warm tones
+  const starColors = [
+    [220, 230, 255],  // Blue-white (most common visible)
+    [255, 255, 255],  // Pure white
+    [255, 250, 240],  // Warm white
+    [255, 235, 200],  // Yellowish
+    [200, 215, 255],  // Cool blue
+  ];
+
+  // Layer 1: ~1200 very faint tiny dots (mag 6+, barely visible)
+  for (let i = 0; i < 1200; i++) {
+    const x = rng() * width;
+    const y = rng() * height;
+    const brightness = 0.12 + rng() * 0.20;
+    const c = starColors[Math.floor(rng() * starColors.length)];
+    ctx.fillStyle = `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${brightness})`;
+    ctx.fillRect(x, y, 1, 1);
+  }
+
+  // Layer 2: ~500 dim small stars (mag 4-5)
+  for (let i = 0; i < 500; i++) {
+    const x = rng() * width;
+    const y = rng() * height;
+    const brightness = 0.35 + rng() * 0.35;
+    const c = starColors[Math.floor(rng() * starColors.length)];
+    ctx.fillStyle = `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${brightness})`;
+    ctx.fillRect(x, y, 1, 1);
+  }
+
+  // Layer 3: ~180 medium stars (mag 2-3, 1-2px sharp)
+  for (let i = 0; i < 180; i++) {
+    const x = rng() * width;
+    const y = rng() * height;
+    const brightness = 0.6 + rng() * 0.35;
+    const c = starColors[Math.floor(rng() * starColors.length)];
+    ctx.fillStyle = `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${brightness})`;
+    ctx.beginPath();
+    ctx.arc(x, y, 0.7 + rng() * 0.4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Layer 4: ~40 bright stars (mag 0-1, sharp 1.5px dot with tiny halo)
+  for (let i = 0; i < 40; i++) {
+    const x = rng() * width;
+    const y = rng() * height;
+    const c = starColors[Math.floor(rng() * 3)]; // Tend blue/white
+
+    // Tiny tight halo (barely 3px)
+    const glow = ctx.createRadialGradient(x, y, 0, x, y, 2.5);
+    glow.addColorStop(0, `rgba(${c[0]}, ${c[1]}, ${c[2]}, 0.9)`);
+    glow.addColorStop(0.4, `rgba(${c[0]}, ${c[1]}, ${c[2]}, 0.2)`);
+    glow.addColorStop(1, `rgba(${c[0]}, ${c[1]}, ${c[2]}, 0)`);
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Sharp bright core
+    ctx.fillStyle = `rgba(255, 255, 255, 1.0)`;
+    ctx.beginPath();
+    ctx.arc(x, y, 0.7, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Milky Way band: sparse extra dots concentrated in a tilted strip
+  ctx.save();
+  ctx.translate(width * 0.5, height * 0.5);
+  ctx.rotate(-0.35);
+  for (let i = 0; i < 400; i++) {
+    const x = (rng() - 0.5) * width * 1.3;
+    const y = (rng() - 0.5) * 120;
+    const brightness = 0.15 + rng() * 0.3;
+    const c = starColors[Math.floor(rng() * starColors.length)];
+    ctx.fillStyle = `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${brightness})`;
+    ctx.fillRect(x, y, 1, 1);
+  }
   ctx.restore();
 
   const texture = new THREE.CanvasTexture(canvas);
@@ -515,8 +590,7 @@ export function createMilkyWaySkyTexture(): THREE.CanvasTexture {
 }
 
 /**
- * Genera un sprite circular suave para estrellas brillantes (anti-aliased)
- * eliminando los artefactos de puntos cuadrados.
+ * Sharp circular star sprite (tight core, minimal glow).
  */
 export function createCircularStarTexture(): THREE.CanvasTexture {
   const size = 64;
@@ -529,8 +603,9 @@ export function createCircularStarTexture(): THREE.CanvasTexture {
 
   const grad = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
   grad.addColorStop(0, 'rgba(255, 255, 255, 1.0)');
-  grad.addColorStop(0.25, 'rgba(224, 238, 255, 0.85)');
-  grad.addColorStop(0.6, 'rgba(147, 197, 253, 0.35)');
+  grad.addColorStop(0.15, 'rgba(240, 245, 255, 0.9)');
+  grad.addColorStop(0.35, 'rgba(200, 220, 255, 0.25)');
+  grad.addColorStop(0.6, 'rgba(150, 180, 220, 0.05)');
   grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
   ctx.fillStyle = grad;
@@ -538,4 +613,130 @@ export function createCircularStarTexture(): THREE.CanvasTexture {
 
   const texture = new THREE.CanvasTexture(canvas);
   return texture;
+}
+
+
+/**
+ * Creates high-detail lunar surface regolith textures (albedo map and bump map)
+ * simulating authentic fine powdery lunar soil, impact micro-craters, rocks and pebbles.
+ */
+export function createLunarRegolithTextures(): {
+  map: THREE.CanvasTexture;
+  bumpMap: THREE.CanvasTexture;
+} {
+  const size = 1024;
+  const albedoCanvas = document.createElement('canvas');
+  albedoCanvas.width = size;
+  albedoCanvas.height = size;
+  const aCtx = albedoCanvas.getContext('2d')!;
+
+  const bumpCanvas = document.createElement('canvas');
+  bumpCanvas.width = size;
+  bumpCanvas.height = size;
+  const bCtx = bumpCanvas.getContext('2d')!;
+
+  // 1. Base regolith tone: natural lunar gray
+  aCtx.fillStyle = '#6b6964';
+  aCtx.fillRect(0, 0, size, size);
+
+  bCtx.fillStyle = '#808080';
+  bCtx.fillRect(0, 0, size, size);
+
+  // 2. High-frequency micro-grain / noise simulation
+  const aImg = aCtx.getImageData(0, 0, size, size);
+  const aData = aImg.data;
+  const bImg = bCtx.getImageData(0, 0, size, size);
+  const bData = bImg.data;
+
+  let seed = 42;
+  const rnd = () => {
+    seed = (seed * 16807) % 2147483647;
+    return (seed - 1) / 2147483646;
+  };
+
+  for (let i = 0; i < aData.length; i += 4) {
+    const n = (rnd() - 0.5) * 36;
+    const base = 108 + n;
+    aData[i] = Math.max(20, Math.min(230, base));
+    aData[i + 1] = Math.max(20, Math.min(230, base - 2));
+    aData[i + 2] = Math.max(20, Math.min(230, base - 5));
+
+    const bVal = 128 + n * 1.5;
+    bData[i] = Math.max(0, Math.min(255, bVal));
+    bData[i + 1] = Math.max(0, Math.min(255, bVal));
+    bData[i + 2] = Math.max(0, Math.min(255, bVal));
+  }
+  aCtx.putImageData(aImg, 0, 0);
+  bCtx.putImageData(bImg, 0, 0);
+
+  // 3. Draw scattered micro-craters with raised rims and shaded pits
+  const drawCrater = (x: number, y: number, r: number) => {
+    const rimGrad = bCtx.createRadialGradient(x, y, r * 0.7, x, y, r * 1.25);
+    rimGrad.addColorStop(0, 'rgba(128, 128, 128, 0)');
+    rimGrad.addColorStop(0.7, 'rgba(215, 215, 215, 0.75)');
+    rimGrad.addColorStop(1, 'rgba(128, 128, 128, 0)');
+    bCtx.fillStyle = rimGrad;
+    bCtx.beginPath();
+    bCtx.arc(x, y, r * 1.25, 0, Math.PI * 2);
+    bCtx.fill();
+
+    const pitGrad = bCtx.createRadialGradient(x, y, 0, x, y, r);
+    pitGrad.addColorStop(0, 'rgba(25, 25, 25, 0.9)');
+    pitGrad.addColorStop(0.8, 'rgba(60, 60, 60, 0.7)');
+    pitGrad.addColorStop(1, 'rgba(128, 128, 128, 0)');
+    bCtx.fillStyle = pitGrad;
+    bCtx.beginPath();
+    bCtx.arc(x, y, r, 0, Math.PI * 2);
+    bCtx.fill();
+
+    const aPitGrad = aCtx.createRadialGradient(x, y, 0, x, y, r * 1.15);
+    aPitGrad.addColorStop(0, 'rgba(38, 36, 34, 0.75)');
+    aPitGrad.addColorStop(0.7, 'rgba(68, 66, 62, 0.55)');
+    aPitGrad.addColorStop(0.9, 'rgba(165, 160, 154, 0.45)');
+    aPitGrad.addColorStop(1, 'rgba(100, 98, 94, 0)');
+    aCtx.fillStyle = aPitGrad;
+    aCtx.beginPath();
+    aCtx.arc(x, y, r * 1.15, 0, Math.PI * 2);
+    aCtx.fill();
+  };
+
+  for (let k = 0; k < 70; k++) {
+    const cx = rnd() * size;
+    const cy = rnd() * size;
+    const cr = 4 + rnd() * 26;
+    drawCrater(cx, cy, cr);
+  }
+  for (let k = 0; k < 240; k++) {
+    const cx = rnd() * size;
+    const cy = rnd() * size;
+    const cr = 1.5 + rnd() * 4;
+    drawCrater(cx, cy, cr);
+  }
+
+  // 4. Small pebbles and rocks
+  for (let k = 0; k < 150; k++) {
+    const rx = rnd() * size;
+    const ry = rnd() * size;
+    const rr = 1.2 + rnd() * 3.5;
+    bCtx.fillStyle = 'rgba(235, 235, 235, 0.85)';
+    bCtx.beginPath();
+    bCtx.arc(rx, ry, rr, 0, Math.PI * 2);
+    bCtx.fill();
+
+    aCtx.fillStyle = 'rgba(175, 172, 164, 0.85)';
+    aCtx.beginPath();
+    aCtx.arc(rx, ry, rr, 0, Math.PI * 2);
+    aCtx.fill();
+  }
+
+  const map = new THREE.CanvasTexture(albedoCanvas);
+  map.wrapS = THREE.RepeatWrapping;
+  map.wrapT = THREE.RepeatWrapping;
+  map.colorSpace = THREE.SRGBColorSpace;
+
+  const bumpMap = new THREE.CanvasTexture(bumpCanvas);
+  bumpMap.wrapS = THREE.RepeatWrapping;
+  bumpMap.wrapT = THREE.RepeatWrapping;
+
+  return { map, bumpMap };
 }

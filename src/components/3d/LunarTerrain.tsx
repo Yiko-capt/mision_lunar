@@ -5,9 +5,10 @@ import { TERRAIN } from '../../data/moon';
 import { useMission } from '../../store/useMission';
 import { SITES } from '../../data/sites';
 import type { Analysis } from '../../lib/analysis';
+import { createLunarRegolithTextures } from '../../lib/textures';
 
-export const SCALE = 1 / 100; // 1 unidad de escena = 100 m
-export const EXAG = 2.8;      // exageración vertical proporcionada para relieve de cráteres
+export const SCALE = 1 / 100; // 1 scene unit = 100 m
+export const EXAG = 1.0;      // 1:1 true physical elevation: prevents sharp spiky artifacts
 
 interface LunarTerrainProps {
   analysis: Analysis;
@@ -62,10 +63,12 @@ export default function LunarTerrain({ analysis: _analysis, showMarker = true }:
     }
   }, [selectedLat, selectedLon, activeSite, half, n, mission.selected, update]);
 
-  // Generar geometría con sombreado de regolito lunar gris fotorrealista (sin verde plano)
+  // Generar geometría con mayor densidad de polígonos, relieve suave sin crestas puntiagudas y UVs para textura
   const geometry = useMemo(() => {
-    const pos = new Float32Array(n * n * 3);
-    const col = new Float32Array(n * n * 3);
+    const subdiv = 160; // Malla de 160x160 (50,562 triángulos) para eliminar caras angulares planas
+    const pos = new Float32Array(subdiv * subdiv * 3);
+    const col = new Float32Array(subdiv * subdiv * 3);
+    const uvs = new Float32Array(subdiv * subdiv * 2);
 
     // Encontrar rango de alturas para normalizar
     let minH = Infinity;
@@ -76,36 +79,60 @@ export default function LunarTerrain({ analysis: _analysis, showMarker = true }:
     }
     const hRange = Math.max(1, maxH - minH);
 
-    // Paleta oficial de regolito lunar PBR:
-    // Crestas iluminadas: #a8a59e -> [0.658, 0.647, 0.620]
-    // Laderas y planicies: #6e6c67 -> [0.431, 0.424, 0.404]
-    // Depresiones y sombras: #262523 -> [0.149, 0.145, 0.137]
+    for (let sj = 0; sj < subdiv; sj++) {
+      const vNorm = sj / (subdiv - 1);
+      const fj = Math.min(n - 1.0001, Math.max(0, vNorm * (n - 1)));
+      const j0 = Math.floor(fj);
+      const j1 = Math.min(n - 1, j0 + 1);
+      const tz = fj - j0;
+      const sz = tz * tz * (3 - 2 * tz); // Suavizado cúbico Hermite
 
-    for (let j = 0; j < n; j++) {
-      for (let i = 0; i < n; i++) {
-        const c = j * n + i;
-        const o = c * 3;
+      for (let si = 0; si < subdiv; si++) {
+        const uNorm = si / (subdiv - 1);
+        const fi = Math.min(n - 1.0001, Math.max(0, uNorm * (n - 1)));
+        const i0 = Math.floor(fi);
+        const i1 = Math.min(n - 1, i0 + 1);
+        const tx = fi - i0;
+        const sx = tx * tx * (3 - 2 * tx);
 
-        pos[o] = (i - half) * cellM * SCALE;
-        pos[o + 1] = h[c] * SCALE * EXAG;
-        pos[o + 2] = (j - half) * cellM * SCALE;
+        // Interpolación continua suave sin aristas angulares
+        const h00 = h[j0 * n + i0];
+        const h10 = h[j0 * n + i1];
+        const h01 = h[j1 * n + i0];
+        const h11 = h[j1 * n + i1];
+        const smoothH = (h00 * (1 - sx) + h10 * sx) * (1 - sz) + (h01 * (1 - sx) + h11 * sx) * sz;
 
-        const normH = (h[c] - minH) / hRange;
-        const slope = Math.min(30, slopeDeg[c]) / 30; // 0..1
+        const s00 = slopeDeg[j0 * n + i0];
+        const s10 = slopeDeg[j0 * n + i1];
+        const s01 = slopeDeg[j1 * n + i0];
+        const s11 = slopeDeg[j1 * n + i1];
+        const smoothSlope = (s00 * (1 - sx) + s10 * sx) * (1 - sz) + (s01 * (1 - sx) + s11 * sx) * sz;
+
+        const vIdx = sj * subdiv + si;
+        const o = vIdx * 3;
+        const uIdx = vIdx * 2;
+
+        pos[o] = (uNorm - 0.5) * (n - 1) * cellM * SCALE;
+        pos[o + 1] = smoothH * SCALE * EXAG;
+        pos[o + 2] = (vNorm - 0.5) * (n - 1) * cellM * SCALE;
+
+        // UVs mapeadas con repetición para micro-detalle de regolito
+        uvs[uIdx] = uNorm * 32;
+        uvs[uIdx + 1] = vNorm * 32;
+
+        const normH = (smoothH - minH) / hRange;
+        const slope = Math.min(30, smoothSlope) / 30;
 
         // Ruido mineral sutil de regolito
-        const noise = ((Math.sin(i * 12.9898 + j * 78.233) * 43758.5453) % 1) * 0.04 - 0.02;
+        const noise = ((Math.sin(si * 12.9898 + sj * 78.233) * 43758.5453) % 1) * 0.04 - 0.02;
 
         let r: number, g: number, b: number;
-
         if (normH > 0.55) {
-          // Crestas altas y bordes de cráteres iluminados (#a8a59e)
           const t = (normH - 0.55) / 0.45;
           r = 0.431 + t * (0.658 - 0.431) - slope * 0.1 + noise;
           g = 0.424 + t * (0.647 - 0.424) - slope * 0.1 + noise;
           b = 0.404 + t * (0.620 - 0.404) - slope * 0.09 + noise;
         } else {
-          // Laderas medias hacia fondos de cráteres oscuros (#262523)
           const t = normH / 0.55;
           r = 0.149 + t * (0.431 - 0.149) + noise;
           g = 0.145 + t * (0.424 - 0.145) + noise;
@@ -119,12 +146,12 @@ export default function LunarTerrain({ analysis: _analysis, showMarker = true }:
     }
 
     const idx: number[] = [];
-    for (let j = 0; j < n - 1; j++) {
-      for (let i = 0; i < n - 1; i++) {
-        const a = j * n + i,
-          b = a + 1,
-          c = a + n,
-          d = c + 1;
+    for (let sj = 0; sj < subdiv - 1; sj++) {
+      for (let si = 0; si < subdiv - 1; si++) {
+        const a = sj * subdiv + si;
+        const b = a + 1;
+        const c = a + subdiv;
+        const d = c + 1;
         idx.push(a, c, b, b, c, d);
       }
     }
@@ -132,10 +159,11 @@ export default function LunarTerrain({ analysis: _analysis, showMarker = true }:
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    geo.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
     geo.setIndex(idx);
     geo.computeVertexNormals();
     return geo;
-  }, [n, cellM, h, slopeDeg, half]);
+  }, [n, cellM, h, slopeDeg]);
 
   // Animación suave del marcador sobre el sitio seleccionado
   useFrame((state) => {
@@ -192,11 +220,16 @@ export default function LunarTerrain({ analysis: _analysis, showMarker = true }:
     ];
   }, [selected, n, half, cellM, h]);
 
+  const { map: regolithMap, bumpMap: regolithBump } = useMemo(() => createLunarRegolithTextures(), []);
+
   return (
     <group>
-      {/* 1. Malla del terreno con regolito lunar gris PBR */}
+      {/* 1. Malla del terreno con regolito lunar PBR, textura fotorrealista y micro-relieve */}
       <mesh geometry={geometry} castShadow receiveShadow onClick={handleClick}>
         <meshStandardMaterial
+          map={regolithMap}
+          bumpMap={regolithBump}
+          bumpScale={0.12}
           vertexColors
           roughness={0.95}
           metalness={0.0}

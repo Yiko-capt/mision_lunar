@@ -10,7 +10,7 @@ export default function TimelineBar() {
       <input type="range" className="flex-1" min={0} max={s.durationDays} step={0.25}
         value={s.simDay} onChange={(e) => s.update({ simDay: Number(e.target.value) })} />
       <span className="text-xs text-slate-400 w-40 text-right">
-        Día {s.simDay.toFixed(2)} de {s.durationDays}
+        Day {s.simDay.toFixed(2)} of {s.durationDays}
       </span>
     </div>
   );

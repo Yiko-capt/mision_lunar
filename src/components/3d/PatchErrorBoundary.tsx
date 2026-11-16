@@ -21,7 +21,7 @@ export default class PatchErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: any) {
-    console.error('[PatchErrorBoundary] Error capturado en vista Polo Sur:', error, errorInfo);
+    console.error('[PatchErrorBoundary] Error caught in South Pole view:', error, errorInfo);
   }
 
   handleRetry = () => {
@@ -36,17 +36,17 @@ export default class PatchErrorBoundary extends Component<Props, State> {
           <div className="max-w-md w-full bg-slate-900/90 border border-amber-500/50 rounded-2xl p-6 text-center space-y-4 shadow-2xl backdrop-blur-md">
             <div className="text-4xl">⛰️⚠️</div>
             <h3 className="text-sm font-bold text-amber-400 font-mono">
-              Incidencia al renderizar terreno del Polo Sur
+              Error rendering South Pole terrain
             </h3>
             <p className="text-[11px] text-slate-300 font-mono bg-slate-950 p-3 rounded-lg border border-slate-800 text-left overflow-auto max-h-32">
-              {this.state.error?.message || 'Error en cómputo topográfico o buffer WebGL'}
+              {this.state.error?.message || 'Error in topographic computation or WebGL buffer'}
             </p>
             <div className="flex gap-2 justify-center pt-1">
               <button
                 onClick={this.handleRetry}
                 className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg transition cursor-pointer shadow-lg"
               >
-                🔄 Reintentar parche
+                🔄 Retry terrain patch
               </button>
             </div>
           </div>

@@ -28,7 +28,7 @@ export default function EnergyCommsWidget({
     <div className="p-3 bg-[#060c18] border border-slate-700/80 rounded-xl space-y-3 font-sans">
       <div className="flex items-center justify-between border-b border-slate-800/80 pb-1.5">
         <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider font-mono">
-          ⚡ Energía y Comunicación (Misión Completa)
+          ⚡ Power & Communications (Full Mission)
         </span>
         <span
           className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${
@@ -37,16 +37,16 @@ export default function EnergyCommsWidget({
               : 'bg-amber-950 text-amber-400 border border-amber-800'
           }`}
         >
-          {meetsMinLight ? '✓ ÓPTIMO' : '⚠️ AJUSTADO'}
+          {meetsMinLight ? '✓ OPTIMAL' : '⚠️ TIGHT'}
         </span>
       </div>
 
-      {/* 1. Barra de Energía Solar Útil */}
+      {/* 1. Usable Solar Energy Bar */}
       <div className="space-y-1">
         <div className="flex justify-between text-[11px]">
           <span className="text-slate-300 flex items-center gap-1.5">
             <span>☀️</span>
-            <span>Energía solar útil</span>
+            <span>Solar Energy Fraction</span>
           </span>
           <span className="font-mono font-bold text-amber-300">
             {sunPct.toFixed(1)}%
@@ -59,17 +59,17 @@ export default function EnergyCommsWidget({
           />
         </div>
         <div className="flex justify-between text-[9px] text-slate-500 font-mono">
-          <span>Umbral mín: {minLightPct}%</span>
-          <span>{trajectory?.summary?.sun_hours?.toFixed(0) ?? 0} h efectivas</span>
+          <span>Min threshold: {minLightPct}%</span>
+          <span>{trajectory?.summary?.sun_hours?.toFixed(0) ?? 0} h sunlight</span>
         </div>
       </div>
 
-      {/* 2. Barra de Enlace Directo con la Tierra (DTE) */}
+      {/* 2. Direct Earth Link Bar (DTE) */}
       <div className="space-y-1">
         <div className="flex justify-between text-[11px]">
           <span className="text-slate-300 flex items-center gap-1.5">
             <span>🌍</span>
-            <span>Enlace directo Tierra (DTE)</span>
+            <span>Direct Earth Link (DTE)</span>
           </span>
           <span className="font-mono font-bold text-cyan-300">
             {earthPct.toFixed(1)}%
@@ -82,8 +82,8 @@ export default function EnergyCommsWidget({
           />
         </div>
         <div className="flex justify-between text-[9px] text-slate-500 font-mono">
-          <span>Visibilidad nominal</span>
-          <span>{trajectory?.summary?.earth_hours_nominal?.toFixed(0) ?? 0} h enlace</span>
+          <span>Nominal visibility</span>
+          <span>{trajectory?.summary?.earth_hours_nominal?.toFixed(0) ?? 0} h comms</span>
         </div>
       </div>
     </div>

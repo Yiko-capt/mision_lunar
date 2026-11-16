@@ -45,7 +45,7 @@ export default function InfoTip({ text, term }: InfoTipProps) {
       <button
         ref={ref}
         type="button"
-        aria-label={term ? `¿Qué es ${term}?` : 'Explicación'}
+        aria-label={term ? `What is ${term}?` : 'Explanation'}
         onMouseEnter={open}
         onMouseLeave={close}
         onFocus={open}

@@ -19,7 +19,7 @@ import PatchSurround from './components/3d/PatchSurround';
 import { LookControls, CardinalMarkers, SkyTracks } from './components/3d/SurfaceView';
 import MiniMap from './components/ui/MiniMap';
 import { GLOBE_SCALES, type ScaleMode } from './config/sceneScale';
-import LunarTerrain from './components/3d/LunarTerrain';
+import LunarTerrain, { EXAG, SCALE as TERRAIN_SCALE } from './components/3d/LunarTerrain';
 import { SunLight, EarthMarker } from './components/3d/Bodies';
 import SpaceBackground from './components/3d/SpaceBackground';
 import PatchErrorBoundary from './components/3d/PatchErrorBoundary';
@@ -316,16 +316,16 @@ export default function App() {
     ];
   }, [mission.selected]);
 
-  // Ojo de la vista "Desde el sitio": el suelo del punto seleccionado + altura del observador
+  // Eye position for "From Site" view: selected terrain ground height + observer eye height
   const surfaceEyePos = useMemo<[number, number, number]>(() => {
     const cell = mission.selected ?? 2048;
     const i = cell % TERRAIN.n;
     const j = Math.floor(cell / TERRAIN.n);
     const half = (TERRAIN.n - 1) / 2;
     return [
-      (i - half) * TERRAIN.cellM * (1 / 100),
-      TERRAIN.h[cell] * (1 / 100) * 2.8 + eyeHeightM / 100,
-      (j - half) * TERRAIN.cellM * (1 / 100),
+      (i - half) * TERRAIN.cellM * TERRAIN_SCALE,
+      TERRAIN.h[cell] * TERRAIN_SCALE * EXAG + eyeHeightM * TERRAIN_SCALE,
+      (j - half) * TERRAIN.cellM * TERRAIN_SCALE,
     ];
   }, [mission.selected, eyeHeightM]);
 
@@ -360,7 +360,7 @@ export default function App() {
               }`}
             >
               <span>🌐</span>
-              <span>Globo 3D</span>
+              <span>3D Globe</span>
             </button>
             <button
               onClick={() => setSceneView('parche')}
@@ -371,11 +371,11 @@ export default function App() {
               }`}
             >
               <span>⛰️</span>
-              <span>Polo Sur (Parche)</span>
+              <span>South Pole (Patch)</span>
             </button>
             <button
               onClick={() => setSceneView('sitio')}
-              title="Párate en el punto seleccionado: arrastra para mirar alrededor"
+              title="Stand at landing site: drag to look around"
               className={`px-3 py-1 rounded-lg transition flex items-center gap-1.5 cursor-pointer font-medium ${
                 sceneView === 'sitio'
                   ? 'bg-[#0e2a47] text-cyan-300 border border-cyan-700/60 shadow-sm'
@@ -383,7 +383,7 @@ export default function App() {
               }`}
             >
               <span>👁️</span>
-              <span>Desde el sitio</span>
+              <span>Site View</span>
             </button>
           </div>
         </header>
@@ -396,7 +396,7 @@ export default function App() {
           <div className={`absolute top-4 left-6 z-20 space-y-2 pointer-events-auto ${focusMode ? 'hidden' : ''}`}>
             <div>
               <div className="text-xs text-slate-400 font-medium">
-                Sitio seleccionado · <span className="text-white font-bold">{activeSite.nombre}</span>
+                Selected Site · <span className="text-white font-bold">{activeSite.nombre}</span>
               </div>
               <div className="text-sm font-bold text-cyan-400 font-mono tracking-wider">
                 {formattedUtcString}
@@ -409,7 +409,7 @@ export default function App() {
                   onClick={() => setIsSpinning(!isSpinning)}
                   className="bg-[#0b1320]/85 hover:bg-[#121e33] text-slate-200 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs font-medium backdrop-blur-sm transition cursor-pointer shadow-lg flex items-center gap-1.5"
                 >
-                  {isSpinning ? '⏸ Pausar rotación' : '▶ Reanudar rotación'}
+                  {isSpinning ? '⏸ Pause rotation' : '▶ Resume rotation'}
                 </button>
               )}
               {sceneView !== 'sitio' && (
@@ -417,52 +417,52 @@ export default function App() {
                   onClick={handleResetCamera}
                   className="bg-[#0b1320]/85 hover:bg-[#121e33] text-slate-200 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs font-medium backdrop-blur-sm transition cursor-pointer shadow-lg flex items-center gap-1.5"
                 >
-                  🔄 Resetear vista de frente
+                  🔄 Reset front view
                 </button>
               )}
               {!leftOpen && sceneView !== 'sitio' && (
                 <button
                   onClick={toggleLeft}
-                  title="Mostrar el panel de misión"
+                  title="Show mission panel"
                   className="bg-[#0b1320]/85 hover:bg-[#121e33] text-cyan-300 border border-cyan-800/80 px-3 py-1.5 rounded-lg text-xs font-medium backdrop-blur-sm transition cursor-pointer shadow-lg"
                 >
-                  ☰ Panel de misión
+                  ☰ Mission Panel
                 </button>
               )}
               <button
                 onClick={() =>
                   setQuality((q) => (q === 'alta' ? 'media' : q === 'media' ? 'baja' : 'alta'))
                 }
-                title="Calidad de render: resolución y sombras (baja sola si el equipo no llega)"
+                title="Render quality: resolution and shadows"
                 className="bg-[#0b1320]/85 hover:bg-[#121e33] text-slate-200 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs font-medium backdrop-blur-sm transition cursor-pointer shadow-lg"
               >
-                🎚 Calidad: {quality === 'alta' ? 'Alta' : quality === 'media' ? 'Media' : 'Baja'}
+                🎚 Quality: {quality === 'alta' ? 'High' : quality === 'media' ? 'Medium' : 'Low'}
               </button>
               <button
                 onClick={() => setFocusMode(true)}
-                title="Modo enfoque: oculta los paneles (tecla F)"
+                title="Focus mode: hides panels (F key)"
                 className="bg-[#0b1320]/85 hover:bg-[#121e33] text-slate-200 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs font-medium backdrop-blur-sm transition cursor-pointer shadow-lg"
               >
-                ⛶ Enfoque
+                ⛶ Focus
               </button>
               <button
                 onClick={() => setTourStep(0)}
-                title="Ver de nuevo el recorrido guiado"
+                title="Open guided tour"
                 className="bg-[#0b1320]/85 hover:bg-[#121e33] text-slate-200 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs font-medium backdrop-blur-sm transition cursor-pointer shadow-lg"
               >
-                ❓ Guía
+                ❓ Guide
               </button>
               {sceneView === 'sitio' && (
                 <>
                   <button
                     onClick={() => setShowSkyMarks((v) => !v)}
-                    title="Puntos cardinales y trayectorias del Sol y la Tierra (24 h)"
+                    title="Cardinal directions and 24h Sun/Earth sky tracks"
                     className="bg-[#0b1320]/85 hover:bg-[#121e33] text-slate-200 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs font-medium backdrop-blur-sm transition cursor-pointer shadow-lg"
                   >
-                    {showSkyMarks ? '🧭 Marcadores: Sí' : '🧭 Marcadores: No'}
+                    {showSkyMarks ? '🧭 Markers: Yes' : '🧭 Markers: No'}
                   </button>
                   <label className="bg-[#0b1320]/85 text-slate-200 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs font-medium backdrop-blur-sm shadow-lg flex items-center gap-1.5 cursor-pointer">
-                    👤 Altura del ojo
+                    👤 Eye height
                     <select
                       value={eyeHeightM}
                       onChange={(e) => setEyeHeightM(Number(e.target.value))}
@@ -485,19 +485,19 @@ export default function App() {
                       : 'bg-[#0b1320]/85 text-slate-200 border-slate-700/80 hover:bg-[#121e33]'
                   }`}
                 >
-                  📏 Escala: {scaleMode === 'real' ? 'Real' : 'Didáctica'}
+                  📏 Scale: {scaleMode === 'real' ? 'True' : 'Educational'}
                 </button>
               )}
               <button
                 onClick={() => setLightMode((m) => (m === 'legible' ? 'realista' : 'legible'))}
                 title={
                   lightMode === 'legible'
-                    ? 'Exposición realzada (+45 %) para leer el relieve nocturno'
-                    : 'Exposición física: el lado nocturno queda casi negro'
+                    ? 'Enhanced exposure (+45%) to inspect night relief'
+                    : 'Physical exposure: night side remains pitch dark'
                 }
                 className="bg-[#0b1320]/85 hover:bg-[#121e33] text-slate-200 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs font-medium backdrop-blur-sm transition cursor-pointer shadow-lg flex items-center gap-1.5"
               >
-                {lightMode === 'legible' ? '💡 Luz: Legible' : '🌑 Luz: Realista'}
+                {lightMode === 'legible' ? '💡 Light: Readable' : '🌑 Light: Physical'}
               </button>
             </div>
           </div>
@@ -505,13 +505,13 @@ export default function App() {
           {/* 2. PANEL FLOTANTE DE FILTROS A LA IZQUIERDA (oculto en la vista inmersiva) */}
           <div className={`absolute top-24 left-6 z-20 w-84 bg-[#09111e]/92 border border-slate-700/70 rounded-2xl p-4 shadow-2xl backdrop-blur-md pointer-events-auto font-sans text-xs space-y-3 max-h-[72vh] overflow-y-auto ${sceneView === 'sitio' || focusMode || !leftOpen ? 'hidden' : ''}`}>
             <div className="flex items-center justify-between -mb-1">
-              <span className="text-[10px] font-bold tracking-widest text-slate-400">PANEL DE MISIÓN</span>
+              <span className="text-[10px] font-bold tracking-widest text-slate-400">MISSION PANEL</span>
               <button
                 onClick={toggleLeft}
-                title="Plegar el panel (el lienzo 3D ocupa el espacio)"
+                title="Collapse panel"
                 className="text-slate-400 hover:text-white cursor-pointer text-[11px] px-1"
               >
-                ▲ plegar
+                ▲ collapse
               </button>
             </div>
             {isStudent ? (
@@ -534,21 +534,21 @@ export default function App() {
             {/* Selector de Sitio de Aterrizaje */}
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                SITIO DE ATERRIZAJE
+                LANDING SITE
               </label>
               <select
                 value={activeSite.site_id}
                 onChange={(e) => selectSite(e.target.value)}
                 className="w-full bg-[#111a2d] text-slate-100 text-xs rounded-lg px-2.5 py-2 border border-slate-700 focus:outline-none focus:border-cyan-400"
               >
-                <optgroup label="Sitios Oficiales (Benchmark)">
+                <optgroup label="Official Sites (Benchmark)">
                   {SITES.filter((s) => s.isOfficial).map((site) => (
                     <option key={site.site_id} value={site.site_id}>
                       {site.nombre} ({site.lat_deg.toFixed(1)}°, {site.lon_deg.toFixed(1)}°)
                     </option>
                   ))}
                 </optgroup>
-                <optgroup label="Sitios adicionales">
+                <optgroup label="Candidate Sites">
                   {SITES.filter((s) => !s.isOfficial).map((site) => (
                     <option key={site.site_id} value={site.site_id}>
                       {site.nombre} ({site.lat_deg.toFixed(1)}°, {site.lon_deg.toFixed(1)}°)
@@ -566,7 +566,7 @@ export default function App() {
                   panelTab === 'filtros' ? 'bg-cyan-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                Filtros
+                Filters
               </button>
               <button
                 onClick={() => setPanelTab('metricas')}
@@ -574,7 +574,7 @@ export default function App() {
                   panelTab === 'metricas' ? 'bg-cyan-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                Métricas
+                Metrics
               </button>
               <button
                 onClick={() => setPanelTab('cabina')}
@@ -582,7 +582,7 @@ export default function App() {
                   panelTab === 'cabina' ? 'bg-cyan-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                Cabina
+                Cabin
               </button>
             </div>
 
@@ -591,17 +591,17 @@ export default function App() {
               <div className="space-y-3 pt-1">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-1">
                   <span className="font-bold text-slate-300 uppercase tracking-wider text-[10px]">
-                    REQUISITOS DE MISIÓN
+                    MISSION REQUIREMENTS
                   </span>
                   <span className="text-[9px] text-cyan-400 font-mono px-1.5 py-0.5 bg-cyan-950/60 rounded border border-cyan-800">
-                    CRITERIOS
+                    CRITERIA
                   </span>
                 </div>
 
                 {/* Inicio de misión */}
                 <div>
                   <label className="text-[11px] text-slate-300 block mb-1">
-                    Inicio de misión
+                    Mission start
                   </label>
                   <input
                     type="date"
@@ -617,8 +617,8 @@ export default function App() {
                 {/* Duración */}
                 <div>
                   <div className="flex justify-between text-[11px] mb-1">
-                    <span className="text-slate-300">Duración</span>
-                    <span className="font-mono text-cyan-300 font-bold">{mission.durationDays} días</span>
+                    <span className="text-slate-300">Duration</span>
+                    <span className="font-mono text-cyan-300 font-bold">{mission.durationDays} days</span>
                   </div>
                   <input
                     type="range"
@@ -634,7 +634,7 @@ export default function App() {
                 {/* Luz solar mínima */}
                 <div>
                   <div className="flex justify-between text-[11px] mb-1">
-                    <span className="text-slate-300">Luz solar mínima</span>
+                    <span className="text-slate-300">Minimum sunlight</span>
                     <span className="font-mono text-cyan-300 font-bold">{mission.minLight}%</span>
                   </div>
                   <input
@@ -651,7 +651,7 @@ export default function App() {
                 {/* Pendiente máxima */}
                 <div>
                   <div className="flex justify-between text-[11px] mb-1">
-                    <span className="text-slate-300">Pendiente máxima</span>
+                    <span className="text-slate-300">Maximum slope</span>
                     <span className="font-mono text-cyan-300 font-bold">{mission.maxSlope}°</span>
                   </div>
                   <input
@@ -673,17 +673,17 @@ export default function App() {
                     onChange={(e) => mission.update({ requireEarth: e.target.checked })}
                     className="rounded bg-slate-800 border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer"
                   />
-                  Exigir línea de visión con la Tierra
+                  Require Earth line-of-sight
                 </label>
 
                 {/* Contador de celdas aptas */}
                 <div className="p-2 rounded-xl bg-[#070e1b] border border-slate-800 text-xs flex items-center justify-between">
                   <span className="text-slate-300 flex items-center gap-1">
-                    Celdas aptas (parche demo): <InfoTip term="Celdas aptas" text={help('aptCells')} />
+                    Eligible cells (demo patch): <InfoTip term="Eligible cells" text={help('aptCells')} />
                   </span>
                   <span className="font-mono font-bold">
                     <span className="text-emerald-400">{aptCellsCount}</span>{' '}
-                    <span className="text-slate-500">/ {totalCells} celdas</span>
+                    <span className="text-slate-500">/ {totalCells} cells</span>
                   </span>
                 </div>
 
@@ -706,46 +706,46 @@ export default function App() {
                 </div>
 
                 <div className="flex justify-between text-slate-300">
-                  <span className="text-slate-400 font-sans">Elevación Sol</span>
+                  <span className="text-slate-400 font-sans">Sun Elevation</span>
                   <span className={`font-bold ${celestial.sunEl > 0 ? 'text-amber-400' : 'text-slate-500'}`}>
                     {celestial.sunEl > 0 ? `+${celestial.sunEl.toFixed(2)}` : celestial.sunEl.toFixed(2)}°
                   </span>
                 </div>
                 <div className="flex justify-between text-slate-300">
-                  <span className="text-slate-400 font-sans">Azimut Sol</span>
+                  <span className="text-slate-400 font-sans">Sun Azimuth</span>
                   <span>+{celestial.sunAz.toFixed(1)}°</span>
                 </div>
                 <div className="flex justify-between text-slate-300">
-                  <span className="text-slate-400 font-sans">Elevación Tierra</span>
+                  <span className="text-slate-400 font-sans">Earth Elevation</span>
                   <span className={`font-bold ${celestial.earthEl > 0 ? 'text-blue-400' : 'text-slate-500'}`}>
                     {celestial.earthEl > 0 ? `+${celestial.earthEl.toFixed(2)}` : celestial.earthEl.toFixed(2)}°
                   </span>
                 </div>
                 <div className="flex justify-between text-slate-300">
-                  <span className="text-slate-400 font-sans">Azimut Tierra</span>
+                  <span className="text-slate-400 font-sans">Earth Azimuth</span>
                   <span>+{celestial.earthAz.toFixed(1)}°</span>
                 </div>
                 <div className="flex justify-between pt-1 border-t border-slate-800 text-slate-300">
-                  <span className="text-slate-400 font-sans">Fase lunar</span>
+                  <span className="text-slate-400 font-sans">Lunar phase</span>
                   <span>{lunarPhase}</span>
                 </div>
                 <div className="flex justify-between text-slate-300">
-                  <span className="text-slate-400 font-sans">η solar instantánea</span>
+                  <span className="text-slate-400 font-sans">Instantaneous solar η</span>
                   <span className="text-emerald-400">{solarEfficiencyPct.toFixed(2)}%</span>
                 </div>
                 <div className="flex justify-between text-slate-300">
-                  <span className="text-slate-400 font-sans">Potencia (W, panel 1 m²)</span>
+                  <span className="text-slate-400 font-sans">Power (W, 1 m² panel)</span>
                   <span className="text-amber-300">{status.powerW.toFixed(1)} W</span>
                 </div>
                 <div className="flex justify-between pt-1 border-t border-slate-800">
-                  <span className="text-slate-400 font-sans">Visibilidad DTE</span>
+                  <span className="text-slate-400 font-sans">DTE Visibility</span>
                   <span className={celestial.isEarthVisible ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
-                    {celestial.isEarthVisible ? '✓ Directa' : '❌ Oculta'}
+                    {celestial.isEarthVisible ? '✓ Direct' : '❌ Occulted'}
                   </span>
                 </div>
 
                 <div className="pt-1 text-slate-300 flex items-center justify-between font-sans">
-                  <span>Hora base (UTC):</span>
+                  <span>Base time (UTC):</span>
                   <input
                     type="time"
                     value={baseTime}
@@ -769,10 +769,10 @@ export default function App() {
             <div className="pt-2.5 border-t border-slate-800 space-y-2">
               <div className="flex items-center justify-between text-[11px]">
                 <span className="font-bold text-slate-300 uppercase tracking-wider font-mono">
-                  Línea de Tiempo
+                  Timeline
                 </span>
                 <span className="text-cyan-300 font-mono font-bold">
-                  Día {Math.min(mission.durationDays, Math.floor(simDayOffset) + 1)} de {mission.durationDays}
+                  Day {Math.min(mission.durationDays, Math.floor(simDayOffset) + 1)} of {mission.durationDays}
                 </span>
               </div>
 
@@ -791,7 +791,7 @@ export default function App() {
                 <button
                   onClick={() => setSimDayOffset((prev) => Math.max(0, Math.floor(prev - 1)))}
                   className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-[11px] font-semibold transition cursor-pointer"
-                  title="Retroceder 1 día"
+                  title="Previous 1 day"
                 >
                   -1 d
                 </button>
@@ -803,21 +803,21 @@ export default function App() {
                       : 'bg-cyan-600 hover:bg-cyan-500 text-white shadow-sm'
                   }`}
                 >
-                  {isAnimating ? '⏸ Pausar' : '▶ Reproducir'}
+                  {isAnimating ? '⏸ Pause' : '▶ Play'}
                 </button>
                 <button
                   onClick={() => setSimDayOffset((prev) => Math.min(mission.durationDays, Math.floor(prev + 1)))}
                   className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-[11px] font-semibold transition cursor-pointer"
-                  title="Avanzar 1 día"
+                  title="Next 1 day"
                 >
                   +1 d
                 </button>
                 <button
                   onClick={() => setSimDayOffset(0)}
                   className="px-2 py-1 bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-slate-200 rounded text-[11px] cursor-pointer"
-                  title="Reiniciar a Día 1"
+                  title="Reset to Day 1"
                 >
-                  Día 1
+                  Day 1
                 </button>
               </div>
 
@@ -833,9 +833,9 @@ export default function App() {
                   className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
                 />
                 <div className="flex justify-between text-[9px] text-slate-500 font-mono pt-1">
-                  <span>Día 1</span>
-                  {mission.durationDays >= 14 && <span>Día {Math.round(mission.durationDays / 2)}</span>}
-                  <span>Día {mission.durationDays}</span>
+                  <span>Day 1</span>
+                  {mission.durationDays >= 14 && <span>Day {Math.round(mission.durationDays / 2)}</span>}
+                  <span>Day {mission.durationDays}</span>
                 </div>
               </div>
             </div>
@@ -861,13 +861,13 @@ export default function App() {
           {sceneView === 'sitio' && (
             <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
               <div className="flex items-center gap-4 px-4 py-2 rounded-xl bg-black/70 border border-slate-700/70 backdrop-blur-sm text-[11px] font-mono text-slate-200">
-                <span title="Azimut y elevación del Sol">
+                <span title="Sun Azimuth & Elevation">
                   ☀️ Az {celestial.sunAz.toFixed(1)}° · El {celestial.sunEl.toFixed(1)}°
                 </span>
                 <span className="text-slate-600">|</span>
-                <span title="Azimut y elevación de la Tierra">
+                <span title="Earth Azimuth & Elevation">
                   🌍 Az {celestial.earthAz.toFixed(1)}° · El {celestial.earthEl.toFixed(1)}°
-                  {celestial.isEarthOccluded ? ' (oculta)' : ''}
+                  {celestial.isEarthOccluded ? ' (occulted)' : ''}
                 </span>
                 <span className="text-slate-600">|</span>
                 <span className="text-amber-300">{countdowns.sunStatusText}</span>
@@ -885,7 +885,7 @@ export default function App() {
                 </span>
               </div>
               <div className="text-center text-[10px] text-slate-500 mt-1">
-                Arrastra para mirar alrededor · estás a {eyeHeightM} m del suelo en el punto seleccionado
+                Drag to look around · you are at {eyeHeightM} m observer height above landing site
               </div>
             </div>
           )}
@@ -982,9 +982,9 @@ export default function App() {
             <button
               onClick={() => setFocusMode(false)}
               className="absolute top-4 right-6 z-20 pointer-events-auto bg-black/70 hover:bg-black/90 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-full text-xs font-medium backdrop-blur-sm cursor-pointer shadow-lg"
-              title="Salir del modo enfoque (tecla F)"
+              title="Exit focus mode (F key)"
             >
-              ⛶ Salir del enfoque (F)
+              ⛶ Exit Focus (F)
             </button>
           )}
 
@@ -994,7 +994,7 @@ export default function App() {
             <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 pointer-events-none max-w-[92%]">
               <span className="inline-block px-3 py-1 rounded-full bg-black/70 border border-slate-700/70 text-[10px] text-slate-300 font-mono backdrop-blur-sm text-center">
                 {GLOBE_SCALES[scaleMode].label}
-                {lightMode === 'legible' ? ' · exposición realzada (modo Legible)' : ''}
+                {lightMode === 'legible' ? ' · enhanced exposure (Readable mode)' : ''}
               </span>
             </div>
           )}
@@ -1003,7 +1003,7 @@ export default function App() {
           <div className="absolute bottom-6 left-0 right-0 h-10 bg-[#05070d]/85 backdrop-blur-md border-t border-slate-800/80 px-6 flex items-center justify-between text-xs z-20 pointer-events-auto">
             {/* Texto de Sitio Activo, Cobertura y Fecha */}
             <div className="text-[11px] text-slate-300 font-mono flex items-center gap-2">
-              <span className="text-slate-500">Sitio activo:</span>{' '}
+              <span className="text-slate-500">Active site:</span>{' '}
               <span className="text-white font-semibold">{activeSite.nombre}</span>{' '}
               <span className="text-cyan-400">
                 ({Number(mission.selectedLat ?? -89.684).toFixed(3)}° Lat, {Number(mission.selectedLon ?? 196.739).toFixed(3)}° Lon)
@@ -1036,9 +1036,9 @@ export default function App() {
           {/* 6. PIE DE PÁGINA CON CRÉDITOS OFICIALES DE TEXTURAS Y DATOS (Problema 1) */}
           <footer className="absolute bottom-0 left-0 right-0 h-6 bg-[#020409] border-t border-slate-850 px-6 flex items-center justify-between text-[9px] text-slate-400 font-mono z-20 pointer-events-auto select-text">
             <div className="flex items-center gap-4">
-              <span><b>Texturas:</b> Luna y Tierra: mosaicos equirectangulares (ver Metodología) · Sol: generado por código · escala rotulada sobre el lienzo (real o didáctica)</span>
+              <span><b>Textures:</b> Moon & Earth: equirectangular mosaics (see Methodology) · Sun: procedural plasma · scale labeled on canvas</span>
               <span className="text-slate-600">|</span>
-              <span><b>Datos:</b> Horizontes sobre DEM LOLA 80 m (Rol A) · Efemérides JPL Horizons (Rol B) · Parche 3D: terreno de demostración</span>
+              <span><b>Data:</b> LOLA DEM 80 m horizons (Role A) · JPL Horizons ephemerides (Role B) · 3D Patch: demonstration terrain</span>
             </div>
             <div className="text-slate-500">
               NASA Space Apps Challenge 2026
@@ -1060,7 +1060,7 @@ export default function App() {
                   onClick={() => setModalOpen(null)}
                   className="text-slate-400 hover:text-white px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs transition cursor-pointer"
                 >
-                  ✕ Cerrar
+                  ✕ Close
                 </button>
               </div>
 
@@ -1107,7 +1107,7 @@ export default function App() {
                       trajectory={trajA}
                       loading={loadingSite}
                       currentMs={currentMs}
-                      horizonLabel="Horizonte local"
+                      horizonLabel="Local horizon"
                       onJump={jumpTo}
                     />
                     <div className="text-[10px] text-slate-400 font-mono">

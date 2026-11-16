@@ -36,8 +36,8 @@ export const fmtPercent = (v: number, dp = 1): string => `${nf(v, dp)}%`;
 /** Horas: fmtHours(378) → "378.0 h". */
 export const fmtHours = (v: number, dp = 1): string => `${nf(v, dp)} h`;
 
-/** Días: fmtDays(14) → "14 días". */
-export const fmtDays = (v: number): string => `${nf(v, 0)} días`;
+/** Days: fmtDays(14) → "14 days". */
+export const fmtDays = (v: number): string => `${nf(v, 0)} days`;
 
 /** Fecha-hora UTC: fmtUTC(Date) → "2026-11-22 00:00 UTC". */
 export const fmtUTC = (d: Date): string => {
@@ -49,8 +49,8 @@ export const fmtUTC = (d: Date): string => {
   return `${y}-${m}-${day} ${hh}:${mm} UTC`;
 };
 
-/** Distancia en UA: fmtAU(1.0) → "1.00 UA". */
-export const fmtAU = (v: number, dp = 2): string => `${nf(v, dp)} UA`;
+/** Distance in AU: fmtAU(1.0) → "1.00 AU". */
+export const fmtAU = (v: number, dp = 2): string => `${nf(v, dp)} AU`;
 
 /** Coordenada selenográfica: fmtLatLon(-89.684, 196.739) → "-89.684° Lat, 196.739° E". */
 export const fmtLatLon = (lat: number, lonE: number, dp = 3): string =>

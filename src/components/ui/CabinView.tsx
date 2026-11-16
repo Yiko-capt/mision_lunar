@@ -55,10 +55,10 @@ export default function CabinView({ siteData, celestial }: CabinViewProps) {
     <div className="p-3 bg-[#070d18] border border-slate-800 rounded-xl space-y-2 text-xs font-sans">
       <div className="flex items-center justify-between border-b border-slate-800 pb-1">
         <span className="font-bold text-slate-300 uppercase tracking-wider text-[10px] font-mono">
-          🔭 Vista Cabina 360° (Cielo Local)
+          🔭 360° Cabin View (Local Sky)
         </span>
         <span className="text-[9px] text-cyan-400 font-mono">
-          N (0°) → E → S → O
+          N (0°) → E → S → W
         </span>
       </div>
 
@@ -96,11 +96,11 @@ export default function CabinView({ siteData, celestial }: CabinViewProps) {
               textAnchor="middle"
               className="text-[9px] fill-amber-300 font-mono font-bold"
             >
-              Sol ({sunEl > 0 ? `+${sunEl.toFixed(1)}` : sunEl.toFixed(1)}°)
+              Sun ({sunEl > 0 ? `+${sunEl.toFixed(1)}` : sunEl.toFixed(1)}°)
             </text>
           </g>
 
-          {/* La Tierra (con libración) */}
+          {/* Earth (with libration) */}
           <g>
             <circle
               cx={ex}
@@ -120,17 +120,17 @@ export default function CabinView({ siteData, celestial }: CabinViewProps) {
                 isEarthVisible ? 'fill-cyan-300' : 'fill-rose-400'
               }`}
             >
-              {isEarthVisible ? 'Tierra' : 'Tierra (Oculta)'} ({earthEl > 0 ? `+${earthEl.toFixed(1)}` : earthEl.toFixed(1)}°)
+              {isEarthVisible ? 'Earth' : 'Earth (Occulted)'} ({earthEl > 0 ? `+${earthEl.toFixed(1)}` : earthEl.toFixed(1)}°)
             </text>
           </g>
         </svg>
 
-        {/* Marcas de puntos cardinales en la base */}
+        {/* Cardinal base marks */}
         <div className="flex justify-between text-[8px] text-slate-500 font-mono px-1 pt-0.5">
           <span>0° N</span>
           <span>90° E</span>
           <span>180° S</span>
-          <span>270° O</span>
+          <span>270° W</span>
           <span>360° N</span>
         </div>
       </div>
@@ -138,11 +138,11 @@ export default function CabinView({ siteData, celestial }: CabinViewProps) {
       <div className="grid grid-cols-2 gap-1 text-[10px] font-mono text-slate-400 pt-0.5">
         <div className="flex items-center gap-1">
           <span className="w-2 h-2 rounded-full bg-amber-400 inline-block" />
-          <span>Sol: {sunAz.toFixed(1)}° Az</span>
+          <span>Sun: {sunAz.toFixed(1)}° Az</span>
         </div>
         <div className="flex items-center gap-1">
           <span className="w-2 h-2 rounded-full bg-cyan-400 inline-block" />
-          <span>Tierra: {earthAz.toFixed(1)}° Az</span>
+          <span>Earth: {earthAz.toFixed(1)}° Az</span>
         </div>
       </div>
     </div>

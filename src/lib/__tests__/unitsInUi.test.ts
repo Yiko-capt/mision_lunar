@@ -31,7 +31,7 @@ const FILES: string[] = [
 
 // Marcas de unidad aceptadas en la misma línea del número
 const UNIT =
-  /°|%|\bW\b|W\/m²|Wh\/m²|\bkm\b|\bm\b|\bh\b|\bUTC\b|días|\bDía\b|horas|celdas|UA|fmt[A-Z]|toExportedPoint|\bLat\b|\bLon\b/;
+  /°|%|\bW\b|W\/m²|Wh\/m²|\bkm\b|\bm\b|\bh\b|\bUTC\b|días|\bDía\b|days|\bDay\b|horas|hours|celdas|cells|UA|AU|fmt[A-Z]|toExportedPoint|\bLat\b|\bLon\b/;
 
 // Líneas que no son cantidades para el usuario: claves, ids, nombres de archivo, estilos,
 // coordenadas de dibujo SVG (paths) y auxiliares cuyos usos añaden la unidad.

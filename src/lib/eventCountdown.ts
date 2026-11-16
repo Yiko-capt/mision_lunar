@@ -11,22 +11,21 @@ export interface CountdownInfo {
 }
 
 const NO_DATA: CountdownInfo = {
-  sunStatusText: 'Sin datos para esta fecha',
-  sunDetailText: 'La fecha simulada queda fuera del periodo con efemérides',
+  sunStatusText: 'No data for this date',
+  sunDetailText: 'Simulated date is outside the ephemeris coverage period',
   isSunLit: false,
-  earthStatusText: 'Sin datos para esta fecha',
-  earthDetailText: 'La fecha simulada queda fuera del periodo con efemérides',
+  earthStatusText: 'No data for this date',
+  earthDetailText: 'Simulated date is outside the ephemeris coverage period',
   isEarthVisible: false,
 };
 
 /**
- * Cuentas regresivas del instante simulado (ms UTC): cuánto falta para que el Sol y la Tierra
- * crucen el horizonte del sitio. Si están ocultos, dice cuándo reaparecen (no un guion).
- * Usa los mismos puntos y criterios que computeTrajectory.
+ * Real-time event countdowns for simulated time (UTC ms): time until Sun and Earth
+ * cross the local terrain horizon.
  */
 export function computeCountdowns(trajectory: ComputedTrajectory | null, currentMs: number): CountdownInfo {
   if (!trajectory || trajectory.points.length === 0) {
-    return { ...NO_DATA, sunStatusText: 'Sin datos de este sitio', earthStatusText: 'Sin datos de este sitio' };
+    return { ...NO_DATA, sunStatusText: 'No site ephemeris data', earthStatusText: 'No site ephemeris data' };
   }
   const currentIdx = indexAtTime(trajectory, currentMs);
   if (currentIdx == null) return NO_DATA;
@@ -37,7 +36,7 @@ export function computeCountdowns(trajectory: ComputedTrajectory | null, current
   const current = pts[currentIdx];
   const remainingDays = (((N - 1 - currentIdx) * stepHours) / 24).toFixed(1);
 
-  /** Horas hasta el próximo cambio de estado de `flag`, o null si no cambia en los datos. */
+  /** Hours until state flip of `flag`, or null if constant in dataset. */
   const hoursToFlip = (flag: (i: number) => boolean): number | null => {
     const now = flag(currentIdx);
     for (let j = currentIdx + 1; j < N; j++) {
@@ -53,21 +52,21 @@ export function computeCountdowns(trajectory: ComputedTrajectory | null, current
   if (isSunLit) {
     sunStatusText =
       sunH != null
-        ? `☀️ Sol visible (se pone en ${sunH.toFixed(1)} h)`
-        : `☀️ Sol visible sin ocaso (${remainingDays} días con datos)`;
+        ? `☀️ Sun visible (sets in ${sunH.toFixed(1)} h)`
+        : `☀️ Continuous sunlight (${remainingDays} days in dataset)`;
     sunDetailText =
       sunH != null
-        ? `Ocaso solar en ${sunH.toFixed(1)} horas`
-        : 'El Sol no se pone en lo que queda del periodo con datos';
+        ? `Sunset in ${sunH.toFixed(1)} hours`
+        : 'Sun does not set during remainder of coverage period';
   } else {
     sunStatusText =
       sunH != null
-        ? `🌑 Sol oculto (sale en ${sunH.toFixed(1)} h)`
-        : `🌑 Sol oculto sin amanecer (${remainingDays} días con datos)`;
+        ? `🌑 Sun occulted (rises in ${sunH.toFixed(1)} h)`
+        : `🌑 Continuous lunar night (${remainingDays} days in dataset)`;
     sunDetailText =
       sunH != null
-        ? `Salida del Sol en ${sunH.toFixed(1)} horas`
-        : 'El Sol no sale en lo que queda del periodo con datos';
+        ? `Sunrise in ${sunH.toFixed(1)} hours`
+        : 'Sun does not rise during remainder of coverage period';
   }
 
   const isEarthVisible = current.earth_nominal;
@@ -77,21 +76,21 @@ export function computeCountdowns(trajectory: ComputedTrajectory | null, current
   if (isEarthVisible) {
     earthStatusText =
       earthH != null
-        ? `🌍 Tierra visible (se oculta en ${earthH.toFixed(1)} h)`
-        : `🌍 Tierra visible sin puesta (${remainingDays} días con datos)`;
+        ? `🌍 Earth visible (sets in ${earthH.toFixed(1)} h)`
+        : `🌍 Continuous Earth line of sight (${remainingDays} days in dataset)`;
     earthDetailText =
       earthH != null
-        ? `Puesta de la Tierra en ${earthH.toFixed(1)} horas`
-        : 'La Tierra no se oculta en lo que queda del periodo con datos';
+        ? `Earthset in ${earthH.toFixed(1)} hours`
+        : 'Earth does not set during remainder of coverage period';
   } else {
     earthStatusText =
       earthH != null
-        ? `📡 Tierra oculta (reaparece en ${earthH.toFixed(1)} h)`
-        : `📡 Tierra oculta (${remainingDays} días con datos)`;
+        ? `📡 Earth occulted (rises in ${earthH.toFixed(1)} h)`
+        : `📡 Continuous Earth occultation (${remainingDays} days in dataset)`;
     earthDetailText =
       earthH != null
-        ? `La Tierra reaparece sobre el horizonte en ${earthH.toFixed(1)} horas`
-        : 'La Tierra no asoma en lo que queda del periodo con datos';
+        ? `Earth rises above horizon in ${earthH.toFixed(1)} hours`
+        : 'Earth does not emerge during remainder of coverage period';
   }
 
   return { sunStatusText, sunDetailText, isSunLit, earthStatusText, earthDetailText, isEarthVisible };

@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { TERRAIN } from '../../data/moon';
 import { SCALE, EXAG } from './LunarTerrain';
 import { MOON_RADIUS_KM } from '../../config/sceneScale';
+import { createLunarRegolithTextures } from '../../lib/textures';
 
 /**
  * Entorno del parche: un "delantal" radial que arranca exactamente en el borde del
@@ -98,6 +99,7 @@ export default function PatchSurround() {
     const vCount = (RINGS + 1) * (SEGS + 1);
     const pos = new Float32Array(vCount * 3);
     const col = new Float32Array(vCount * 3);
+    const uvs = new Float32Array(vCount * 2);
     const idx: number[] = [];
 
     for (let ring = 0; ring <= RINGS; ring++) {
@@ -116,10 +118,14 @@ export default function PatchSurround() {
         const blend = Math.min(1, (r - rIn) / 20);
         const y = (1 - blend) * borderH + blend * reliefH + sagitta(r);
 
-        const o = (ring * (SEGS + 1) + s) * 3;
+        const vIdx = ring * (SEGS + 1) + s;
+        const o = vIdx * 3;
         pos[o] = x;
         pos[o + 1] = y;
         pos[o + 2] = z;
+
+        uvs[vIdx * 2] = (x / HALF) * 16;
+        uvs[vIdx * 2 + 1] = (z / HALF) * 16;
 
         // Paleta de regolito (continuación de la del parche), con ruido mineral
         const noise = ((Math.sin(x * 12.9898 + z * 78.233) * 43758.5453) % 1) * 0.04 - 0.02;
@@ -144,6 +150,7 @@ export default function PatchSurround() {
     const apron = new THREE.BufferGeometry();
     apron.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     apron.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    apron.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
     apron.setIndex(idx);
     apron.computeVertexNormals();
 
@@ -174,11 +181,20 @@ export default function PatchSurround() {
     return { apron, skirt };
   }, []);
 
+  const { map: regolithMap, bumpMap: regolithBump } = useMemo(() => createLunarRegolithTextures(), []);
+
   return (
     <group>
       {/* Delantal: del borde del parche al horizonte curvo (380 km) */}
       <mesh geometry={apron} receiveShadow>
-        <meshStandardMaterial vertexColors roughness={0.97} metalness={0} />
+        <meshStandardMaterial
+          map={regolithMap}
+          bumpMap={regolithBump}
+          bumpScale={0.12}
+          vertexColors
+          roughness={0.96}
+          metalness={0}
+        />
       </mesh>
       {/* Faldón que sella la costura parche ↔ delantal */}
       <mesh geometry={skirt}>

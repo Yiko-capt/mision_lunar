@@ -94,8 +94,8 @@ export function getCelestialInstant(
 
       const isSynt = siteData.efemerides.sintetico;
       const sourceLabel = isSynt
-        ? 'Efemérides sintéticas (Rol D)'
-        : 'NASA JPL Horizons (coord@301, sin refracción)';
+        ? 'Synthetic ephemerides (Role D)'
+        : 'NASA JPL Horizons (coord@301, no refraction)';
 
       return {
         timestampUtc,
@@ -145,7 +145,7 @@ export function getCelestialInstant(
     isEarthOccluded: eEl - R_EARTH_DEG < horEarth,
     earthRotationRad,
     isSynthetic: true,
-    sourceLabel: 'Modelo analítico aproximado (fecha fuera de cobertura JPL)',
+    sourceLabel: 'Approximate analytical model (date outside JPL coverage)',
   };
 }
 

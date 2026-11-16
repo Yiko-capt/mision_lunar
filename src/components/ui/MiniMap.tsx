@@ -45,9 +45,9 @@ export default function MiniMap({ activeSiteId, onSelectSite }: MiniMapProps) {
       <button
         onClick={() => setOpen(true)}
         className="bg-[#0b1320]/85 hover:bg-[#121e33] text-slate-200 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs font-medium backdrop-blur-sm transition cursor-pointer shadow-lg"
-        title="Mostrar minimapa del polo sur"
+        title="Show South Pole minimap"
       >
-        🗺️ Minimapa
+        🗺️ Minimap
       </button>
     );
   }
@@ -56,12 +56,12 @@ export default function MiniMap({ activeSiteId, onSelectSite }: MiniMapProps) {
     <div className="bg-[#09111e]/92 border border-slate-700/70 rounded-2xl p-3 shadow-2xl backdrop-blur-md pointer-events-auto w-56">
       <div className="flex items-center justify-between mb-1.5">
         <span className="text-[10px] font-bold tracking-widest text-slate-300">
-          POLO SUR · MAPA
+          SOUTH POLE · MAP
         </span>
         <button
           onClick={() => setOpen(false)}
           className="text-slate-500 hover:text-white text-xs cursor-pointer px-1"
-          title="Plegar minimapa"
+          title="Collapse minimap"
         >
           ─
         </button>
@@ -82,20 +82,20 @@ export default function MiniMap({ activeSiteId, onSelectSite }: MiniMapProps) {
           85°S
         </text>
         <text x="4" y="8" fill="#64748b" fontSize="7">
-          ⌖ polo
+          ⌖ pole
         </text>
 
         {/* Sitios del catálogo */}
         {sites.map((s) => {
           const isActive = s.id === activeSiteId;
           if (!s.inside) {
-            // Fuera del casquete (p. ej. Apolo 11): marcador en el borde
+            // Outside polar cap (e.g. Apollo 11)
             const n = Math.hypot(s.x, s.y) || 1;
             const bx = (s.x / n) * (R_VIEW - 4);
             const by = (s.y / n) * (R_VIEW - 4);
             return (
               <g key={s.id} className="cursor-pointer" onClick={() => onSelectSite(s.id)}>
-                <title>{`${s.nombre} (fuera del casquete 80°S)`}</title>
+                <title>{`${s.nombre} (outside 80°S polar cap)`}</title>
                 <path
                   d={`M ${bx} ${by} l 4 6 l -8 0 Z`}
                   fill={isActive ? '#22c55e' : '#f87171'}
@@ -116,8 +116,8 @@ export default function MiniMap({ activeSiteId, onSelectSite }: MiniMapProps) {
         })}
       </svg>
       <div className="text-[9px] text-slate-500 leading-tight mt-1">
-        Proyección polar (hasta 80°S). Clic en un punto: saltar a ese sitio. Relieve LDEM:
-        instalar con <span className="font-mono">npm run fetch:moon</span>.
+        Polar projection (down to 80°S). Click a marker to jump to site. High-res relief:
+        install with <span className="font-mono">npm run fetch:moon</span>.
       </div>
     </div>
   );

@@ -39,61 +39,61 @@ function siteNumbers(data: SiteDataSet | undefined): SiteNumbers | null {
 
 const shortPeriod = (n: SiteNumbers) => n.days != null && n.days < MIN_DAYS_ANNUAL;
 const periodNote = (n: SiteNumbers) =>
-  `Solo hay ${n.days!.toFixed(0)} días de efemérides: el criterio es anual y no se puede auditar con este periodo.`;
+  `Only ${n.days!.toFixed(0)} days of ephemerides available: criterion is annual and cannot be audited over this period.`;
 
 /**
- * Evalúa los 5 casos de validación física de referencia según ale/casos_de_validación_LOLA.
+ * Evaluates the 5 physical benchmark reference cases.
  */
 export function evaluateBenchmark(siteDataMap: Record<string, SiteDataSet>): BenchmarkCaseResult[] {
   const results: BenchmarkCaseResult[] = [];
 
-  // CASO 1: Shackleton Rim (Pico de luz casi eterna)
+  // CASE 1: Shackleton Rim (Quasi-eternal light peak)
   {
     const met = siteNumbers(siteDataMap['shackleton_rim']);
     if (!met) {
       results.push({
         site_id: 'shackleton_rim',
-        nombre: 'Cresta Shackleton (Pico de luz)',
+        nombre: 'Shackleton Rim (Light Peak)',
         tipo_prueba: 'anual',
         estado: 'SIN DATOS',
-        criterioEsperado: 'Iluminación solar anual en [78.0%, 91.0%]',
-        valorObtenido: 'Sin métricas anuales de efemérides',
+        criterioEsperado: 'Annual solar illumination in [78.0%, 91.0%]',
+        valorObtenido: 'No annual ephemerides metrics',
         fuente: 'Mazarico et al. (2011), Icarus 211(2)',
-        motivo: 'Faltan efemérides anuales completas para auditar el año lunar entero.',
+        motivo: 'Missing complete annual ephemerides to audit full lunar year.',
       });
     } else {
       const ilum = met.ilum;
       const pasa = ilum >= 78.0 && ilum <= 91.0;
       results.push({
         site_id: 'shackleton_rim',
-        nombre: 'Cresta Shackleton (Pico de luz)',
+        nombre: 'Shackleton Rim (Light Peak)',
         tipo_prueba: 'anual',
         estado: shortPeriod(met) ? 'NO COMPARABLE' : pasa ? 'PASA' : 'NO PASA',
-        criterioEsperado: 'Iluminación solar anual en [78.0%, 91.0%]',
-        valorObtenido: shortPeriod(met) ? `${ilum.toFixed(1)}% en ${met.days!.toFixed(0)} días` : `${ilum.toFixed(1)}%`,
+        criterioEsperado: 'Annual solar illumination in [78.0%, 91.0%]',
+        valorObtenido: shortPeriod(met) ? `${ilum.toFixed(1)}% over ${met.days!.toFixed(0)} days` : `${ilum.toFixed(1)}%`,
         fuente: 'Mazarico et al. (2011), Icarus 211(2)',
         motivo: shortPeriod(met)
           ? periodNote(met)
           : pasa
-          ? 'Reproduce la iluminación solar casi continua del borde polar.'
-          : `El valor obtenido (${ilum.toFixed(1)}%) queda fuera del rango esperado [78%, 91%].`,
+          ? 'Reproduces quasi-continuous solar illumination on polar rim.'
+          : `Obtained value (${ilum.toFixed(1)}%) outside expected range [78%, 91%].`,
       });
     }
   }
 
-  // CASO 2: Shackleton Floor (Fondo PSR)
+  // CASE 2: Shackleton Floor (Deep PSR)
   {
     const met = siteNumbers(siteDataMap['shackleton_floor']);
     if (!met) {
       results.push({
         site_id: 'shackleton_floor',
-        nombre: 'Interior Shackleton (Fondo PSR)',
+        nombre: 'Shackleton Floor (Deep PSR)',
         tipo_prueba: 'anual',
         estado: 'SIN DATOS',
-        criterioEsperado: 'Iluminación solar == 0.0% y Visibilidad Tierra == 0.0%',
-        valorObtenido: 'Sin datos',
+        criterioEsperado: 'Solar illumination == 0.0% & Earth visibility == 0.0%',
+        valorObtenido: 'No data',
         fuente: 'Zuber et al. (2012), Nature 486',
-        motivo: 'Faltan datos de métricas para este sitio.',
+        motivo: 'Missing metrics data for this site.',
       });
     } else {
       const ilum = met.ilum;
@@ -101,36 +101,36 @@ export function evaluateBenchmark(siteDataMap: Record<string, SiteDataSet>): Ben
       const pasa = ilum === 0.0 && tierra === 0.0;
       results.push({
         site_id: 'shackleton_floor',
-        nombre: 'Interior Shackleton (Fondo PSR)',
+        nombre: 'Shackleton Floor (Deep PSR)',
         tipo_prueba: 'anual',
         estado: pasa ? 'PASA' : 'NO PASA',
-        criterioEsperado: 'Iluminación solar == 0.0% y Visibilidad Tierra == 0.0%',
-        valorObtenido: `Iluminación: ${ilum.toFixed(1)}%, Tierra: ${tierra.toFixed(1)}%`,
+        criterioEsperado: 'Solar illumination == 0.0% & Earth visibility == 0.0%',
+        valorObtenido: `Illumination: ${ilum.toFixed(1)}%, Earth: ${tierra.toFixed(1)}%`,
         fuente: 'Zuber et al. (2012), Nature 486',
         motivo: pasa
           ? met.days != null
-            ? `Sin Sol ni Tierra en los ${met.days.toFixed(0)} días con datos (horizonte del cráter aplicado).`
-            : 'Bloqueo topográfico completo verificado por el cráter.'
+            ? `Zero Sun and Earth over ${met.days.toFixed(0)} days with data (crater terrain horizon applied).`
+            : 'Complete topographic occlusion verified by crater rim.'
           : met.days != null
-          ? 'NO PASA: con el horizonte del sitio aplicado, el Sol o la Tierra asoman en el periodo con datos.'
-          : 'NO PASA: el resumen de métricas reporta iluminación porque se calculó sin horizonte (esfera lisa).',
+          ? 'NO PASA: with site horizon applied, Sun or Earth rises in dataset window.'
+          : 'NO PASA: metrics summary reports illumination because it was calculated without horizon (smooth sphere).',
       });
     }
   }
 
-  // CASO 3: Malapert Peak (Enlace DTE Continuo)
+  // CASE 3: Malapert Peak (Continuous DTE Link)
   {
     const met = siteNumbers(siteDataMap['malapert_peak']);
     if (!met) {
       results.push({
         site_id: 'malapert_peak',
-        nombre: 'Cima Macizo Malapert',
+        nombre: 'Malapert Mountain Peak',
         tipo_prueba: 'anual',
         estado: 'SIN DATOS',
-        criterioEsperado: 'Visibilidad Tierra >= 95.0% e Iluminación en [68.0%, 78.0%]',
-        valorObtenido: 'Sin datos',
+        criterioEsperado: 'Earth visibility >= 95.0% & Illumination in [68.0%, 78.0%]',
+        valorObtenido: 'No data',
         fuente: 'Sharpe & Schrunk (2003), ASR 31(11)',
-        motivo: 'Faltan datos de métricas anuales.',
+        motivo: 'Missing annual metrics data.',
       });
     } else {
       const tierra = met.tierra;
@@ -138,32 +138,31 @@ export function evaluateBenchmark(siteDataMap: Record<string, SiteDataSet>): Ben
       const pasa = tierra >= 95.0 && ilum >= 68.0 && ilum <= 78.0;
       results.push({
         site_id: 'malapert_peak',
-        nombre: 'Cima Macizo Malapert',
+        nombre: 'Malapert Mountain Peak',
         tipo_prueba: 'anual',
         estado: shortPeriod(met) ? 'NO COMPARABLE' : pasa ? 'PASA' : 'NO PASA',
-        criterioEsperado: 'Visibilidad Tierra >= 95.0% e Iluminación en [68.0%, 78.0%]',
-        valorObtenido: `Tierra: ${tierra.toFixed(1)}%, Ilum: ${ilum.toFixed(1)}%`,
+        criterioEsperado: 'Earth visibility >= 95.0% & Illumination in [68.0%, 78.0%]',
+        valorObtenido: `Earth: ${tierra.toFixed(1)}%, Illum: ${ilum.toFixed(1)}%`,
         fuente: 'Sharpe & Schrunk (2003), ASR 31(11)',
         motivo: shortPeriod(met)
           ? periodNote(met)
           : pasa
-          ? 'Cima despejada con línea de visión continua a la Tierra confirmada.'
-          : `Valores obtenidos (Tierra: ${tierra.toFixed(1)}%, Ilum: ${ilum.toFixed(1)}%) fuera de rango de referencia.`,
+          ? 'Clear summit with verified continuous line of sight to Earth.'
+          : `Obtained values (Earth: ${tierra.toFixed(1)}%, Illum: ${ilum.toFixed(1)}%) outside reference range.`,
       });
     }
   }
 
-  // CASO 4: Apolo 11 (Calibración puntual histórica, 1969-07-20T20:17:40Z)
+  // CASE 4: Apollo 11 (Historical calibration epoch, 1969-07-20T20:17:40Z)
   {
     const data = siteDataMap['apollo_11'];
     const base = {
       site_id: 'apollo_11',
-      nombre: 'Base Tranquilidad (Apolo 11)',
+      nombre: 'Tranquility Base (Apollo 11)',
       tipo_prueba: 'puntual' as const,
-      criterioEsperado: 'Sol El = 10.8° (±0.2°), Az = 88.0° (±0.2°) en 1969-07-20T20:17:40Z',
+      criterioEsperado: 'Sun El = 10.8° (±0.2°), Az = 88.0° (±0.2°) at 1969-07-20T20:17:40Z',
       fuente: 'Apollo 11 Mission Report (NASA SP-238) / JPL Horizons',
     };
-    // La época de 1969 viene en un archivo aparte (efemerides_landing.json)
     const pts = [...(data?.efemeridesLanding?.datos ?? []), ...(data?.efemerides?.datos ?? [])].filter((d) =>
       d.timestamp_utc.startsWith('1969-07-20T20')
     );
@@ -171,11 +170,10 @@ export function evaluateBenchmark(siteDataMap: Record<string, SiteDataSet>): Ben
       results.push({
         ...base,
         estado: 'SIN DATOS',
-        valorObtenido: 'Sin efemérides de la época de alunizaje',
-        motivo: 'SIN DATOS: no hay efemérides de 1969 para Apolo 11 en los archivos cargados.',
+        valorObtenido: 'No ephemerides for landing epoch',
+        motivo: 'SIN DATOS: no 1969 ephemerides for Apollo 11 in loaded files.',
       });
     } else {
-      // Interpolar al instante del contacto entre las dos muestras que lo rodean
       const target = Date.UTC(1969, 6, 20, 20, 17, 40);
       const sorted = [...pts].sort((x, y) => Date.parse(x.timestamp_utc) - Date.parse(y.timestamp_utc));
       let p0 = sorted[0];
@@ -201,44 +199,44 @@ export function evaluateBenchmark(siteDataMap: Record<string, SiteDataSet>): Ben
         estado: pasa ? 'PASA' : 'NO PASA',
         valorObtenido: `El: ${el.toFixed(2)}°, Az: ${az.toFixed(2)}°`,
         motivo: pasa
-          ? 'Calibración esférica verificada con éxito.'
+          ? 'Spherical calibration verified successfully.'
           : errEl <= 0.2
-          ? `Elevación dentro de tolerancia (ΔEl=${errEl.toFixed(2)}°); azimut fuera (ΔAz=${errAz.toFixed(2)}°). Pendiente: revisar la referencia de azimut (88.0°) o su convención.`
-          : `Error angular excesivo (ΔEl=${errEl.toFixed(2)}°, ΔAz=${errAz.toFixed(2)}°).`,
+          ? `Elevation within tolerance (ΔEl=${errEl.toFixed(2)}°); azimuth outside (ΔAz=${errAz.toFixed(2)}°).`
+          : `Excessive angular error (ΔEl=${errEl.toFixed(2)}°, ΔAz=${errAz.toFixed(2)}°).`,
       });
     }
   }
 
-  // CASO 5: Cabeus Rim (Sensibilidad espacial Artemis III)
+  // CASE 5: Cabeus Rim (Artemis III spatial sensitivity)
   {
     const met = siteNumbers(siteDataMap['cabeus_rim']);
     if (!met) {
       results.push({
         site_id: 'cabeus_rim',
-        nombre: 'Borde de Cabeus (Peak near Cabeus B)',
+        nombre: 'Cabeus Rim (Peak near Cabeus B)',
         tipo_prueba: 'anual',
         estado: 'SIN DATOS',
-        criterioEsperado: 'Iluminación solar anual en [58.0%, 75.0%]',
-        valorObtenido: 'Sin datos',
+        criterioEsperado: 'Annual solar illumination in [58.0%, 75.0%]',
+        valorObtenido: 'No data',
         fuente: 'Colaprete et al. (2010), Science 330',
-        motivo: 'Faltan métricas anuales para este sitio.',
+        motivo: 'Missing annual metrics for this site.',
       });
     } else {
       const ilum = met.ilum;
       const pasa = ilum >= 58.0 && ilum <= 75.0;
       results.push({
         site_id: 'cabeus_rim',
-        nombre: 'Borde de Cabeus (Peak near Cabeus B)',
+        nombre: 'Cabeus Rim (Peak near Cabeus B)',
         tipo_prueba: 'anual',
         estado: shortPeriod(met) ? 'NO COMPARABLE' : pasa ? 'PASA' : 'NO PASA',
-        criterioEsperado: 'Iluminación solar anual en [58.0%, 75.0%]',
-        valorObtenido: shortPeriod(met) ? `${ilum.toFixed(1)}% en ${met.days!.toFixed(0)} días` : `${ilum.toFixed(1)}%`,
+        criterioEsperado: 'Annual solar illumination in [58.0%, 75.0%]',
+        valorObtenido: shortPeriod(met) ? `${ilum.toFixed(1)}% over ${met.days!.toFixed(0)} days` : `${ilum.toFixed(1)}%`,
         fuente: 'Colaprete et al. (2010), Science 330',
         motivo: shortPeriod(met)
           ? periodNote(met)
           : pasa
-          ? 'Sensibilidad topográfica verificada dentro del umbral Artemis III.'
-          : `Iluminación obtenida (${ilum.toFixed(1)}%) fuera del rango de borde de Cabeus [58%, 75%].`,
+          ? 'Topographic sensitivity verified within Artemis III threshold.'
+          : `Obtained illumination (${ilum.toFixed(1)}%) outside Cabeus rim range [58%, 75%].`,
       });
     }
   }

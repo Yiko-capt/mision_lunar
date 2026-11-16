@@ -19,12 +19,11 @@ interface SkyViewProps {
 const W = 900;
 const H = 360;
 const PAD = { l: 48, r: 14, t: 14, b: 36 };
-const CARDINALS: Record<number, string> = { 0: 'N', 45: 'NE', 90: 'E', 135: 'SE', 180: 'S', 225: 'SO', 270: 'O', 315: 'NO', 360: 'N' };
+const CARDINALS: Record<number, string> = { 0: 'N', 45: 'NE', 90: 'E', 135: 'SE', 180: 'S', 225: 'SW', 270: 'W', 315: 'NW', 360: 'N' };
 
 /**
- * "Cielo visto desde el sitio": panorámica 360° con la silueta del horizonte, la trayectoria
- * del Sol y de la Tierra en las 24 h del día simulado y su posición en el instante actual.
- * Usa los mismos puntos (efemérides + horizonte) que el resto de la app.
+ * "Sky view from site": 360° panoramic projection with terrain horizon profile,
+ * 24-hour apparent trajectory of Sun and Earth, and real-time instantaneous positions.
  */
 export default function SkyView({ siteData, trajectory, celestial, currentMs }: SkyViewProps) {
   const viewMode = useMission((s) => s.viewMode);
@@ -47,7 +46,7 @@ export default function SkyView({ siteData, trajectory, celestial, currentMs }: 
     return { sunTrack: sun, earthTrack: earth };
   }, [trajectory, currentMs]);
 
-  // Rango vertical dinámico: en el polo el Sol roza el horizonte; en el ecuador sube mucho.
+  // Dynamic vertical range
   let emax = 12;
   let emin = -4;
   for (const [, el] of [...sunTrack, ...earthTrack, [0, celestial.sunEl], [0, celestial.earthEl]] as Array<[number, number]>) {
@@ -87,12 +86,12 @@ export default function SkyView({ siteData, trajectory, celestial, currentMs }: 
   const signed = (v: number) => (v > 0 ? `+${v.toFixed(2)}` : v.toFixed(2));
   const both = celestial.isSunVisible && celestial.isEarthVisible;
   const summary = both
-    ? 'Sol y Tierra sobre el horizonte: hay energía y comunicación directa.'
+    ? 'Sun and Earth above horizon: power generation and direct line-of-sight active.'
     : celestial.isSunVisible
-    ? 'Solo el Sol es visible: los paneles cargan, pero no hay enlace directo con la Tierra.'
+    ? 'Sun visible only: solar arrays generating, but no direct Earth link.'
     : celestial.isEarthVisible
-    ? 'Solo la Tierra es visible: hay enlace de comunicación, pero no energía solar.'
-    : 'Ni el Sol ni la Tierra se ven desde este sitio ahora.';
+    ? 'Earth visible only: direct communication link active, but solar panels in darkness.'
+    : 'Neither Sun nor Earth are visible from this site at this time.';
 
   const Cell = ({ k, value, tone }: { k: 'sunElevation' | 'sunAzimuth' | 'earthElevation' | 'earthAzimuth'; value: string; tone: string }) => (
     <div className="bg-[#070e1a] border border-slate-800 rounded-lg px-2.5 py-1.5">
@@ -106,7 +105,7 @@ export default function SkyView({ siteData, trajectory, celestial, currentMs }: 
   return (
     <div className="space-y-3" data-testid="sky-view">
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full bg-[#03060c] border border-slate-800 rounded-lg" role="img"
-        aria-label="Panorámica del cielo: horizonte, Sol y Tierra">
+        aria-label="Sky panoramic view: horizon, Sun, and Earth">
         <path d={horizonPath} fill="#1e293b" stroke="#475569" strokeWidth="1" />
         {Object.keys(CARDINALS).map((k) => {
           const a = Number(k);
@@ -130,22 +129,22 @@ export default function SkyView({ siteData, trajectory, celestial, currentMs }: 
         {segments(earthTrack).map((s, i) => (
           <polyline key={`e${i}`} points={s.map((p) => `${x(p[0]).toFixed(1)},${y(p[1]).toFixed(1)}`).join(' ')} fill="none" stroke="#38bdf8" strokeWidth="1.8" strokeOpacity="0.7" />
         ))}
-        {/* Posición en el instante actual. El relleno indica si está sobre el horizonte. */}
+        {/* Instantaneous positions. Solid fill = above horizon. */}
         <circle cx={x(celestial.sunAz)} cy={y(celestial.sunEl)} r="8" fill={celestial.isSunVisible ? '#fbbf24' : 'none'} stroke="#fbbf24" strokeWidth="2" strokeDasharray={celestial.isSunVisible ? undefined : '3 2'} />
         <text x={x(celestial.sunAz)} y={y(celestial.sunEl) - 12} fill="#fcd34d" fontSize="11" fontWeight="bold" textAnchor="middle">
-          Sol{celestial.isSunVisible ? '' : ' (oculto)'}
+          Sun{celestial.isSunVisible ? '' : ' (occluded)'}
         </text>
         <circle cx={x(celestial.earthAz)} cy={y(celestial.earthEl)} r="7" fill={celestial.isEarthVisible ? '#38bdf8' : 'none'} stroke="#38bdf8" strokeWidth="2" strokeDasharray={celestial.isEarthVisible ? undefined : '3 2'} />
         <text x={x(celestial.earthAz)} y={y(celestial.earthEl) - 11} fill="#7dd3fc" fontSize="11" fontWeight="bold" textAnchor="middle">
-          Tierra{celestial.isEarthVisible ? '' : ' (oculta)'}
+          Earth{celestial.isEarthVisible ? '' : ' (occluded)'}
         </text>
       </svg>
 
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-400">
-        <span><span className="inline-block w-3 h-0.5 bg-amber-400 align-middle mr-1.5" />Trayectoria del Sol (24 h)</span>
-        <span><span className="inline-block w-3 h-0.5 bg-sky-400 align-middle mr-1.5" />Trayectoria de la Tierra (24 h)</span>
+        <span><span className="inline-block w-3 h-0.5 bg-amber-400 align-middle mr-1.5" />Sun trajectory (24 h)</span>
+        <span><span className="inline-block w-3 h-0.5 bg-sky-400 align-middle mr-1.5" />Earth trajectory (24 h)</span>
         <span><span className="inline-block w-3 h-2.5 bg-slate-700 align-middle mr-1.5" />{label('horizon', viewMode)} <InfoTip term={label('horizon', viewMode)} text={help('horizon')} /></span>
-        <span>Círculo relleno = visible · punteado = tapado por el horizonte</span>
+        <span>Solid marker = visible · Dashed = occluded by terrain horizon</span>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -159,7 +158,7 @@ export default function SkyView({ siteData, trajectory, celestial, currentMs }: 
         <b className="font-mono text-cyan-300">{celestial.timestampUtc.replace('T', ' ').replace('Z', ' UTC')}</b> · {summary}
         {viewMode === 'professional' && (
           <div className="text-[10px] text-slate-400 pt-1 font-mono">
-            Horizonte hacia el Sol: {celestial.localHorizonSun.toFixed(2)}° · hacia la Tierra: {celestial.localHorizonEarth.toFixed(2)}° ·{' '}
+            Horizon towards Sun: {celestial.localHorizonSun.toFixed(2)}° · towards Earth: {celestial.localHorizonEarth.toFixed(2)}° ·{' '}
             {horizonSourceLabel(siteData?.horizonte)} · {celestial.sourceLabel}
           </div>
         )}

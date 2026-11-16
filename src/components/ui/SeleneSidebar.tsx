@@ -99,21 +99,21 @@ export default function SeleneSidebar({
         {/* 1. SELECCIÓN DE SITIO DE ATERRIZAJE */}
         <div className="bg-[#0f172a]/70 border border-[#1e293b] rounded-lg p-2.5 space-y-1">
           <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-            Sitio de Aterrizaje
+            Landing Site
           </label>
           <select
             value={activeSite.site_id}
             onChange={(e) => onSelectSite(e.target.value)}
             className="w-full bg-[#1e293b] text-slate-100 text-xs rounded-md px-2 py-1.5 border border-slate-700 focus:outline-none focus:border-cyan-400"
           >
-            <optgroup label="Sitios Oficiales (Benchmark)">
+            <optgroup label="Official Benchmark Sites (Role C)">
               {SITES.filter((s) => s.isOfficial).map((site) => (
                 <option key={site.site_id} value={site.site_id}>
                   {site.nombre} ({site.lat_deg.toFixed(1)}°, {site.lon_deg.toFixed(1)}°)
                 </option>
               ))}
             </optgroup>
-            <optgroup label="Sitios Adicionales (DEM LOLA)">
+            <optgroup label="Additional Sites (LOLA DEM)">
               {SITES.filter((s) => !s.isOfficial).map((site) => (
                 <option key={site.site_id} value={site.site_id}>
                   {site.nombre} ({site.lat_deg.toFixed(1)}°, {site.lon_deg.toFixed(1)}°)
@@ -136,7 +136,7 @@ export default function SeleneSidebar({
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            Filtros Misión
+            Mission Filters
           </button>
           <button
             onClick={() => setTab('metricas')}
@@ -146,7 +146,7 @@ export default function SeleneSidebar({
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            Métricas 3D
+            3D Metrics
           </button>
         </div>
 
@@ -155,14 +155,14 @@ export default function SeleneSidebar({
           <div className="space-y-3">
             <div className="bg-[#0f172a]/70 border border-[#1e293b] rounded-lg p-3 space-y-3">
               <h2 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center justify-between border-b border-slate-800 pb-1.5">
-                <span>Requisitos de misión</span>
-                <span className="text-[9px] text-cyan-400 font-mono">CRITERIOS</span>
+                <span>Mission Requirements</span>
+                <span className="text-[9px] text-cyan-400 font-mono">CRITERIA</span>
               </h2>
 
               {/* Inicio de Misión */}
               <div>
                 <label className="text-[11px] text-slate-300 block mb-1">
-                  Inicio de misión
+                  Mission start
                 </label>
                 <input
                   type="date"
@@ -175,8 +175,8 @@ export default function SeleneSidebar({
               {/* Duración */}
               <div>
                 <div className="flex justify-between text-[11px] mb-1">
-                  <span className="text-slate-300">Duración</span>
-                  <span className="font-mono text-cyan-300 font-bold">{missionDurationDays} días</span>
+                  <span className="text-slate-300">Duration</span>
+                  <span className="font-mono text-cyan-300 font-bold">{missionDurationDays} days</span>
                 </div>
                 <input
                   type="range"
@@ -192,7 +192,7 @@ export default function SeleneSidebar({
               {/* Luz solar mínima */}
               <div>
                 <div className="flex justify-between text-[11px] mb-1">
-                  <span className="text-slate-300">Luz solar mínima</span>
+                  <span className="text-slate-300">Minimum sunlight</span>
                   <span className="font-mono text-cyan-300 font-bold">{minSolarLightPct}%</span>
                 </div>
                 <input
@@ -209,7 +209,7 @@ export default function SeleneSidebar({
               {/* Pendiente máxima */}
               <div>
                 <div className="flex justify-between text-[11px] mb-1">
-                  <span className="text-slate-300">Pendiente máxima</span>
+                  <span className="text-slate-300">Maximum slope</span>
                   <span className="font-mono text-cyan-300 font-bold">{maxSlopeDeg}°</span>
                 </div>
                 <input
@@ -231,15 +231,15 @@ export default function SeleneSidebar({
                   onChange={(e) => onRequireEarthVisibilityChange(e.target.checked)}
                   className="rounded bg-slate-800 border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer"
                 />
-                Exigir línea de visión con la Tierra
+                Require Earth line-of-sight
               </label>
 
               {/* Contador de celdas aptas */}
               <div className="mt-2 p-2.5 rounded bg-[#131d33] border border-slate-800 text-xs flex items-center justify-between">
-                <span className="text-slate-300">Celdas aptas:</span>
+                <span className="text-slate-300">Eligible cells:</span>
                 <span className="font-mono font-bold">
                   <span className="text-emerald-400">{aptCellsCount}</span>{' '}
-                  <span className="text-slate-500">/ {totalCellsCount}</span>
+                  <span className="text-slate-500">/ {totalCellsCount} cells</span>
                 </span>
               </div>
             </div>
@@ -252,7 +252,7 @@ export default function SeleneSidebar({
             {/* Control temporal */}
             <div className="bg-[#0f172a]/70 border border-[#1e293b] rounded-lg p-3 space-y-2">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                Control Temporal (UTC)
+                Time Control (UTC)
               </label>
               <div className="flex gap-2">
                 <input
@@ -264,7 +264,7 @@ export default function SeleneSidebar({
               </div>
               <div>
                 <div className="flex justify-between text-[11px] text-slate-400 font-mono mb-1">
-                  <span>Desplazamiento:</span>
+                  <span>Offset:</span>
                   <span className="text-cyan-300 font-bold">{simDayOffset.toFixed(2)} d</span>
                 </div>
                 <input
@@ -286,13 +286,13 @@ export default function SeleneSidebar({
                       : 'bg-[#1e293b] border-slate-700 hover:bg-slate-700 text-slate-200'
                   }`}
                 >
-                  {isAnimating ? '⏸ Pausar' : '▶ Animar'}
+                  {isAnimating ? '⏸ Pause' : '▶ Animate'}
                 </button>
                 <button
                   onClick={onResetNow}
                   className="py-1 px-3 rounded text-xs font-medium bg-[#1e293b] border border-slate-700 hover:bg-slate-700 text-slate-200 transition cursor-pointer"
                 >
-                  Ahora
+                  Now
                 </button>
               </div>
             </div>
@@ -300,43 +300,43 @@ export default function SeleneSidebar({
             {/* Valores de Elevación y Azimut */}
             <div className="bg-[#0f172a]/70 border border-[#1e293b] rounded-lg p-3 space-y-1.5 font-mono text-xs">
               <div className="flex justify-between">
-                <span className="text-slate-400 font-sans">Elevación Sol</span>
+                <span className="text-slate-400 font-sans">Sun Elevation</span>
                 <span className={`font-bold ${sunEl > 0 ? 'text-amber-400' : 'text-slate-500'}`}>
                   {sunEl > 0 ? `+${sunEl.toFixed(2)}` : sunEl.toFixed(2)}°
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400 font-sans">Azimut Sol</span>
+                <span className="text-slate-400 font-sans">Sun Azimuth</span>
                 <span className="text-slate-200">+{sunAz.toFixed(1)}°</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400 font-sans">Elevación Tierra</span>
+                <span className="text-slate-400 font-sans">Earth Elevation</span>
                 <span className={`font-bold ${earthEl > 0 ? 'text-blue-400' : 'text-slate-500'}`}>
                   {earthEl > 0 ? `+${earthEl.toFixed(2)}` : earthEl.toFixed(2)}°
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400 font-sans">Azimut Tierra</span>
+                <span className="text-slate-400 font-sans">Earth Azimuth</span>
                 <span className="text-slate-200">+{earthAz.toFixed(1)}°</span>
               </div>
               <div className="flex justify-between pt-1 border-t border-slate-800">
-                <span className="text-slate-400 font-sans">Fase lunar</span>
+                <span className="text-slate-400 font-sans">Moon Phase</span>
                 <span className="text-slate-200">{lunarPhase}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400 font-sans">Horas al ocaso</span>
+                <span className="text-slate-400 font-sans">Hours to Sunset</span>
                 <span className={hoursToSunset != null && hoursToSunset <= 24 ? 'text-amber-300 font-bold' : 'text-slate-300'}>
                   {hoursToSunset != null ? `${hoursToSunset.toFixed(1)} h` : '—'}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400 font-sans">η solar (panel)</span>
+                <span className="text-slate-400 font-sans">Solar η (panel)</span>
                 <span className="text-emerald-400">{solarEfficiencyPct.toFixed(2)}%</span>
               </div>
               <div className="flex justify-between pt-1 border-t border-slate-800">
-                <span className="text-slate-400 font-sans">Visibilidad DTE</span>
+                <span className="text-slate-400 font-sans">DTE Visibility</span>
                 <span className={hasDte ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
-                  {hasDte ? '✓ Directa' : '❌ Oculta'}
+                  {hasDte ? '✓ Direct' : '❌ Occulted'}
                 </span>
               </div>
             </div>
@@ -350,7 +350,7 @@ export default function SeleneSidebar({
           onClick={onOpenChart}
           className="w-full text-xs font-semibold py-1.5 px-3 rounded bg-cyan-950/60 hover:bg-cyan-900/60 text-cyan-200 border border-cyan-800 flex items-center justify-between transition cursor-pointer"
         >
-          <span>📊 Ver Gráfica de Elevación</span>
+          <span>📊 View Elevation Profile</span>
           <span className="text-[10px] text-cyan-400 font-mono">LOLA</span>
         </button>
 
@@ -358,16 +358,16 @@ export default function SeleneSidebar({
           onClick={onOpenCompare}
           className="w-full text-xs font-semibold py-1.5 px-3 rounded bg-[#0f172a] hover:bg-slate-800 text-slate-300 border border-slate-700 flex items-center justify-between transition cursor-pointer"
         >
-          <span>⚖️ Comparador A/B</span>
-          <span className="text-[10px] text-slate-400 font-mono">Sensibilidad</span>
+          <span>⚖️ Site Comparator A/B</span>
+          <span className="text-[10px] text-slate-400 font-mono">Sensitivity</span>
         </button>
 
         <button
           onClick={onOpenBenchmark}
           className="w-full text-xs font-semibold py-1.5 px-3 rounded bg-[#0f172a] hover:bg-slate-800 text-slate-300 border border-slate-700 flex items-center justify-between transition cursor-pointer"
         >
-          <span>📋 Benchmark Físico</span>
-          <span className="text-[10px] text-slate-400 font-mono">5 Casos</span>
+          <span>📋 Physical Benchmark</span>
+          <span className="text-[10px] text-slate-400 font-mono">5 Cases</span>
         </button>
       </div>
     </aside>

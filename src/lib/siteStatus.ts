@@ -35,7 +35,7 @@ export interface PointStatus {
   viabilityReason: string;
 }
 
-export const SLOPE_SOURCE = 'Parche sintético de demostración (no es DEM LOLA)';
+export const SLOPE_SOURCE = 'Synthetic demo patch (not LOLA DEM)';
 
 export interface PointStatusInput {
   siteId: string;
@@ -49,7 +49,7 @@ export interface PointStatusInput {
   hasData: boolean;
 }
 
-/** η instantánea (%): eficiencia de celda × seno de la elevación solar, 0 si el Sol está oculto. */
+/** Instantaneous η (%): cell efficiency × sin(solar elevation), 0 if Sun is occulted. */
 export function instantEfficiencyPct(celestial: CelestialInstant): number {
   if (!celestial.isSunVisible) return 0;
   return CONSTANTS.DEFAULT_ETA * Math.sin(Math.max(0, (celestial.sunEl * Math.PI) / 180)) * 100;
@@ -57,8 +57,11 @@ export function instantEfficiencyPct(celestial: CelestialInstant): number {
 
 export function derivePointStatus(input: PointStatusInput): PointStatus {
   const { celestial } = input;
-  // "Fuera de cobertura" = el servicio de efemérides tuvo que usar el modelo analítico aproximado
-  const outOfCoverage = celestial.isSynthetic && celestial.sourceLabel.includes('fuera de cobertura');
+  // Out of coverage = ephemeris service had to use the approximate analytical fallback
+  const outOfCoverage =
+    celestial.isSynthetic &&
+    (celestial.sourceLabel.includes('fuera de cobertura') ||
+      celestial.sourceLabel.includes('outside JPL coverage'));
   const etaPct = instantEfficiencyPct(celestial);
   const powerW = solarPower(celestial.sunEl, celestial.localHorizonSun);
 
@@ -66,16 +69,16 @@ export function derivePointStatus(input: PointStatusInput): PointStatus {
   let viabilityReason: string;
   if (!input.hasData || outOfCoverage) {
     viability = 'no_data';
-    viabilityReason = 'No hay efemérides para esta fecha en este sitio.';
+    viabilityReason = 'No ephemeris coverage for this date at this site.';
   } else if (!celestial.isSunVisible) {
     viability = 'no_sun';
-    viabilityReason = `El Sol está a ${celestial.sunEl.toFixed(2)}° y el horizonte en esa dirección a ${celestial.localHorizonSun.toFixed(2)}°: queda tapado.`;
+    viabilityReason = `Sun is at ${celestial.sunEl.toFixed(2)}° and the local horizon is at ${celestial.localHorizonSun.toFixed(2)}°: occulted.`;
   } else if (input.slopeDeg > input.maxSlopeDeg) {
     viability = 'danger';
-    viabilityReason = `La inclinación del suelo (${input.slopeDeg.toFixed(1)}°) supera el máximo permitido (${input.maxSlopeDeg}°).`;
+    viabilityReason = `Terrain slope (${input.slopeDeg.toFixed(1)}°) exceeds maximum allowed (${input.maxSlopeDeg}°).`;
   } else {
     viability = 'apt';
-    viabilityReason = `Hay Sol y la inclinación del suelo (${input.slopeDeg.toFixed(1)}°) está dentro del máximo (${input.maxSlopeDeg}°).`;
+    viabilityReason = `Sunlight available and terrain slope (${input.slopeDeg.toFixed(1)}°) is within limit (${input.maxSlopeDeg}°).`;
   }
 
   return {
@@ -103,8 +106,8 @@ export function derivePointStatus(input: PointStatusInput): PointStatus {
 }
 
 export const VIABILITY_LABEL: Record<Viability, string> = {
-  apt: 'ZONA APTA PARA ALUNIZAJE',
-  danger: 'TERRENO PELIGROSO',
-  no_sun: 'SIN LUZ SOLAR',
-  no_data: 'SIN DATOS PARA ESTA FECHA',
+  apt: 'SUITABLE LANDING ZONE',
+  danger: 'HAZARDOUS TERRAIN',
+  no_sun: 'NO SUNLIGHT',
+  no_data: 'NO DATA FOR THIS DATE',
 };

@@ -26,15 +26,15 @@ interface ToolEntry {
  * el modo Estudiante oculta el Benchmark, el Comparador A/B y la gráfica técnica.
  */
 export const TOOL_ENTRIES: ToolEntry[] = [
-  { id: 'bestDays', icon: '🏆', text: 'Mejores días', tag: 'Ranking', modes: ['student', 'professional'], accent: true },
-  { id: 'sky', icon: '🔭', text: 'Cielo visto desde el sitio', tag: 'Az / El', modes: ['student', 'professional'] },
-  { id: 'siteMetrics', icon: '📈', text: 'Métricas del sitio', tag: 'Resumen', modes: ['student', 'professional'] },
-  { id: 'sitesTable', icon: '🗺️', text: 'Comparación entre sitios', tag: '10 sitios', modes: ['student', 'professional'] },
-  { id: 'timeline', icon: '🕒', text: 'Línea del tiempo', tag: 'Sol / Tierra', modes: ['student', 'professional'] },
-  { id: 'chart', icon: '📊', text: 'Gráfica de elevación', tag: 'Horizonte', modes: ['professional'] },
-  { id: 'compare', icon: '⚖️', text: 'Comparador A/B', tag: 'Sensibilidad', modes: ['professional'] },
-  { id: 'benchmark', icon: '📋', text: 'Benchmark físico', tag: '5 casos', modes: ['professional'] },
-  { id: 'method', icon: 'ℹ️', text: 'Metodología y fuentes', tag: 'Límites', modes: ['student', 'professional'] },
+  { id: 'bestDays', icon: '🏆', text: 'Best Days', tag: 'Ranking', modes: ['student', 'professional'], accent: true },
+  { id: 'sky', icon: '🔭', text: 'Sky View from Site', tag: 'Az / El', modes: ['student', 'professional'] },
+  { id: 'siteMetrics', icon: '📈', text: 'Site Metrics', tag: 'Summary', modes: ['student', 'professional'] },
+  { id: 'sitesTable', icon: '🗺️', text: 'Site Comparison', tag: '10 sites', modes: ['student', 'professional'] },
+  { id: 'timeline', icon: '🕒', text: 'Timeline', tag: 'Sun / Earth', modes: ['student', 'professional'] },
+  { id: 'chart', icon: '📊', text: 'Elevation Chart', tag: 'Horizon', modes: ['professional'] },
+  { id: 'compare', icon: '⚖️', text: 'A/B Comparator', tag: 'Sensitivity', modes: ['professional'] },
+  { id: 'benchmark', icon: '📋', text: 'Physical Benchmark', tag: '5 cases', modes: ['professional'] },
+  { id: 'method', icon: 'ℹ️', text: 'Methodology & Sources', tag: 'Limits', modes: ['student', 'professional'] },
 ];
 
 export function toolTitle(id: ToolId): string {
@@ -71,14 +71,14 @@ export default function ToolsMenu({ onOpen }: { onOpen: (id: ToolId) => void }) 
   };
 
   return (
-    <nav aria-label="Herramientas" className="flex flex-col gap-1 w-64">
+    <nav aria-label="Tools" className="flex flex-col gap-1 w-64">
       <button
         onClick={toggle}
         aria-expanded={open}
         className="w-full text-xs font-bold py-1 px-3 rounded-xl backdrop-blur-md flex items-center justify-between transition cursor-pointer shadow-lg border bg-[#0e1626]/95 hover:bg-[#15203a] text-slate-100 border-slate-600/80"
       >
-        <span>🧰 Herramientas</span>
-        <span className="text-[10px] font-mono text-slate-400">{open ? '▲ plegar' : `▼ ${entries.length}`}</span>
+        <span>🧰 Tools</span>
+        <span className="text-[10px] font-mono text-slate-400">{open ? '▲ collapse' : `▼ ${entries.length}`}</span>
       </button>
       {open && entries.map((t) => (
         <button

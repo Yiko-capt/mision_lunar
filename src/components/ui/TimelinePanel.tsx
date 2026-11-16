@@ -37,7 +37,7 @@ export default function TimelinePanel({ trajectory, currentMs, missionStartMs, d
   }, [trajectory]);
 
   if (!model) {
-    return <div className="text-xs text-slate-300">Este sitio no tiene efemérides cargadas.</div>;
+    return <div className="text-xs text-slate-300">This site does not have ephemerides loaded.</div>;
   }
 
   const { t0, t1, runs } = model;
@@ -61,16 +61,16 @@ export default function TimelinePanel({ trajectory, currentMs, missionStartMs, d
   return (
     <div className="space-y-2" data-testid="timeline">
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full bg-[#03060c] border border-slate-800 rounded-lg cursor-pointer" onClick={handleClick}
-        role="img" aria-label="Línea del tiempo de visibilidad del Sol y la Tierra">
+        role="img" aria-label="Sun and Earth visibility timeline">
         {runs.map((r, i) => (
           <rect key={i} x={x(r.a)} y={barY} width={Math.max(0.5, x(r.b) - x(r.a) + 0.4)} height={barH} fill={r.c} />
         ))}
-        {/* Ventana de misión */}
+        {/* Mission window */}
         {missionEndMs > t0 && missionStartMs < t1 && (
           <g>
             <rect x={x(clamp(missionStartMs))} y={barY - 5} width={x(clamp(missionEndMs)) - x(clamp(missionStartMs))} height={barH + 10}
               fill="none" stroke="#e2e8f0" strokeWidth="1.5" strokeDasharray="5 3" />
-            <text x={x(clamp(missionStartMs)) + 4} y={barY - 9} fill="#e2e8f0" fontSize="10">Misión ({durationDays} d)</text>
+            <text x={x(clamp(missionStartMs)) + 4} y={barY - 9} fill="#e2e8f0" fontSize="10">Mission ({durationDays} d)</text>
           </g>
         )}
         {ticks.map((d) => (
@@ -84,15 +84,15 @@ export default function TimelinePanel({ trajectory, currentMs, missionStartMs, d
         {inRange && <line x1={x(currentMs)} y1={barY - 8} x2={x(currentMs)} y2={barY + barH + 8} stroke="#ffffff" strokeWidth="2" />}
       </svg>
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-300">
-        <span><span className="inline-block w-3 h-3 rounded-sm align-middle mr-1.5" style={{ background: COLORS.both }} />Sol y Tierra visibles</span>
-        <span><span className="inline-block w-3 h-3 rounded-sm align-middle mr-1.5" style={{ background: COLORS.sun }} />Solo Sol</span>
-        <span><span className="inline-block w-3 h-3 rounded-sm align-middle mr-1.5" style={{ background: COLORS.earth }} />Solo Tierra</span>
-        <span><span className="inline-block w-3 h-3 rounded-sm align-middle mr-1.5 border border-slate-600" style={{ background: COLORS.none }} />Ninguno</span>
-        <span className="text-slate-400">Línea blanca = instante actual · clic para saltar a esa fecha</span>
+        <span><span className="inline-block w-3 h-3 rounded-sm align-middle mr-1.5" style={{ background: COLORS.both }} />Sun & Earth visible</span>
+        <span><span className="inline-block w-3 h-3 rounded-sm align-middle mr-1.5" style={{ background: COLORS.sun }} />Sun only</span>
+        <span><span className="inline-block w-3 h-3 rounded-sm align-middle mr-1.5" style={{ background: COLORS.earth }} />Earth only</span>
+        <span><span className="inline-block w-3 h-3 rounded-sm align-middle mr-1.5 border border-slate-600" style={{ background: COLORS.none }} />Neither</span>
+        <span className="text-slate-400">White line = current simulated time · click to jump</span>
       </div>
       <div className="text-[10px] text-slate-500 font-mono">
-        Periodo con datos: {new Date(t0).toISOString().slice(0, 10)} a {new Date(t1).toISOString().slice(0, 10)} (UTC), paso de 1 hora.
-        {!inRange && ' La fecha actual queda fuera de este periodo.'}
+        Dataset range: {new Date(t0).toISOString().slice(0, 10)} to {new Date(t1).toISOString().slice(0, 10)} (UTC), 1-hour time step.
+        {!inRange && ' Current time is outside this dataset range.'}
       </div>
     </div>
   );

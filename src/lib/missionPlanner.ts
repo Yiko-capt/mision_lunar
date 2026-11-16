@@ -56,7 +56,7 @@ export function findBestMissionWindows(
   });
 
   if (!horizon || !ephemeris || !ephemeris.datos || ephemeris.datos.length === 0) {
-    return emptyResult('no_data', 'Rango sin datos (sin efemérides ni perfil de horizonte)');
+    return emptyResult('no_data', 'No data range (missing ephemerides or horizon profile)');
   }
 
   const datos = ephemeris.datos;
@@ -67,7 +67,7 @@ export function findBestMissionWindows(
   const rangeEndMs = rangeEndDate.getTime();
 
   if (rangeEndMs <= rangeStartMs) {
-    return emptyResult('no_data', 'Rango sin datos: la fecha de fin debe ser posterior a la de inicio.');
+    return emptyResult('no_data', 'No data range: end date must be after start date.');
   }
 
   const durationMs = durationDays * 86400000;
@@ -76,7 +76,7 @@ export function findBestMissionWindows(
   if (rangeStartMs < ephemStartMs || rangeEndMs + durationMs > ephemEndMs + 86400000) {
     return emptyResult(
       'no_data',
-      `Rango sin datos: Las efemérides cubren desde ${datos[0].timestamp_utc.slice(0, 10)} hasta ${datos[datos.length - 1].timestamp_utc.slice(0, 10)}.`
+      `No data range: ephemerides cover from ${datos[0].timestamp_utc.slice(0, 10)} to ${datos[datos.length - 1].timestamp_utc.slice(0, 10)}.`
     );
   }
 
@@ -144,7 +144,7 @@ export function findBestMissionWindows(
   }
 
   if (candidates.length === 0) {
-    return emptyResult('insufficient_range', 'Rango sin datos suficientes para la duración indicada.');
+    return emptyResult('insufficient_range', 'Insufficient data range for the specified duration.');
   }
 
   // Ordenar para obtener el Top 5

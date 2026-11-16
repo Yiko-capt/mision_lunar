@@ -99,7 +99,7 @@ export const GLOBE_SCALES: Record<ScaleMode, GlobeScale> = {
     minCameraDistance: 1.15,
     maxCameraDistance: 420,
     cameraFar: 4000,
-    label: `Escala real · Tierra a ${EARTH_MOON_DISTANCE_LR.toFixed(0)} radios lunares (384 400 km) · Sol dibujado con su diámetro aparente real (0.53°)`,
+    label: `True scale · Earth–Moon: ${EARTH_MOON_DISTANCE_LR.toFixed(0)} lunar radii (384,400 km real) · Earth: 3.67× Moon (real) · Sun: true 0.53° angular diameter (placed at 1,200 LR for rendering; real: 86,104 LR)`,
   },
   didactica: {
     mode: 'didactica',
@@ -113,7 +113,7 @@ export const GLOBE_SCALES: Record<ScaleMode, GlobeScale> = {
     minCameraDistance: 1.15,
     maxCameraDistance: 70,
     cameraFar: 1000,
-    label: 'Escala didáctica · distancias comprimidas · proporción de tamaños Tierra:Luna conservada (3.67:1) · Sol ampliado a 3°',
+    label: 'Educational scale · compressed distances · preserved Earth:Moon size ratio (3.67:1) · Sun scaled to 3° · light direction is real',
   },
 };
 

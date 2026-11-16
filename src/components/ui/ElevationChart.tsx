@@ -97,7 +97,7 @@ export default function ElevationChart({ trajectory, loading, currentMs, horizon
   if (loading) {
     return (
       <div className="h-56 flex items-center justify-center bg-slate-950/60 border border-slate-800 rounded-lg text-xs text-slate-400">
-        Cargando curvas de elevación...
+        Loading elevation profiles...
       </div>
     );
   }
@@ -105,15 +105,15 @@ export default function ElevationChart({ trajectory, loading, currentMs, horizon
   if (numPoints === 0) {
     return (
       <div className="h-56 flex flex-col items-center justify-center bg-slate-950/60 border border-slate-800 rounded-lg text-xs text-slate-400 p-4">
-        <span className="text-amber-400 font-bold mb-1">SIN DATOS DE TRAYECTORIA</span>
+        <span className="text-amber-400 font-bold mb-1">NO TRAJECTORY DATA</span>
         <p className="text-center text-slate-500">
-          No hay efemérides temporales disponibles para este sitio en la ventana de simulación.
+          No time-series ephemerides available for this site in the simulation window.
         </p>
       </div>
     );
   }
 
-  // Marcas de eje Y
+  // Y axis ticks
   const yTicks = [-5, 0, 5, 10];
   const toY = (deg: number) => PADDING.top + plotH - ((deg - yMin) / (yMax - yMin)) * plotH;
 
@@ -122,26 +122,26 @@ export default function ElevationChart({ trajectory, loading, currentMs, horizon
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold text-cyan-400 uppercase tracking-wide">
-            {uiMode === 'public' ? 'Perfil de Elevación respecto al Horizonte' : 'Efemérides topocéntricas y horizonte local'}
+            {uiMode === 'public' ? 'Elevation Profile Relative to Horizon' : 'Topocentric Ephemerides & Local Horizon'}
           </span>
           <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">
-            Paso: {trajectory?.stepHours || 1} h · Total: {trajectory?.totalHours || 0} h
+            Step: {trajectory?.stepHours || 1} h · Total: {trajectory?.totalHours || 0} h
           </span>
         </div>
 
-        {/* Leyenda interactiva */}
+        {/* Interactive legend */}
         <div className="flex items-center gap-3 text-[11px] font-mono">
           <span className="flex items-center gap-1.5 text-amber-300">
             <span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" />
-            Sol {curPoint ? `(${curPoint.sun_el.toFixed(1)}°)` : ''}
+            Sun {curPoint ? `(${curPoint.sun_el.toFixed(1)}°)` : ''}
           </span>
           <span className="flex items-center gap-1.5 text-blue-400">
             <span className="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block" />
-            Tierra {curPoint ? `(${curPoint.earth_el.toFixed(1)}°)` : ''}
+            Earth {curPoint ? `(${curPoint.earth_el.toFixed(1)}°)` : ''}
           </span>
           <span className="flex items-center gap-1.5 text-slate-400">
             <span className="w-3 h-0.5 border-t-2 border-dashed border-slate-400 inline-block" />
-            {horizonLabel ?? 'Horizonte local'} {curPoint ? `(${curPoint.hor_sun.toFixed(1)}°)` : ''}
+            {horizonLabel ?? 'Local horizon'} {curPoint ? `(${curPoint.hor_sun.toFixed(1)}°)` : ''}
           </span>
         </div>
       </div>
@@ -263,34 +263,34 @@ export default function ElevationChart({ trajectory, loading, currentMs, horizon
         )}
       </svg>
 
-      {/* Alerta de estado y cruces en el instante actual */}
+      {/* Current status alert and crossings */}
       {curPoint && (
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs bg-slate-900 border border-slate-800 rounded px-2.5 py-1 font-mono">
           <div className="flex items-center gap-2">
             <span className={curPoint.sun_visible ? 'text-amber-400 font-bold' : 'text-slate-500'}>
               {curPoint.sun_visible
                 ? curPoint.sun_fully_visible
-                  ? '☀️ Sol pleno'
-                  : `⛅ Sol parcial (${(curPoint.disk_fraction * 100).toFixed(0)}%)`
-                : '🌑 Sol oculto bajo horizonte'}
+                  ? '☀️ Full Sun'
+                  : `⛅ Partial Sun (${(curPoint.disk_fraction * 100).toFixed(0)}%)`
+                : '🌑 Sun occluded below horizon'}
             </span>
             <span className="text-slate-600">|</span>
             <span className={curPoint.earth_nominal ? 'text-blue-400 font-bold' : 'text-slate-500'}>
               {curPoint.earth_nominal
                 ? curPoint.earth_margen
-                  ? '📡 DTE Margen óptimo'
+                  ? '📡 DTE Optimal Margin'
                   : '📡 DTE Nominal'
-                : '❌ Sin enlace DTE'}
+                : '❌ No DTE Link'}
             </span>
           </div>
 
           <div className="text-cyan-300">
             {curPoint.sun_visible && curPoint.hours_to_sun_sunset != null ? (
-              <span>⚠️ Puesta de Sol en <b className="text-amber-300">{curPoint.hours_to_sun_sunset.toFixed(1)} h</b></span>
+              <span>⚠️ Sunset in <b className="text-amber-300">{curPoint.hours_to_sun_sunset.toFixed(1)} h</b></span>
             ) : curPoint.sun_visible ? (
-              <span className="text-emerald-400">Sol continuo en esta ventana</span>
+              <span className="text-emerald-400">Continuous sunlight in this window</span>
             ) : (
-              <span className="text-slate-400">Sol bajo el horizonte</span>
+              <span className="text-slate-400">Sun below horizon</span>
             )}
           </div>
         </div>

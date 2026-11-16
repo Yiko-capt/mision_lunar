@@ -30,8 +30,8 @@ export const STUDENT_SCENARIOS: StudentScenario[] = [
   {
     id: 'safe_landing',
     icon: '🛬',
-    title: 'Aterrizaje Seguro',
-    blurb: 'Un sitio con Sol y con la Tierra a la vista, y suelo poco inclinado.',
+    title: 'Safe Landing',
+    blurb: 'A site with sunlight, Earth in view, and gentle ground slope.',
     siteId: 'malapert_peak',
     baseDate: '2026-11-15',
     baseTime: '00:00',
@@ -43,8 +43,8 @@ export const STUDENT_SCENARIOS: StudentScenario[] = [
   {
     id: 'max_solar',
     icon: '☀️',
-    title: 'Máxima Energía Solar',
-    blurb: 'Una cresta donde el Sol casi no se pone durante el periodo con datos.',
+    title: 'Maximum Solar Energy',
+    blurb: 'A polar ridge with near-continuous sunlight during mission window.',
     siteId: 'shackleton_rim',
     baseDate: '2026-11-15',
     baseTime: '00:00',
@@ -56,8 +56,8 @@ export const STUDENT_SCENARIOS: StudentScenario[] = [
   {
     id: 'crater_exploration',
     icon: '🕳️',
-    title: 'Exploración de Cráter',
-    blurb: 'El fondo de un cráter polar donde nunca llega la luz del Sol.',
+    title: 'Crater Exploration',
+    blurb: 'A deep polar crater floor where direct sunlight never reaches.',
     siteId: 'shackleton_floor',
     baseDate: '2026-11-15',
     baseTime: '00:00',

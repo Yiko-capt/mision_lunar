@@ -12,13 +12,15 @@ interface SpaceBackgroundProps {
 }
 
 export default function SpaceBackground({ showEclipticGrid = true, radius = 350 }: SpaceBackgroundProps) {
-  // 1. Textura envolvente de la Vía Láctea y polvo cósmico
+  // 1. Skybox texture with embedded Milky Way, nebulae, and baked-in stars
   const milkyWayTexture = useMemo(() => createMilkyWaySkyTexture(), []);
   const starSprite = useMemo(() => createCircularStarTexture(), []);
 
-  // 2. 3800 estrellas circulares multicolores con magnitudes reales
+  const scaleFactor = radius / 350;
+
+  // 2. Sparse sharp point-cloud stars (fewer, more spread apart)
   const { starGeometry } = useMemo(() => {
-    const COUNT = 3800;
+    const COUNT = 1600;
     const positions = new Float32Array(COUNT * 3);
     const colors = new Float32Array(COUNT * 3);
 
@@ -28,14 +30,13 @@ export default function SpaceBackground({ showEclipticGrid = true, radius = 350 
       return (seed - 1) / 2147483646;
     };
 
-    // Paleta de temperaturas estelares
+    // Mostly white / blue-white (matching the sharp punctual aesthetic)
     const stellarColors: [number, number, number][] = [
-      [0.65, 0.82, 1.00], // Azul O/B brillante
-      [0.85, 0.92, 1.00], // Blanco A
-      [1.00, 1.00, 1.00], // Blanco neutro F
-      [1.00, 0.95, 0.75], // Amarillo cálido G (tipo Solar)
-      [1.00, 0.82, 0.55], // Naranja K
-      [1.00, 0.65, 0.50], // Rojo M gigante
+      [0.78, 0.85, 1.00], // Blue-white
+      [0.90, 0.94, 1.00], // Cool white
+      [1.00, 1.00, 1.00], // Pure white
+      [1.00, 0.97, 0.90], // Warm white
+      [1.00, 0.90, 0.75], // Yellow-white
     ];
 
     for (let i = 0; i < COUNT; i++) {
@@ -43,31 +44,28 @@ export default function SpaceBackground({ showEclipticGrid = true, radius = 350 
       const theta = rng() * Math.PI * 2;
       const phi = Math.acos(2 * rng() - 1);
 
-      const x = r * Math.sin(phi) * Math.cos(theta);
-      const y = r * Math.sin(phi) * Math.sin(theta);
-      const z = r * Math.cos(phi);
-
-      positions[i * 3] = x;
-      positions[i * 3 + 1] = y;
-      positions[i * 3 + 2] = z;
+      positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+      positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+      positions[i * 3 + 2] = r * Math.cos(phi);
 
       const colorType = stellarColors[Math.floor(rng() * stellarColors.length)];
-      const brightness = 0.5 + rng() * 0.5;
+      const brightness = 0.4 + rng() * 0.6;
       colors[i * 3] = colorType[0] * brightness;
       colors[i * 3 + 1] = colorType[1] * brightness;
       colors[i * 3 + 2] = colorType[2] * brightness;
-
     }
 
     const geom = new THREE.BufferGeometry();
     geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-
     return { starGeometry: geom };
   }, []);
 
-  // 3. Cuadrícula orbital / eclíptica estilo Solar System Scope
+  // Point size: small and sharp
+  const pointSize = 1.2;
+
+  // 3. Orbital / ecliptic reference grid (Solar System Scope style)
   const eclipticGrid = useMemo(() => {
     const size = 32;
     const divisions = 32;
@@ -92,8 +90,8 @@ export default function SpaceBackground({ showEclipticGrid = true, radius = 350 
 
   return (
     <group>
-      {/* Fondo espacial negro profundo (#03050a) con la Vía Láctea */}
-      <mesh scale={radius / 350}>
+      {/* Deep space background with baked-in Milky Way and stars */}
+      <mesh scale={scaleFactor}>
         <sphereGeometry args={[350, 48, 32]} />
         <meshBasicMaterial
           map={milkyWayTexture}
@@ -102,23 +100,24 @@ export default function SpaceBackground({ showEclipticGrid = true, radius = 350 
         />
       </mesh>
 
-      {/* Estrellas circulares anti-aliased (la cáscara se escala con el radio del fondo) */}
-      <points geometry={starGeometry} scale={radius / 350}>
+      {/* Anti-aliased circular point-cloud stars (shell scales with background radius) */}
+      <points geometry={starGeometry} scale={scaleFactor}>
         <pointsMaterial
-          size={1.6}
+          size={pointSize}
           map={starSprite}
           vertexColors
           transparent
           alphaTest={0.02}
           depthWrite={false}
           blending={THREE.AdditiveBlending}
+          sizeAttenuation={false}
         />
       </points>
 
-      {/* Nota: no se dibujan "constelaciones" porque los patrones serían inventados
-          (las estrellas de este fondo son procedurales, no un catálogo real). */}
+      {/* Note: no "constellations" are drawn because the patterns would be fictitious
+          (the stars in this background are procedural, not from a real catalog). */}
 
-      {/* Cuadrícula de referencia orbital */}
+      {/* Orbital reference grid */}
       {showEclipticGrid && (
         <>
           <primitive object={eclipticGrid} />

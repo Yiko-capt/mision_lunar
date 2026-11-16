@@ -54,7 +54,7 @@ export default function IntroOverlay({ loaded, total, onChoose }: IntroOverlayPr
   return (
     <div
       role="dialog"
-      aria-label="Bienvenida a KillaLand"
+      aria-label="Welcome to KillaLand"
       className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
       style={{
         background:
@@ -62,21 +62,21 @@ export default function IntroOverlay({ loaded, total, onChoose }: IntroOverlayPr
       }}
     >
       <div className="max-w-3xl w-[92%] text-center py-10">
-        {/* Luna + Tierra con la proporción real de tamaños (1 : 3.67) */}
+        {/* Moon + Earth real size proportion (1 : 3.67) */}
         <div className="flex items-end justify-center gap-10 mb-6" aria-hidden="true">
           <div
             className={`rounded-full bg-gradient-to-br from-amber-100 via-stone-300 to-stone-500 shadow-[0_0_40px_rgba(251,191,36,0.25)] ${reduced ? '' : 'animate-[spin_60s_linear_infinite]'}`}
             style={{ width: 44, height: 44 }}
-            title="Luna"
+            title="Moon"
           />
           <div
             className="rounded-full bg-gradient-to-br from-sky-300 via-blue-500 to-indigo-800 shadow-[0_0_60px_rgba(56,189,248,0.35)]"
             style={{ width: 161, height: 161 }}
-            title="Tierra (3.67 veces el radio lunar)"
+            title="Earth (3.67 times Moon radius)"
           />
         </div>
         <div className="text-[10px] text-indigo-300/70 mb-8 font-mono">
-          Tamaños relativos reales: el radio de la Tierra es 3.67 veces el de la Luna
+          Actual relative sizes: Earth radius is 3.67× Moon radius
         </div>
 
         <h1
@@ -86,11 +86,11 @@ export default function IntroOverlay({ loaded, total, onChoose }: IntroOverlayPr
           🌙 KillaLand
         </h1>
         <p className="text-indigo-200 text-lg mb-2">
-          Elige dónde alunizar en el polo sur de la Luna con luz solar, pendiente del
-          terreno y línea directa con la Tierra calculadas con datos reales.
+          Select landing zones at the lunar South Pole with solar illumination, terrain slope,
+          and direct Earth line-of-sight computed from real planetary data.
         </p>
         <p className="text-indigo-400/80 text-xs mb-10 font-mono">
-          Efemérides JPL Horizons · horizontes sobre el DEM LOLA (80 m) · NASA Space Apps 2026
+          JPL Horizons ephemerides · LOLA DEM horizons (80 m) · NASA Space Apps 2026
         </p>
 
         {!ready ? (
@@ -102,16 +102,16 @@ export default function IntroOverlay({ loaded, total, onChoose }: IntroOverlayPr
               />
             </div>
             <div className="text-indigo-300 text-sm mt-3 font-mono">
-              Cargando datos de los sitios… {loaded}/{total} ({pct}%)
+              Loading site data… {loaded}/{total} ({pct}%)
             </div>
             <div className="text-indigo-500/80 text-[11px] mt-1">
-              Efemérides y horizontes de cada sitio del catálogo
+              Ephemerides and horizons for each catalog site
             </div>
           </div>
         ) : (
           <>
             <h2 className="text-amber-200 text-sm font-bold tracking-[0.3em] uppercase mb-4">
-              ¿Cómo quieres explorar?
+              How would you like to explore?
             </h2>
             <div className="grid sm:grid-cols-2 gap-5 max-w-2xl mx-auto mb-6">
               <button
@@ -119,13 +119,13 @@ export default function IntroOverlay({ loaded, total, onChoose }: IntroOverlayPr
                 className="group text-left rounded-2xl border-2 border-indigo-700 hover:border-amber-400 focus-visible:border-amber-400 focus-visible:outline-none bg-indigo-950/60 hover:bg-indigo-900/60 p-6 transition cursor-pointer"
               >
                 <div className="text-4xl mb-3">🎓</div>
-                <div className="text-amber-50 font-bold text-xl mb-1.5">Estudiante</div>
+                <div className="text-amber-50 font-bold text-xl mb-1.5">Undergraduate</div>
                 <p className="text-indigo-200 text-sm leading-relaxed">
-                  Explora y aprende con escenarios de un clic («Aterrizaje seguro», «Máxima
-                  energía solar»…), etiquetas sencillas y fichas educativas con fuentes.
+                  Explore and learn with 1-click scenarios ("Safe Landing", "Maximum Solar
+                  Power"…), simplified labels, and educational sheets with sources.
                 </p>
                 <div className="text-amber-300/90 text-xs mt-3 font-semibold group-hover:translate-x-1 transition-transform">
-                  Empezar como estudiante →
+                  Start as Undergraduate →
                 </div>
               </button>
               <button
@@ -133,13 +133,13 @@ export default function IntroOverlay({ loaded, total, onChoose }: IntroOverlayPr
                 className="group text-left rounded-2xl border-2 border-indigo-700 hover:border-cyan-300 focus-visible:border-cyan-300 focus-visible:outline-none bg-indigo-950/60 hover:bg-indigo-900/60 p-6 transition cursor-pointer"
               >
                 <div className="text-4xl mb-3">🚀</div>
-                <div className="text-amber-50 font-bold text-xl mb-1.5">Profesional</div>
+                <div className="text-amber-50 font-bold text-xl mb-1.5">Professional</div>
                 <p className="text-indigo-200 text-sm leading-relaxed">
-                  Todos los datos técnicos: gráfica de elevación, comparador A/B, benchmark
-                  físico de 5 casos y exportación del punto en JSON o CSV.
+                  Full technical datasets: elevation profiles, A/B comparison, 5-case
+                  physics benchmark, and target export to JSON or CSV.
                 </p>
                 <div className="text-cyan-300/90 text-xs mt-3 font-semibold group-hover:translate-x-1 transition-transform">
-                  Empezar como profesional →
+                  Start as Professional →
                 </div>
               </button>
             </div>
@@ -147,10 +147,10 @@ export default function IntroOverlay({ loaded, total, onChoose }: IntroOverlayPr
               onClick={() => onChoose('professional', false)}
               className="text-indigo-400 hover:text-indigo-200 text-xs underline underline-offset-4 cursor-pointer focus-visible:outline-amber-300"
             >
-              Entrar sin recorrido guiado
+              Enter without guided tour
             </button>
             <p className="text-indigo-500/70 text-[11px] mt-4">
-              Puedes cambiar de modo en cualquier momento desde la barra superior.
+              You can switch view modes at any time from the top bar.
             </p>
           </>
         )}
@@ -168,24 +168,24 @@ export interface TourStep {
 
 export const TOUR_STEPS: TourStep[] = [
   {
-    title: 'El globo y los sitios',
-    body: 'Cada punto rojo es un sitio candidato (regiones Artemis III y sitios históricos). Haz clic en la Luna para elegir un punto; el marcador verde es tu objetivo.',
+    title: 'Globe and Landing Sites',
+    body: 'Each marker is a candidate site (Artemis III regions and historic landing sites). Click anywhere on the Moon to select a target; the green ring marks your objective.',
   },
   {
-    title: 'La fecha manda',
-    body: 'La luz, la sombra y la visibilidad de la Tierra salen de las efemérides JPL del instante simulado. Avanza días con la línea de tiempo y verás moverse el terminador.',
+    title: 'Date & Time Control',
+    body: 'Illumination, shadows, and Earth visibility are calculated from JPL Horizons ephemerides at the simulated time. Move through days with the timeline to see the terminator shift.',
   },
   {
-    title: 'Objetivo lunar',
-    body: 'La tarjeta de la derecha resume el punto: pendiente, eficiencia solar, potencia y si hay señal directa con la Tierra. Estudiante y Profesional leen los mismos datos.',
+    title: 'Lunar Target',
+    body: 'The right panel summarizes the active site: slope, solar efficiency, power, and line of sight to Earth. Both Undergraduate and Professional modes show identical physics.',
   },
   {
-    title: 'Herramientas',
-    body: 'En el menú superior derecho están el ranking de mejores días, el cielo desde el sitio, las métricas, las comparaciones y la metodología con sus fuentes.',
+    title: 'Mission Tools',
+    body: 'The top-right tools menu contains best days ranking, site sky view, metrics, side-by-side comparison, and scientific methodology with citations.',
   },
   {
-    title: 'Tres maneras de mirar',
-    body: 'Globo 3D (contexto), Polo Sur en parche (terreno) y «Desde el sitio» (a 2 m del suelo, con minimapa para saltar entre sitios). Cambiar de vista no pierde tu selección.',
+    title: 'Three View Modes',
+    body: '3D Globe (global context), South Pole Patch (high-res regional DEM), and Site View (first-person ground perspective at 2 m). Switching views keeps your target selection.',
   },
 ];
 
@@ -204,14 +204,14 @@ export function TourOverlay({ step, onNext, onClose }: TourProps) {
       <div className="rounded-2xl border-2 border-amber-400/70 bg-[#1e1b4b]/95 backdrop-blur-md p-4 shadow-2xl">
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-amber-200 text-xs font-bold tracking-widest">
-            GUÍA · {step + 1} de {TOUR_STEPS.length}
+            GUIDE · {step + 1} of {TOUR_STEPS.length}
           </span>
           <button
             onClick={onClose}
             className="text-indigo-300 hover:text-white text-xs cursor-pointer"
-            aria-label="Cerrar la guía"
+            aria-label="Close guide"
           >
-            ✕ Saltar
+            ✕ Skip
           </button>
         </div>
         <div className="text-white font-bold text-sm mb-1">{s.title}</div>
@@ -229,7 +229,7 @@ export function TourOverlay({ step, onNext, onClose }: TourProps) {
             onClick={last ? onClose : onNext}
             className="bg-amber-400 hover:bg-amber-300 text-indigo-950 font-bold text-xs px-4 py-1.5 rounded-lg cursor-pointer"
           >
-            {last ? 'Terminar' : 'Siguiente →'}
+            {last ? 'Finish' : 'Next →'}
           </button>
         </div>
       </div>

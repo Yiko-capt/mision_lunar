@@ -37,10 +37,10 @@ export default function BestDaysModal({
             <span className="text-xl">🏆</span>
             <div>
               <h2 className="text-sm font-bold text-white tracking-wide">
-                Optimización de Ventanas de Lanzamiento (Mejores Días)
+                Launch Window Optimization (Best Days)
               </h2>
               <p className="text-[11px] text-slate-400 font-mono">
-                Sitio analizado: <span className="text-cyan-400 font-semibold">{siteName}</span>
+                Analyzed site: <span className="text-cyan-400 font-semibold">{siteName}</span>
               </p>
             </div>
           </div>
@@ -48,7 +48,7 @@ export default function BestDaysModal({
             onClick={onClose}
             className="text-slate-400 hover:text-white px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs transition cursor-pointer"
           >
-            ✕ Cerrar
+            ✕ Close
           </button>
         </div>
 
@@ -58,7 +58,7 @@ export default function BestDaysModal({
           <div className="bg-[#050b14] p-4 rounded-xl border border-slate-800 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
             <div>
               <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-                Fecha Inicio Búsqueda
+                Search Start Date
               </label>
               <input
                 type="date"
@@ -70,7 +70,7 @@ export default function BestDaysModal({
 
             <div>
               <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-                Fecha Fin Búsqueda
+                Search End Date
               </label>
               <input
                 type="date"
@@ -82,7 +82,7 @@ export default function BestDaysModal({
 
             <div>
               <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-                Duración Misión: <span className="text-cyan-400 font-mono">{duration} días</span>
+                Mission Duration: <span className="text-cyan-400 font-mono">{duration} days</span>
               </label>
               <input
                 type="range"
@@ -98,10 +98,10 @@ export default function BestDaysModal({
           {/* Fórmula del Puntaje */}
           <div className="p-3 bg-cyan-950/40 border border-cyan-800/60 rounded-xl text-xs flex flex-wrap items-center justify-between gap-2">
             <span className="text-cyan-300 font-medium">
-              📐 Función Objetivo: <code className="font-mono text-white">Puntaje = {(WEIGHT_SOLAR_LIGHT * 100).toFixed(0)}% · Luz + {(WEIGHT_EARTH_VISIBILITY * 100).toFixed(0)}% · DTE</code>
+              📐 Objective Function: <code className="font-mono text-white">Score = {(WEIGHT_SOLAR_LIGHT * 100).toFixed(0)}% · Light + {(WEIGHT_EARTH_VISIBILITY * 100).toFixed(0)}% · DTE</code>
             </span>
             <span className="text-[10px] text-slate-400 font-mono">
-              Tiempo de cómputo: {plannerResult.evaluationTimeMs} ms
+              Compute time: {plannerResult.evaluationTimeMs} ms
             </span>
           </div>
 
@@ -109,9 +109,9 @@ export default function BestDaysModal({
           {plannerResult.status !== 'ok' ? (
             <div className="p-8 text-center bg-slate-900/60 border border-amber-500/40 rounded-2xl space-y-2">
               <span className="text-3xl">⚠️</span>
-              <h3 className="text-sm font-bold text-amber-300 font-mono">Rango sin datos</h3>
+              <h3 className="text-sm font-bold text-amber-300 font-mono">No data in range</h3>
               <p className="text-xs text-slate-400 max-w-md mx-auto">
-                {plannerResult.message || 'No se cuenta con efemérides de JPL Horizons para este rango temporal.'}
+                {plannerResult.message || 'No JPL Horizons ephemerides available for this time range.'}
               </p>
             </div>
           ) : (
@@ -119,8 +119,8 @@ export default function BestDaysModal({
               {/* Ranking Top 5 */}
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between text-xs font-bold text-slate-300 uppercase tracking-wider">
-                  <span>🏆 Ranking Top 5 de Ventanas Óptimas</span>
-                  <span className="text-[10px] text-emerald-400 font-mono">Haz clic para cargar en simulación</span>
+                  <span>🏆 Top 5 Optimal Mission Windows</span>
+                  <span className="text-[10px] text-emerald-400 font-mono">Click to load into simulation</span>
                 </div>
 
                 <div className="grid gap-2">
@@ -156,13 +156,13 @@ export default function BestDaysModal({
                             <span>{item.startDateUtc}</span>
                             {item.isBest && (
                               <span className="text-[9px] px-1.5 py-0.2 bg-emerald-900 text-emerald-300 border border-emerald-700 rounded uppercase tracking-wider">
-                                Óptimo Global
+                                Global Optimum
                               </span>
                             )}
                           </div>
                           <div className="text-[11px] text-slate-400 flex gap-4 pt-0.5">
-                            <span>☀️ Luz solar útil: <b className="text-amber-300">{item.solarLightPct}%</b></span>
-                            <span>🌍 Visibilidad DTE: <b className="text-cyan-300">{item.earthVisibilityPct}%</b></span>
+                            <span>☀️ Solar light: <b className="text-amber-300">{item.solarLightPct}%</b></span>
+                            <span>🌍 DTE visibility: <b className="text-cyan-300">{item.earthVisibilityPct}%</b></span>
                           </div>
                         </div>
                       </div>
@@ -172,7 +172,7 @@ export default function BestDaysModal({
                           {item.score} <span className="text-xs text-slate-500">pts</span>
                         </div>
                         <div className="text-[10px] text-cyan-400 underline font-medium">
-                          Cargar día →
+                          Load day →
                         </div>
                       </div>
                     </div>
@@ -183,7 +183,7 @@ export default function BestDaysModal({
               {/* Gráfica de Puntaje Diario */}
               <div className="space-y-2 pt-2">
                 <span className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
-                  📈 Curva de Aptitud Temporal ({duration} días de misión)
+                  📈 Temporal Fitness Curve ({duration} mission days)
                 </span>
                 <div className="h-28 bg-[#040810] p-2.5 rounded-xl border border-slate-800 flex items-end gap-1 overflow-x-auto">
                   {plannerResult.dailyScores.map((day) => (

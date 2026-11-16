@@ -8,7 +8,7 @@ export default function RiskPanel({ analysis }: { analysis: Analysis }) {
   if (s.selected === null) {
     return (
       <aside className="p-4 text-sm text-slate-400">
-        Haz clic en el terreno para inspeccionar una celda.
+        Click on terrain to inspect a cell.
       </aside>
     );
   }
@@ -19,25 +19,25 @@ export default function RiskPanel({ analysis }: { analysis: Analysis }) {
   const S = TERRAIN.slopeDeg[c];
 
   const fails: string[] = [];
-  if (L < s.minLight) fails.push(`Luz ${L.toFixed(0)}% (mínimo ${s.minLight}%)`);
-  if (S > s.maxSlope) fails.push(`Pendiente ${S.toFixed(1)}° (máximo ${s.maxSlope}°)`);
-  if (s.requireEarth && E < s.minEarth) fails.push(`Tierra visible ${E.toFixed(0)}% (mínimo ${s.minEarth}%)`);
+  if (L < s.minLight) fails.push(`Sunlight ${L.toFixed(0)}% (minimum ${s.minLight}%)`);
+  if (S > s.maxSlope) fails.push(`Slope ${S.toFixed(1)}° (maximum ${s.maxSlope}°)`);
+  if (s.requireEarth && E < s.minEarth) fails.push(`Visible Earth ${E.toFixed(0)}% (minimum ${s.minEarth}%)`);
   const ok = fails.length === 0;
 
   return (
     <aside className="p-4 text-sm">
-      <h2 className="text-lg font-semibold mb-3">Medidor de riesgo</h2>
+      <h2 className="text-lg font-semibold mb-3">Risk Assessment</h2>
       <div className={`mb-3 px-3 py-2 rounded font-bold text-center ${ok ? 'bg-emerald-600' : 'bg-rose-700'}`}>
-        {ok ? 'APTO' : 'NO APTO'}
+        {ok ? 'SUITABLE' : 'UNSUITABLE'}
       </div>
       <ul className="space-y-1 font-mono text-slate-300">
-        <li>Luz solar: {L.toFixed(0)}%</li>
-        <li>Tierra visible: {E.toFixed(0)}%</li>
-        <li>Pendiente: {S.toFixed(1)}°</li>
+        <li>Sunlight: {L.toFixed(0)}%</li>
+        <li>Visible Earth: {E.toFixed(0)}%</li>
+        <li>Slope: {S.toFixed(1)}°</li>
       </ul>
       {!ok && (
         <div className="mt-3 text-rose-300">
-          <p className="font-semibold">Motivos:</p>
+          <p className="font-semibold">Reasons:</p>
           <ul className="list-disc ml-5">{fails.map((f) => <li key={f}>{f}</li>)}</ul>
         </div>
       )}

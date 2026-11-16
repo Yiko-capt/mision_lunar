@@ -25,34 +25,34 @@ export default function FilterPanel({ analysis, total }: { analysis: Analysis; t
 
   return (
     <aside className="w-72 p-4 bg-slate-900/80 border-r border-slate-800 overflow-y-auto">
-      <h2 className="text-lg font-semibold mb-4">Requisitos de misión</h2>
+      <h2 className="text-lg font-semibold mb-4">Mission Requirements</h2>
 
       <label className="block text-sm mb-4">
-        Inicio de misión
+        Mission start
         <input type="date" className="block w-full mt-1 bg-slate-800 rounded px-2 py-1"
           value={dateFromDays(s.startDays).toISOString().slice(0, 10)}
           onChange={(e) => s.update({ startDays: daysSince(new Date(e.target.value + 'T00:00:00Z')) })} />
       </label>
 
-      <Slider label="Duración" value={s.durationDays} min={7} max={28} unit=" días"
+      <Slider label="Duration" value={s.durationDays} min={7} max={28} unit=" days"
         onChange={(v) => s.update({ durationDays: v, simDay: Math.min(s.simDay, v) })} />
-      <Slider label="Luz solar mínima" value={s.minLight} min={0} max={100} unit="%"
+      <Slider label="Minimum sunlight" value={s.minLight} min={0} max={100} unit="%"
         onChange={(v) => s.update({ minLight: v })} />
-      <Slider label="Pendiente máxima" value={s.maxSlope} min={1} max={30} unit="°"
+      <Slider label="Maximum slope" value={s.maxSlope} min={1} max={30} unit="°"
         onChange={(v) => s.update({ maxSlope: v })} />
 
       <label className="flex items-center gap-2 text-sm mb-4">
         <input type="checkbox" checked={s.requireEarth}
           onChange={(e) => s.update({ requireEarth: e.target.checked })} />
-        Exigir línea de visión con la Tierra
+        Require Earth line-of-sight
       </label>
       {s.requireEarth && (
-        <Slider label="Tierra visible mínima" value={s.minEarth} min={0} max={100} unit="%"
+        <Slider label="Minimum visible Earth" value={s.minEarth} min={0} max={100} unit="%"
           onChange={(v) => s.update({ minEarth: v })} />
       )}
 
       <div className="mt-4 p-3 rounded bg-slate-800 text-sm">
-        Celdas aptas: <b className="text-emerald-400">{apt}</b> / {total}
+        Eligible cells: <b className="text-emerald-400">{apt}</b> / {total}
       </div>
     </aside>
   );

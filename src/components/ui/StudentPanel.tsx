@@ -34,7 +34,7 @@ export default function StudentPanel({
     <div className="space-y-3">
       <div>
         <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-          Elige una misión
+          Choose a mission
         </div>
         <div className="space-y-1.5">
           {STUDENT_SCENARIOS.map((s) => {
@@ -64,18 +64,18 @@ export default function StudentPanel({
       </div>
 
       <div className="p-2 rounded-xl bg-[#070e1b] border border-slate-800 text-[11px] text-slate-300">
-        Estás viendo: <span className="text-white font-semibold">{siteName}</span>
-        <div className="text-[10px] text-slate-400 pt-0.5">También puedes tocar otro punto de la Luna.</div>
+        You are viewing: <span className="text-white font-semibold">{siteName}</span>
+        <div className="text-[10px] text-slate-400 pt-0.5">Click any other point on the Moon to inspect.</div>
       </div>
 
       <div className="pt-2.5 border-t border-slate-800 space-y-2">
         <div className="flex items-center justify-between text-[11px]">
           <span className="font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-            Línea de tiempo
-            <InfoTip term="Línea de tiempo" text={help('duration') + ' Toca un día para ver cómo cambian el Sol y la Tierra.'} />
+            Timeline
+            <InfoTip term="Timeline" text={help('duration') + ' Click a day to see how Sun and Earth positions change.'} />
           </span>
           <span className="text-cyan-300 font-bold">
-            Día {currentDay + 1} de {durationDays}
+            Day {currentDay + 1} of {durationDays}
           </span>
         </div>
 
@@ -90,7 +90,7 @@ export default function StudentPanel({
                   ? 'bg-cyan-600 text-white shadow'
                   : 'bg-slate-800/80 text-slate-300 hover:bg-slate-700'
               }`}
-              title={`Ir al día ${d + 1}`}
+              title={`Jump to day ${d + 1}`}
             >
               {d + 1}
             </button>
@@ -103,7 +103,7 @@ export default function StudentPanel({
             isAnimating ? 'bg-amber-600 hover:bg-amber-500 text-white' : 'bg-cyan-600 hover:bg-cyan-500 text-white'
           }`}
         >
-          {isAnimating ? '⏸ Pausar' : '▶ Ver pasar los días'}
+          {isAnimating ? '⏸ Pause' : '▶ Watch days advance'}
         </button>
 
         <div className="p-2 bg-[#050b14] rounded-lg border border-slate-800 text-[11px] space-y-1">

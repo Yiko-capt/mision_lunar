@@ -13,23 +13,27 @@ export default function BenchmarkPanel({ siteDataMap }: BenchmarkPanelProps) {
     <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-4 space-y-4">
       <div className="flex items-center justify-between border-b border-slate-800 pb-2">
         <h2 className="text-sm font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
-          <span>📋 Auditoría Física de Referencia (Benchmark)</span>
-          <span className="text-[10px] text-slate-400 font-normal">5 Casos Científicos Oficiales (Rol C)</span>
+          <span>📋 Physical Reference Audit (Benchmark)</span>
+          <span className="text-[10px] text-slate-400 font-normal">5 Official Scientific Cases (Role C)</span>
         </h2>
         <span className="text-xs font-mono text-slate-400">
-          Pasa / No pasa / No comparable / Sin datos
+          Pass / Fail / Incomparable / No data
         </span>
       </div>
 
       <div className="space-y-2.5">
         {results.map((res: BenchmarkCaseResult) => {
           let badgeColor = 'bg-emerald-950/80 text-emerald-300 border-emerald-700';
+          let statusLabel = 'PASS';
           if (res.estado === 'NO PASA') {
             badgeColor = 'bg-rose-950/80 text-rose-300 border-rose-700 font-bold';
+            statusLabel = 'FAIL';
           } else if (res.estado === 'NO COMPARABLE') {
             badgeColor = 'bg-amber-950/70 text-amber-300 border-amber-700';
+            statusLabel = 'INCOMPARABLE';
           } else if (res.estado === 'SIN DATOS') {
             badgeColor = 'bg-slate-800 text-slate-300 border-slate-600';
+            statusLabel = 'NO DATA';
           }
 
           return (
@@ -49,22 +53,22 @@ export default function BenchmarkPanel({ siteDataMap }: BenchmarkPanelProps) {
                   <span className="text-[10px] text-slate-500">({res.site_id})</span>
                 </div>
                 <span className={`text-[11px] px-2 py-0.5 rounded border ${badgeColor}`}>
-                  {res.estado}
+                  {statusLabel}
                 </span>
               </div>
 
               <div className="space-y-1 text-slate-400 text-[11px]">
                 <div>
-                  <span className="text-slate-500">Criterio esperado:</span> {res.criterioEsperado}
+                  <span className="text-slate-500">Expected criterion:</span> {res.criterioEsperado}
                 </div>
                 <div>
-                  <span className="text-slate-500">Valor obtenido:</span> <b className="text-slate-200">{res.valorObtenido}</b>
+                  <span className="text-slate-500">Obtained value:</span> <b className="text-slate-200">{res.valorObtenido}</b>
                 </div>
                 <div className="text-slate-400 italic pt-0.5">
                   {res.motivo}
                 </div>
                 <div className="text-[10px] text-slate-500 pt-1 border-t border-slate-800/60">
-                  Fuente: {res.fuente}
+                  Source: {res.fuente}
                 </div>
               </div>
             </div>

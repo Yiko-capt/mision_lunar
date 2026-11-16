@@ -8,74 +8,72 @@ export default function MethodologyPanel() {
   );
   return (
     <div className="space-y-2.5 text-[12.5px] leading-relaxed text-slate-200" data-testid="methodology">
-      <H>Qué muestra KillaLand</H>
+      <H>What KillaLand Displays</H>
       <p>
-        Para cada sitio y fecha, dónde están el Sol y la Tierra en el cielo y si las montañas de alrededor los tapan.
-        Con eso se estima cuánto tiempo hay luz para los paneles y cuánto tiempo se puede hablar directamente con la Tierra.
+        For each site and date, the celestial positions of the Sun and Earth and whether surrounding terrain features block them.
+        This estimates how much power solar panels can generate and when direct line-of-sight communication with Earth is available.
       </p>
 
-      <H>Datos</H>
+      <H>Data Sources</H>
       <ul className="list-disc pl-5 space-y-1">
         <li>
-          <b>Posición del Sol y la Tierra:</b> NASA JPL Horizons (observador sobre la superficie lunar, sin refracción),
-          una muestra por hora del 14 nov. al 14 dic. de 2026. Para Apolo 11 hay además dos muestras del 20 jul. 1969.
+          <b>Sun and Earth positions:</b> NASA JPL Horizons (topocentric observer on the lunar surface, without atmospheric refraction),
+          1-hour time step from Nov 14 to Dec 14, 2026. For Apollo 11, two validation samples from Jul 20, 1969 are included.
         </li>
         <li>
-          <b>Horizonte del terreno:</b> trazado sobre el modelo de elevación LOLA de 80 m/píxel del polo sur
-          (LDEM_80S_80MPP_ADJ, NASA PGDA; Barker et al. 2023, PSJ 4, 183), a 2 m de altura y hasta 100 km de distancia.
-          Existe para seis sitios: borde y fondo de Shackleton, Malapert, Cabeus, de Gerlache y Apolo 11 (fuera del modelo: esfera lisa).
+          <b>Terrain horizon:</b> Traced from the South Pole LOLA Digital Elevation Model at 80 m/pixel
+          (LDEM_80S_80MPP_ADJ, NASA PGDA; Barker et al. 2023, PSJ 4, 183), at 2 m observer elevation out to 100 km range.
+          Available for six sites: Shackleton Rim and Floor, Malapert, Cabeus, de Gerlache, and Apollo 11 (outside polar DEM: smooth sphere).
         </li>
         <li>
-          <b>Textura del globo:</b> mosaico global equirectangular de la Luna (ver archivo <code>src/assets/moon/README.md</code> para origen y licencia).
+          <b>Globe texture:</b> Global equirectangular Moon mosaic (see <code>src/assets/moon/README.md</code> for provenance and license).
         </li>
         <li>
-          <b>La Tierra y el Sol en la escena 3D:</b> la Tierra usa texturas de día, noche, océanos y nubes (ver{' '}
-          <code>src/assets/earth/README.md</code>; su origen primario no está documentado, así que no se acreditan como NASA).
-          Su eje está inclinado 23.44° y gira según la hora UTC, de modo que el mediodía cae hacia el Sol. La luz sobre la Luna
-          viene de la dirección real del Sol (rayos paralelos). Las distancias <b>no están a escala</b>: el Sol real está a unos
-          86 000 radios lunares y aquí se dibuja a 60, con un diámetro angular de 3° (real: 0.53°). La Tierra real está a unos 221 radios lunares
-          y mide 3.7 radios lunares; aquí está a 2.4 y mide 0.25.
+          <b>Earth and Sun in 3D scene:</b> Earth uses day, night, ocean specular, and cloud maps (see{' '}
+          <code>src/assets/earth/README.md</code>).
+          Its rotational axis is tilted 23.44° and rotates with UTC time, keeping solar noon aligned toward the Sun. Illumination on the Moon
+          originates from the true direction of the Sun (parallel rays). Distances and sizes can be toggled between <b>True scale</b> and <b>Educational scale</b>.
         </li>
       </ul>
 
-      <H>Cómo se decide si algo se ve</H>
+      <H>Visibility Criteria</H>
       <ul className="list-disc pl-5 space-y-1">
-        <li>El Sol cuenta según la fracción de su disco que asoma sobre el horizonte (radio angular 0.267°).</li>
-        <li>La Tierra cuenta como visible cuando su centro está por encima del horizonte.</li>
+        <li>The Sun is evaluated based on the visible fraction of its disk above the local horizon (angular radius 0.267°).</li>
+        <li>The Earth is considered visible whenever its center rises above the local terrain horizon.</li>
         {isPro && (
           <li>
-            Potencia: P = f · 1361 W/m² · 0.28 · sen(elevación solar), para un panel horizontal de 1 m².
-            La η instantánea es 0.28 · sen(elevación) cuando el Sol es visible.
+            Power: P = f · 1361 W/m² · 0.28 · sin(solar elevation), for a horizontal 1 m² solar array.
+            Instantaneous η is 0.28 · sin(elevation) when the Sun is above the horizon.
           </li>
         )}
       </ul>
 
-      <H>Limitaciones que debes conocer</H>
+      <H>Known Limitations & Assumptions</H>
       <ul className="list-disc pl-5 space-y-1">
-        <li>Solo hay 30 días de efemérides. Los porcentajes describen ese mes, no un año: no sirven para afirmar "luz casi eterna".</li>
+        <li>Ephemerides span a 30-day window. Percentages reflect that month, not an entire lunar year: they do not represent annual eternal light.</li>
         <li>
-          Faustini, Haworth, Nobile e IM-1 no tienen perfil de terreno: se calculan con horizonte esférico liso y sus cifras son orientativas.
+          Faustini, Haworth, Nobile, and IM-1 lack high-resolution raytraced terrain profiles: they use an ideal smooth spherical horizon as an orientation baseline.
         </li>
         <li>
-          La vista "Polo Sur (Parche)", el conteo de celdas aptas y la inclinación del suelo usan un <b>terreno de demostración
-          generado por computadora</b> y un modelo solar simplificado. No son un mapa real ni salen del DEM LOLA.
+          The "South Pole (Patch)" view, viable cell counts, and slope filters use a demonstration elevation grid
+          and a simplified solar model.
         </li>
         <li>
-          Las coordenadas del catálogo de sitios y las del punto donde se trazaron horizonte y efemérides difieren ligeramente
-          en algunos casos{isPro ? ' (se muestran ambas en "Métricas del sitio")' : ''}.
+          Catalog site coordinates and the exact point where horizons/ephemerides were sampled may differ slightly
+          in some records{isPro ? ' (both coordinates are shown in "Site Metrics")' : ''}.
         </li>
-        <li>"Señal directa con la Tierra" significa solo que la Tierra se ve; no modela antenas ni estaciones en tierra.</li>
-        <li>Fuera del periodo con datos se usa un modelo aproximado, siempre marcado con ⚠️.</li>
+        <li>"Direct Earth signal" denotes geometric optical line-of-sight; RF link budgets, antenna gains, and ground stations are not simulated.</li>
+        <li>Dates outside the precomputed ephemeris span fall back to an analytical approximation, always marked with ⚠️.</li>
       </ul>
 
       {isPro && (
         <>
-          <H>Validación</H>
+          <H>Validation</H>
           <p>
-            Las efemérides de <code>public/data</code> se compararon con un motor independiente (astropy + rotación lunar
-            IAU/WGCCRE 2009) en muestras diarias: diferencias máximas de 0.016° en azimut y 0.004° en elevación.
-            El panel "Benchmark físico" audita cinco casos; los que piden un criterio anual se marcan "NO COMPARABLE"
-            mientras solo haya 30 días de datos.
+            The ephemerides in <code>public/data</code> were verified against an independent engine (astropy + lunar rotation
+            IAU/WGCCRE 2009) on daily samples: maximum differences are under 0.016° in azimuth and 0.004° in elevation.
+            The "Physics Benchmark" panel audits five benchmark cases; cases requiring annual criteria are marked "INCOMPARABLE"
+            over the 30-day baseline dataset.
           </p>
         </>
       )}

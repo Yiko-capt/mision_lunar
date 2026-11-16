@@ -29,12 +29,12 @@ export function flatHorizon(siteId: string): UnifiedHorizon {
   };
 }
 
-/** Texto corto y veraz sobre el origen del horizonte de un sitio. */
+/** Concise label indicating the horizon data source of a site. */
 export function horizonSourceLabel(h: UnifiedHorizon | null | undefined): string {
-  if (!h) return 'Sin horizonte';
-  if (h.fuenteFormato === 'fallback') return 'Horizonte liso 0° (sin perfil de terreno)';
-  if (h.sintetico) return 'Horizonte sintético de prueba';
-  return 'Horizonte trazado sobre DEM LOLA';
+  if (!h) return 'No horizon';
+  if (h.fuenteFormato === 'fallback') return 'Smooth 0° horizon (no DEM profile)';
+  if (h.sintetico) return 'Synthetic test horizon';
+  return 'Horizon traced from LOLA DEM';
 }
 
 export async function loadSiteDataSet(siteId: string): Promise<SiteDataSet> {

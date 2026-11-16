@@ -28,105 +28,104 @@ const SVS_SHACKLETON = {
 
 export const REGION_FACTS: Record<string, RegionCard> = {
   shackleton_rim: {
-    title: 'Borde del cráter Shackleton',
+    title: 'Shackleton Crater Rim',
     facts: [
       {
-        text: 'Shackleton es un cráter con forma de cuenco, de 21 km de ancho y unos 4 km de profundidad, en el polo sur de la Luna.',
+        text: 'Shackleton is a bowl-shaped impact crater, 21 km wide and ~4 km deep, located at the lunar South Pole.',
         ...SVS_SHACKLETON,
       },
       {
-        text: 'Algunos puntos de su borde reciben luz del Sol de forma persistente, por lo que se consideran buenos lugares para paneles solares.',
+        text: 'Certain high points along its rim receive near-continuous solar illumination, making them prime candidates for solar power arrays.',
         ...SVS_SHACKLETON,
       },
     ],
   },
   shackleton_floor: {
-    title: 'Fondo del cráter Shackleton',
+    title: 'Shackleton Crater Floor',
     facts: [
       {
-        text: 'El fondo de Shackleton está en sombra perpetua. Su interior frío podría conservar hielo de agua y otros compuestos que se evaporarían al Sol.',
+        text: 'The interior floor of Shackleton lies in perpetual darkness. Its cryogenic environment could preserve volatile water ice that would sublimate in sunlight.',
         ...SVS_SHACKLETON,
       },
       {
-        text: 'El altímetro láser LOLA midió que el fondo refleja más luz que el de cráteres vecinos. Eso es compatible con algo de hielo en la capa más superficial, pero también puede tener otras causas.',
-        source: 'Zuber et al. (2012), Nature 486, 378-381; nota de prensa del MIT',
+        text: 'The LOLA laser altimeter measured higher reflectance on the floor compared to surrounding craters, consistent with surface ice frost or grain scattering.',
+        source: 'Zuber et al. (2012), Nature 486, 378-381; MIT News',
         url: 'https://news.mit.edu/2012/shackletons-crater-0620',
       },
     ],
   },
   cabeus_rim: {
-    title: 'Borde de Cabeus',
+    title: 'Cabeus Crater Rim',
     facts: [
       {
-        text: 'El 9 de octubre de 2009 la misión LCROSS hizo chocar una etapa de cohete contra una zona en sombra del cráter Cabeus. En el material expulsado se estimó 5.6 ± 2.9 % de agua en masa.',
+        text: 'On October 9, 2009, the NASA LCROSS impactor struck a permanently shadowed region of Cabeus crater, detecting 5.6 ± 2.9% water vapor by mass in the ejecta plume.',
         source: 'Colaprete et al. (2010), Science 330, 463-468',
         url: 'https://doi.org/10.1126/science.1186986',
       },
       {
-        text: '"Peak near Cabeus B" es una de las nueve regiones candidatas para el alunizaje de Artemis III.',
+        text: '"Peak near Cabeus B" is one of the candidate landing regions identified for the Artemis III crewed mission.',
         ...ARTEMIS_2024,
       },
     ],
   },
   malapert_peak: {
-    title: 'Macizo Malapert',
+    title: 'Malapert Mountain Massif',
     facts: [
       {
-        text: '"Malapert Massif" es una de las nueve regiones candidatas para el alunizaje de Artemis III.',
+        text: '"Malapert Massif" is one of the candidate landing regions identified for the Artemis III crewed mission.',
         ...ARTEMIS_2024,
       },
     ],
   },
   haworth: {
-    title: 'Cráter Haworth',
+    title: 'Haworth Crater',
     facts: [
       {
-        text: '"Haworth" es una de las nueve regiones candidatas para el alunizaje de Artemis III.',
+        text: '"Haworth" is one of the candidate landing regions identified for the Artemis III crewed mission.',
         ...ARTEMIS_2024,
       },
     ],
   },
   nobile: {
-    title: 'Región de Nobile',
+    title: 'Nobile Region',
     facts: [
       {
-        text: '"Nobile Rim 1" y "Nobile Rim 2", en el borde del cráter Nobile, son dos de las nueve regiones candidatas de Artemis III.',
+        text: '"Nobile Rim 1" and "Nobile Rim 2" on the rim of Nobile crater are candidate regions for Artemis III.',
         ...ARTEMIS_2024,
       },
       {
-        text: 'El rover VIPER de la NASA, diseñado para buscar hielo de agua, se planificó para aterrizar cerca del borde occidental del cráter Nobile.',
+        text: 'NASA VIPER lunar rover was planned to explore volatile distribution near the western rim of Nobile crater.',
         source: 'The Planetary Society, "VIPER, NASA’s Moon resource mapper"',
         url: 'https://www.planetary.org/space-missions/viper',
       },
     ],
   },
   de_gerlache_rim: {
-    title: 'Borde del cráter de Gerlache',
+    title: 'de Gerlache Crater Rim',
     facts: [
       {
-        text: '"de Gerlache Rim 2" es una de las nueve regiones candidatas para el alunizaje de Artemis III.',
+        text: '"de Gerlache Rim 2" is one of the candidate landing regions for the Artemis III mission.',
         ...ARTEMIS_2024,
       },
     ],
   },
   im1: {
-    title: 'Sitio de IM-1 (Odysseus)',
+    title: 'IM-1 Landing Site (Odysseus)',
     facts: [
       {
-        text: 'El módulo Odysseus de Intuitive Machines (misión IM-1) se posó cerca del cráter Malapert A el 22 de febrero de 2024, dentro del programa CLPS de la NASA.',
-        source: 'Eos (AGU), "Commercial lander touches down on Moon" (22 feb. 2024)',
+        text: 'The Intuitive Machines Odysseus lander touched down near Malapert A crater on February 22, 2024, under NASA CLPS initiative.',
+        source: 'Eos (AGU), "Commercial lander touches down on Moon" (Feb 22, 2024)',
         url: 'https://eos.org/articles/commercial-lander-touches-down-on-moon',
       },
     ],
   },
   apollo_11: {
-    title: 'Base Tranquilidad (Apolo 11)',
+    title: 'Tranquility Base (Apollo 11)',
     facts: [
       {
-        text: 'Aquí se posó el módulo lunar del Apolo 11 el 20 de julio de 1969 a las 20:17:40 UTC, en el Mar de la Tranquilidad.',
+        text: 'The Apollo 11 Lunar Module Eagle touched down here on July 20, 1969 at 20:17:40 UTC in Mare Tranquillitatis.',
         source: 'Apollo 11 Mission Report (NASA SP-238)',
       },
     ],
   },
-  // faustini: sin dato verificado todavía -> no se muestra ficha.
 };
